@@ -16,6 +16,10 @@ Template is using cheetah
 	export ARCHFLAGS=-Wno-error=unused-command-line-argument-hard-error-in-future
 	pip install cheetah
 
+# Usage
+
+	python xuanwu.py thrift_file_path output_folder_path
+
 # Convention
 
 * All struct must has the field `1: string ID`
