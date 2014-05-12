@@ -11,23 +11,11 @@ if len(sys.argv) != 3:
 	print "usage: \n\tpython xuanwu.py thrift_file_path output_folder_path"
 	sys.exit()
 
+namespace = ""
 thrift_file = sys.argv[1]
 out_path = sys.argv[2]
 if not out_path.endswith(path.sep):
 		out_path = out_path + path.sep
-
-
-def get_namespace(thrift_file):
-	tpl = open(thrift_file, 'r').read()
-	tree = Parser().parse(tpl)
-	for space in tree.namespaces:
-		if space.language_id == "go":
-			return space.name
-
-	print 'namespace go not found, please add `namespace go XXXX` to ' + thrift_file + " and retry"
-	sys.exit(1)
-
-namespace = get_namespace(thrift_file)
 
 def transform_enum(enum):
 	name = enum.name.value
@@ -108,7 +96,14 @@ def transform(module):
 
 
 def main(thrift_idl):
+	global namespace
 	loader = Loader(thrift_idl, lambda x: x)
+
+	if loader.namespace == "":
+		print 'namespace go not found, please add `namespace go XXXX` to ' + thrift_file + " and retry"
+		sys.exit(1)
+
+	namespace = loader.namespace
 
 	tpl = open('go_package.tmpl', 'r').read()
 	t = Template(tpl, searchList=[{"namespace": namespace}])
