@@ -1,0 +1,15 @@
+package $namespace
+
+import (
+	//Official libs
+	"fmt"
+
+	//3rd party libs
+	"github.com/sipin/gothrift/thrift"
+)
+
+// (needed to ensure safety because of naive import list construction.)
+var _ = thrift.ZERO
+var _ = fmt.Printf
+
+var GoUnusedProtection__ int

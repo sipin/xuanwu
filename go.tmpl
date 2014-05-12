@@ -1,0 +1,192 @@
+package $namespace
+
+import (
+	//Official libs
+	"fmt"
+
+	//3rd party libs
+	"labix.org/v2/mgo"
+	"labix.org/v2/mgo/bson"
+	"github.com/sipin/gothrift/thrift"
+
+	//Own libs
+	"kp/db"
+)
+
+type $obj.name.value struct {
+	#for field in $obj.fields
+		#if $field.name.value == "ID"
+	ID         bson.ObjectId `bson:"_id" thrift:"$field.name.value,$field.tag"`
+		#else
+	$field.name.value  $field.go_type `thrift:"$field.name.value,$field.tag"`
+		#end if
+	#end for
+}
+
+func New$(obj.name.value)() *$obj.name.value {
+	rval := &$obj.name.value{}
+	rval.ID = bson.NewObjectId()
+	return rval
+}
+
+//Thrift Methods
+
+func (p *$obj.name.value) Read(iprot thrift.TProtocol) error {
+	if _, err := iprot.ReadStructBegin(); err != nil {
+		return fmt.Errorf("%T read error: %s", p, err)
+	}
+	for {
+		_, fieldTypeId, fieldId, err := iprot.ReadFieldBegin()
+		if err != nil {
+			return fmt.Errorf("%T field %d read error: %s", p, fieldId, err)
+		}
+		if fieldTypeId == thrift.STOP {
+			break
+		}
+		switch fieldId {
+#for field in $obj.fields
+		case $field.tag:
+			if err := p.readField$(field.tag)(iprot); err != nil {
+				return err
+			}
+#end for
+		default:
+			if err := iprot.Skip(fieldTypeId); err != nil {
+				return err
+			}
+		}
+		if err := iprot.ReadFieldEnd(); err != nil {
+			return err
+		}
+	}
+	if err := iprot.ReadStructEnd(); err != nil {
+		return fmt.Errorf("%T read struct end error: %s", p, err)
+	}
+	return nil
+}
+
+#for field in $obj.fields
+func (p *$obj.name.value) readField$(field.tag)(iprot thrift.TProtocol) error {
+	#if $field.type == "string"
+	if v, err := iprot.ReadString(); err != nil {
+	#else if $field.type == "i32"
+	if v, err := iprot.ReadI32(); err != nil {
+	#else
+	Change go.tmpl go support $field.type now!
+	#end if
+		return fmt.Errorf("error reading field $(field.tag): %s", err)
+	} else {
+		#if $field.name.value == "ID"
+		p.$field.name.value = bson.ObjectId(v)
+		#else
+		p.$field.name.value = v
+		#end if
+	}
+	return nil
+}
+#end for
+
+func (p *$obj.name.value) Write(oprot thrift.TProtocol) error {
+	if err := oprot.WriteStructBegin("$obj.name.value"); err != nil {
+		return fmt.Errorf("%T write struct begin error: %s", p, err)
+	}
+#for field in $obj.fields
+	if err := p.writeField$(field.tag)(oprot); err != nil {
+		return err
+	}
+#end for
+	if err := oprot.WriteFieldStop(); err != nil {
+		return fmt.Errorf("write field stop error: %s", err)
+	}
+	if err := oprot.WriteStructEnd(); err != nil {
+		return fmt.Errorf("write struct stop error: %s", err)
+	}
+	return nil
+}
+
+#for field in $obj.fields
+func (p *$obj.name.value) writeField$(field.tag)(oprot thrift.TProtocol) (err error) {
+	#if $field.type == "string"
+	if err := oprot.WriteFieldBegin("$field.name.value", thrift.STRING, $field.tag); err != nil {
+		return fmt.Errorf("%T write field begin error $field.type:$field.name.value: %s", p, err)
+	}
+	if err := oprot.WriteString(string(p.$field.name.value)); err != nil {
+		return fmt.Errorf("%T.$field.name.value ($field.type) field write error: %s", p, err)
+	}
+	#else if $field.type == "i32"
+	if err := oprot.WriteFieldBegin("$field.name.value", thrift.I32, $field.tag); err != nil {
+		return fmt.Errorf("%T write field begin error $field.type:$field.name.value: %s", p, err)
+	}
+	if err := oprot.WriteI32(int32(p.$field.name.value)); err != nil {
+		return fmt.Errorf("%T.$field.name.value ($field.type) field write error: %s", p, err)
+	}
+	#else
+	Change go.tmpl go support $field.type now!
+	#end if
+	if err := oprot.WriteFieldEnd(); err != nil {
+		return fmt.Errorf("%T write field end error 1:ID: %s", p, err)
+	}
+	return err
+}
+#end for
+
+func (p *$obj.name.value) String() string {
+	if p == nil {
+		return "<nil>"
+	}
+	return fmt.Sprintf("$(obj.name.value)(%+v)", *p)
+}
+
+//mongo methods
+
+func (o *$obj.name.value) Save() (info *mgo.ChangeInfo, err error) {
+	session, col := db.GetCol("$obj.name.value")
+	defer session.Close()
+
+	if o.ID == "" {
+		o.ID = bson.NewObjectId()
+	}
+
+	return col.UpsertId(o.ID, o)
+}
+
+func $(obj.name.value)FindOne (query interface{}) (result *$obj.name.value, err error) {
+	session, col := db.GetCol("$obj.name.value")
+	defer session.Close()
+
+	err = col.Find(query).One(&result)
+	return
+}
+
+func $(obj.name.value)Find (query interface{}, limit int, offset int) (result []*$obj.name.value, err error) {
+	session, col := db.GetCol("$obj.name.value")
+	defer session.Close()
+
+	err = col.Find(query).Limit(limit).Skip(offset).All(&result)
+	return
+}
+
+func $(obj.name.value)FindAll (query interface{}) (result []*$obj.name.value, err error) {
+	session, col := db.GetCol("$obj.name.value")
+	defer session.Close()
+
+	err = col.Find(query).All(&result)
+	return
+}
+
+func $(obj.name.value)Count (query interface{}) (result int) {
+	session, col := db.GetCol("$obj.name.value")
+	defer session.Close()
+
+	result, _ = col.Find(query).Count()
+	return
+}
+
+func $(obj.name.value)FindByID(id string) (result *$obj.name.value, err error) {
+	session, col := db.GetCol("$obj.name.value")
+	defer session.Close()
+
+	err = col.FindId(bson.ObjectId(id)).One(&result)
+	return
+}
+
