@@ -20,6 +20,23 @@ Template is using cheetah
 
 	python xuanwu.py thrift_file_path output_folder_path
 
+# Types
+
+Currently only supports:
+
+* bool: A boolean value (true or false), one byte
+* i32: A 32-bit signed integer
+* string: Encoding agnostic text or binary string
+
+Will support when needed:
+
+* byte: A signed byte
+* i16: A 16-bit signed integer
+* i64: A 64-bit signed integer
+* double: A 64-bit floating point number
+* Containers: list/set/map
+* Enums
+
 # Convention
 
 * All struct must has the field `1: string ID`
