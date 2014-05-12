@@ -80,6 +80,7 @@ def transform_field(field, indent=0):
 def transform_struct(obj):
 	types = {
 		"string": "string",
+		"bool": "bool",
 		"i32": "int32"
 	}
 	for field in obj.fields:
