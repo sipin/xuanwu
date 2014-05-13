@@ -37,6 +37,37 @@ Will support when needed:
 * Containers: list/set/map
 * Enums
 
+## Annotations
+
+Field could be annotated, for example:
+
+```java
+struct User {
+	1: string ID
+	2: string UserName (label = "User Name", index = "username")
+	3: string Password
+	4: string Name     (search = "simple", search = "full-10")
+	5: string Email
+	6: string Intro    (label = "Self Introduction", search = "full-2")
+	7: string Picture  (index = "adminWithPictureIndex")
+	8: string Remark
+	9: bool IsAdmin    (index = "adminWithPictureIndex")
+	10: string UserGroupID
+}
+```
+
+In above example, xuanwu will use `label` defined when generating HTML widgets.
+
+Two indexes:
+
+* UserName
+* Union Index Picture + IsAdmin
+
+Two types of search:
+
+* simple: only seach for name
+* full: seach for name (weight 10) & intro (weight 2)
+
 # Convention
 
 * All struct must has the field `1: string ID`
@@ -45,9 +76,8 @@ Will support when needed:
 * Field name ends with ID is the foreign key to another struct
   * `HospitalID` => foreign key to `Hospital` struct
 
-# TBD
 
-How to define index?
+# TBD
 
 Generate crud template?
   * How to update?
