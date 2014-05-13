@@ -3,6 +3,7 @@ package $namespace
 import (
 	//Official libs
 	"fmt"
+	"strconv"
 
 	//3rd party libs
 	"labix.org/v2/mgo"
@@ -12,6 +13,11 @@ import (
 	//Own libs
 	"db"
 )
+
+func init() {
+	//hack to make sure go compiler won't complain about strconv is imported but not used
+	strconv.Itoa(0)
+}
 
 type $obj.name.value struct {
 	#for field in $obj.fields
@@ -156,6 +162,31 @@ func (o *$obj.name.value) Save() (info *mgo.ChangeInfo, err error) {
 	return col.UpsertId(o.ID, o)
 }
 
+//Form methods
+
+func (o *$obj.name.value) ReadForm(params map[string]string) {
+#for field in $obj.fields
+#if $field.name.value != "ID"
+	if val, ok := params["$field.name.value"]; ok {
+	#if $field.type == "string"
+		o.$field.name.value = val
+	#else if $field.type == "i32"
+		intVal, _ := strconv.Atoi(val)
+		o.$field.name.value = int32(intVal)
+	#else if $field.type == "bool"
+		o.$field.name.value = (val != "")
+	#else
+	Change go.tmpl go support $field.type now!
+	#end if
+	#if $field.type == "bool"
+	} else {
+		o.$field.name.value = false	
+	#end if
+	}
+#end if
+#end for	
+}
+
 //foreigh keys
 
 #for field in $obj.fields
@@ -174,6 +205,8 @@ func (o *$field.foreign) GetAll$(obj.name.value)() (result []*$obj.name.value, e
 }
 	#end if
 #end for
+
+//Collection Manage methods
 
 func $(obj.name.value)FindOne (query interface{}) (result *$obj.name.value, err error) {
 	session, col := db.GetCol("$obj.name.value")
