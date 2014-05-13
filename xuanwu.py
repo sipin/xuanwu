@@ -74,6 +74,9 @@ def transform_struct(obj):
 	for field in obj.fields:
 		field.type = str(field.type)
 		field.go_type = types[str(field.type)]
+		field.foreign = ""
+		if field.name.value.endswith("ID"):
+			field.foreign = field.name.value[:-2]
 
 	tpl = open('go.tmpl', 'r').read()
 	t = Template(tpl, searchList=[{"namespace": namespace, "obj": obj}])

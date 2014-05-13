@@ -156,6 +156,16 @@ func (o *$obj.name.value) Save() (info *mgo.ChangeInfo, err error) {
 	return col.UpsertId(o.ID, o)
 }
 
+//foreigh keys
+
+#for field in $obj.fields
+	#if $field.foreign != ""
+func (p *$obj.name.value) Get$(field.foreign)() (result *$field.foreign, err error) {
+	return $(field.foreign)FindByID(p.$field.name.value)
+}
+	#end if
+#end for
+
 func $(obj.name.value)FindOne (query interface{}) (result *$obj.name.value, err error) {
 	session, col := db.GetCol("$obj.name.value")
 	defer session.Close()
@@ -195,4 +205,3 @@ func $(obj.name.value)FindByID(id string) (result *$obj.name.value, err error) {
 	err = col.FindId(bson.ObjectId(id)).One(&result)
 	return
 }
-
