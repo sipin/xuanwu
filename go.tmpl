@@ -163,6 +163,15 @@ func (o *$obj.name.value) Save() (info *mgo.ChangeInfo, err error) {
 func (p *$obj.name.value) Get$(field.foreign)() (result *$field.foreign, err error) {
 	return $(field.foreign)FindByID(p.$field.name.value)
 }
+
+func (p *$obj.name.value) Set$(field.foreign)(obj *$field.foreign) {
+	p.$field.name.value = obj.ID.Hex()
+}
+
+func (o *$field.foreign) GetAll$(obj.name.value)() (result []*$obj.name.value, err error) {
+	query := bson.M{"$(field.foreign.lower())id": o.ID.Hex()}
+	return $(obj.name.value)FindAll(query)
+}
 	#end if
 #end for
 
@@ -202,6 +211,6 @@ func $(obj.name.value)FindByID(id string) (result *$obj.name.value, err error) {
 	session, col := db.GetCol("$obj.name.value")
 	defer session.Close()
 
-	err = col.FindId(bson.ObjectId(id)).One(&result)
+	err = col.FindId(bson.ObjectIdHex(id)).One(&result)
 	return
 }
