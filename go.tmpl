@@ -208,7 +208,7 @@ func (o *$field.foreign) GetAll$(obj.name.value)() (result []*$obj.name.value, e
 
 //Collection Manage methods
 
-func $(obj.name.value)FindOne (query interface{}) (result *$obj.name.value, err error) {
+func $(obj.name.value)FindOne(query interface{}) (result *$obj.name.value, err error) {
 	session, col := db.GetCol("$obj.name.value")
 	defer session.Close()
 
@@ -216,7 +216,7 @@ func $(obj.name.value)FindOne (query interface{}) (result *$obj.name.value, err 
 	return
 }
 
-func $(obj.name.value)Find (query interface{}, limit int, offset int) (result []*$obj.name.value, err error) {
+func $(obj.name.value)Find(query interface{}, limit int, offset int) (result []*$obj.name.value, err error) {
 	session, col := db.GetCol("$obj.name.value")
 	defer session.Close()
 
@@ -224,7 +224,7 @@ func $(obj.name.value)Find (query interface{}, limit int, offset int) (result []
 	return
 }
 
-func $(obj.name.value)FindAll (query interface{}) (result []*$obj.name.value, err error) {
+func $(obj.name.value)FindAll(query interface{}) (result []*$obj.name.value, err error) {
 	session, col := db.GetCol("$obj.name.value")
 	defer session.Close()
 
@@ -232,7 +232,7 @@ func $(obj.name.value)FindAll (query interface{}) (result []*$obj.name.value, er
 	return
 }
 
-func $(obj.name.value)Count (query interface{}) (result int) {
+func $(obj.name.value)Count(query interface{}) (result int) {
 	session, col := db.GetCol("$obj.name.value")
 	defer session.Close()
 
