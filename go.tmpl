@@ -247,3 +247,12 @@ func $(obj.name.value)FindByID(id string) (result *$obj.name.value, err error) {
 	err = col.FindId(bson.ObjectIdHex(id)).One(&result)
 	return
 }
+
+func $(obj.name.value)RemoveByID(id string) (result *$obj.name.value, err error) {
+	session, col := db.GetCol("$obj.name.value")
+	defer session.Close()
+
+	err = col.RemoveId(bson.ObjectIdHex(id))
+	return
+}
+
