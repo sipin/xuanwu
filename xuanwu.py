@@ -69,7 +69,8 @@ def transform_struct(obj):
 	types = {
 		"string": "string",
 		"bool": "bool",
-		"i32": "int32"
+		"i32": "int32",
+		"i64": "int64",
 	}
 	for field in obj.fields:
 		field.type = str(field.type)
