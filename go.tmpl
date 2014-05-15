@@ -2,6 +2,7 @@ package $namespace
 
 import (
 	//Official libs
+	"bytes"
 	"fmt"
 	"strconv"
 
@@ -33,6 +34,14 @@ func New$(obj.name.value)() *$obj.name.value {
 	rval := &$obj.name.value{}
 	rval.ID = bson.NewObjectId()
 	return rval
+}
+
+func New$(obj.name.value)FromBytes(data []byte) *$obj.name.value {
+	o := &$obj.name.value{}
+	transport := thrift.NewStreamTransportR(bytes.NewBuffer(data))
+	protocol := thrift.NewTCompactProtocol(transport)
+	o.Read(protocol)
+	return o
 }
 
 //Thrift Methods
@@ -147,6 +156,15 @@ func (p *$obj.name.value) String() string {
 		return "<nil>"
 	}
 	return fmt.Sprintf("$(obj.name.value)(%+v)", *p)
+}
+
+func (p *$obj.name.value) ToBytes() []byte {
+	transport := thrift.NewTMemoryBuffer()
+	protocol := thrift.NewTCompactProtocol(transport)
+	p.Write(protocol)
+	protocol.Flush()
+
+	return transport.Bytes()
 }
 
 //mongo methods
