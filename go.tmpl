@@ -86,6 +86,8 @@ func (p *$obj.name.value) readField$(field.tag)(iprot thrift.TProtocol) error {
 	if v, err := iprot.ReadString(); err != nil {
 	#else if $field.type == "i32"
 	if v, err := iprot.ReadI32(); err != nil {
+	#else if $field.type == "i64"
+	if v, err := iprot.ReadI64(); err != nil {
 	#else if $field.type == "bool"
 	if v, err := iprot.ReadBool(); err != nil {
 	#else
@@ -133,6 +135,12 @@ func (p *$obj.name.value) writeField$(field.tag)(oprot thrift.TProtocol) (err er
 		return fmt.Errorf("%T write field begin error $field.type:$field.name.value: %s", p, err)
 	}
 	if err := oprot.WriteI32(int32(p.$field.name.value)); err != nil {
+	#else if $field.type == "i64"
+	if err := oprot.WriteFieldBegin("$field.name.value", thrift.I64, $field.tag); err != nil {
+		return fmt.Errorf("%T write field begin error $field.type:$field.name.value: %s", p, err)
+	}
+	if err := oprot.WriteI64(int64(p.$field.name.value)); err != nil {
+	
 	#else if $field.type == "bool"
 	if err := oprot.WriteFieldBegin("$field.name.value", thrift.BOOL, 9); err != nil {
 		return fmt.Errorf("%T write field begin error 9:IsAdmin: %s", p, err)
@@ -191,6 +199,9 @@ func (o *$obj.name.value) ReadForm(params map[string]string) {
 	#else if $field.type == "i32"
 		intVal, _ := strconv.Atoi(val)
 		o.$field.name.value = int32(intVal)
+	#else if $field.type == "i64"
+		intVal, _ := strconv.ParseInt(val, 10, 64)
+		o.$field.name.value = intVal
 	#else if $field.type == "bool"
 		o.$field.name.value = (val != "")
 	#else
@@ -202,7 +213,7 @@ func (o *$obj.name.value) ReadForm(params map[string]string) {
 	#end if
 	}
 #end if
-#end for	
+#end for
 }
 
 //foreigh keys
