@@ -27,6 +27,7 @@ type $obj.name.value struct {
 	ID         bson.ObjectId `bson:"_id" thrift:"$field.name.value,$field.tag"`
 		#else
 	$field.name.value  $field.go_type `bson:"$field.name.value" thrift:"$field.name.value,$field.tag"`
+	_${field.name.value}Widget *gorazor.Widget
 		#end if
 	#end for
 }
@@ -219,33 +220,37 @@ func (o *$obj.name.value) ReadForm(params map[string]string) {
 
 #for field in $obj.fields
 #if $field.name.value != "ID"
-func (o *$obj.name.value) ${field.name.value}ToWidget() *gorazor.Widget {
-	return &gorazor.Widget{
-		Label: "$field.label",
-	#if $field.type == "string"
-		Value : o.$field.name.value,
-	#else if $field.type == "i32"
-		Value : strconv.FormatInt(int64(o.$field.name.value), 10),
-	#else if $field.type == "i64"
-		Value : strconv.FormatInt(o.$field.name.value, 10),
-	#else if $field.type == "bool"
-		Value : strconv.FormatBool(o.$field.name.value),
-	#else
-	Change go.tmpl go support $field.type now!
-	#end if
-		Name: "$field.name.value",
-		PlaceHolder: "",
-		Type: "$field.type",
+func (o *$obj.name.value) ${field.name.value}Widget() *gorazor.Widget {
+	if o._${field.name.value}Widget == nil {
+		o._${field.name.value}Widget = &gorazor.Widget{
+				Label: "$field.label",
+			#if $field.type == "string"
+				Value : o.$field.name.value,
+			#else if $field.type == "i32"
+				Value : strconv.FormatInt(int64(o.$field.name.value), 10),
+			#else if $field.type == "i64"
+				Value : strconv.FormatInt(o.$field.name.value, 10),
+			#else if $field.type == "bool"
+				Value : strconv.FormatBool(o.$field.name.value),
+			#else
+			Change go.tmpl go support $field.type now!
+			#end if
+				Name: "$field.name.value",
+				PlaceHolder: "",
+				Type: "$field.type",
+			}
 	}
+
+	return o._${field.name.value}Widget
 }
 #end if
 #end for
 
-func (o *$obj.name.value) ToWidgets() []*gorazor.Widget {
+func (o *$obj.name.value) Widgets() []*gorazor.Widget {
 	return []*gorazor.Widget{
 #for field in $obj.fields
 #if $field.name.value != "ID"
-		o.${field.name.value}ToWidget(),
+		o.${field.name.value}Widget(),
 #end if
 #end for
 	}
