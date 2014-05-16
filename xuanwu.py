@@ -17,6 +17,13 @@ out_path = sys.argv[2]
 if not out_path.endswith(path.sep):
 		out_path = out_path + path.sep
 
+def add_properties(field):
+	field.label = field.name.value
+
+	for att in field.annotations:
+		if att.name.value.lower() == "label":
+			field.label = att.value.value
+
 def transform_enum(enum):
 	name = enum.name.value
 
@@ -73,6 +80,7 @@ def transform_struct(obj):
 		"i64": "int64",
 	}
 	for field in obj.fields:
+		add_properties(field)
 		field.type = str(field.type)
 		field.go_type = types[str(field.type)]
 		field.foreign = ""
@@ -81,7 +89,7 @@ def transform_struct(obj):
 
 	tpl = open('go.tmpl', 'r').read()
 	t = Template(tpl, searchList=[{"namespace": namespace, "obj": obj}])
-	code = unicode(t)
+	code = str(t)
 	f = open(out_path + 'gen_' + obj.name.value.lower() + ".go", "w")
 	f.write(code)
 	f.close()
