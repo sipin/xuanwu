@@ -26,7 +26,7 @@ type $obj.name.value struct {
 		#if $field.name.value == "ID"
 	ID         bson.ObjectId `bson:"_id" thrift:"$field.name.value,$field.tag"`
 		#else
-	$field.name.value  $field.go_type `thrift:"$field.name.value,$field.tag"`
+	$field.name.value  $field.go_type `bson:"$field.name.value" thrift:"$field.name.value,$field.tag"`
 		#end if
 	#end for
 }
