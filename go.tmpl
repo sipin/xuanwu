@@ -269,7 +269,7 @@ func (p *$obj.name.value) Set$(field.foreign)(obj *$field.foreign) {
 }
 
 func (o *$field.foreign) GetAll$(obj.name.value)() (result []*$obj.name.value, err error) {
-	query := bson.M{"$(field.foreign.lower())id": o.ID.Hex()}
+	query := bson.M{"$(field.foreign)ID": o.ID.Hex()}
 	return $(obj.name.value)FindAll(query)
 }
 	#end if
