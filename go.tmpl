@@ -16,10 +16,10 @@ import (
 	"db"
 )
 
-func init() {
+var (
 	//hack to make sure go compiler won't complain about strconv is imported but not used
-	strconv.Itoa(0)
-}
+	_ = strconv.Itoa
+)
 
 type $obj.name.value struct {
 	#for field in $obj.fields
@@ -324,4 +324,3 @@ func $(obj.name.value)RemoveByID(id string) (result *$obj.name.value, err error)
 	err = col.RemoveId(bson.ObjectIdHex(id))
 	return
 }
-
