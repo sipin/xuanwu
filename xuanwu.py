@@ -79,10 +79,18 @@ def transform_struct(obj):
 		"i32": "int32",
 		"i64": "int64",
 	}
+
+	obj.need_strconv = False
+
+
 	for field in obj.fields:
 		add_properties(field)
 		field.type = str(field.type)
 		field.go_type = types[str(field.type)]
+
+		if field.go_type != "string":
+			obj.need_strconv = True
+
 		field.foreign = ""
 		if field.name.value.endswith("ID"):
 			field.foreign = field.name.value[:-2]

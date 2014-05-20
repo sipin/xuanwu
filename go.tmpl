@@ -4,7 +4,9 @@ import (
 	//Official libs
 	"bytes"
 	"fmt"
+	#if $obj.need_strconv
 	"strconv"
+	#end if
 
 	//3rd party libs
 	"labix.org/v2/mgo"
@@ -14,11 +16,6 @@ import (
 
 	//Own libs
 	"db"
-)
-
-var (
-	//hack to make sure go compiler won't complain about strconv is imported but not used
-	_ = strconv.Itoa
 )
 
 type $obj.name.value struct {
