@@ -13,6 +13,9 @@ import (
 	"labix.org/v2/mgo/bson"
 	"github.com/sipin/gothrift/thrift"
 	"github.com/sipin/gorazor/gorazor"
+	#if $obj.need_search
+	"github.com/mattbaird/elastigo/core"
+	#end if
 
 	//Own libs
 	"db"
@@ -28,6 +31,14 @@ type $obj.name.value struct {
 		#end if
 	#end for
 }
+
+#for key, fields in $obj.search.iteritems()
+type $(obj.name.value)Search$(key)Obj struct {
+	#for field in fields
+	$field string `json:"$(field)"`
+	#end for
+}
+#end for
 
 func New$(obj.name.value)() *$obj.name.value {
 	rval := &$obj.name.value{}
@@ -184,6 +195,15 @@ func (o *$obj.name.value) Save() (info *mgo.ChangeInfo, err error) {
 		o.ID = bson.NewObjectId()
 	}
 
+	#for key, fields in $obj.search.iteritems()
+	core.Index("$(obj.name.value.lower())", "$(key.lower())", o.ID.Hex(), nil, $(obj.name.value)Search$(key)Obj{
+		#for field in fields
+		o.$(field),
+		#end for
+	})
+	#end for
+
+
 	return col.UpsertId(o.ID, o)
 }
 
@@ -272,6 +292,7 @@ func (o *$field.foreign) GetAll$(obj.name.value)() (result []*$obj.name.value, e
 	#end if
 #end for
 
+
 //Collection Manage methods
 
 func $(obj.name.value)FindOne(query interface{}, sortFields ...string) (result *$obj.name.value, err error) {
@@ -343,5 +364,24 @@ func $(obj.name.value)RemoveByID(id string) (result *$obj.name.value, err error)
 	defer session.Close()
 
 	err = col.RemoveId(bson.ObjectIdHex(id))
+	#for key, v in $obj.search.iteritems()
+	core.Delete("$(obj.name.value.lower())", "$(key.lower())", id, nil)
+	#end for
 	return
 }
+
+// Search
+#for key, v in $obj.search.iteritems()
+func $(obj.name.value)Search$(key)(word string) (core.SearchResult, error) {
+	searchJson := `{
+    "query" : {
+        "query_string" :  {
+	      "default_operator": "OR",
+	      "fields": ` + `$(str(v).replace("'", '"'))` + `,
+	      "query": "` + word + `"
+	    }
+    }
+}`
+	return core.SearchRequest("$(obj.name.value.lower())", "$(key.lower())", nil, searchJson)
+}
+#end for

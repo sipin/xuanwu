@@ -24,6 +24,22 @@ def add_properties(field):
 		if att.name.value.lower() == "label":
 			field.label = att.value.value
 
+def get_search(obj):
+	search = {}
+	
+	for field in obj.fields:
+		for att in field.annotations:
+			if att.name.value.lower() == "search":
+				if str(field.type) != "string":
+					raise Exception(obj.name.value + ":" + field.name.value + " must be string to be searchable")
+				search_key = att.value.value.split("-")[0]
+				if search.has_key(search_key):
+					search[search_key].append(field.name.value)
+				else:
+					search[search_key] = [field.name.value]
+	return search
+
+
 def transform_enum(enum):
 	name = enum.name.value
 
@@ -81,7 +97,8 @@ def transform_struct(obj):
 	}
 
 	obj.need_strconv = False
-
+	obj.search = get_search(obj)
+	obj.need_search = len(obj.search) > 0
 
 	for field in obj.fields:
 		add_properties(field)
