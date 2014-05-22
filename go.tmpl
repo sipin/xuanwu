@@ -372,7 +372,7 @@ func $(obj.name.value)RemoveByID(id string) (result *$obj.name.value, err error)
 
 // Search
 #for key, v in $obj.search.iteritems()
-func $(obj.name.value)Search$(key)(word string) (core.SearchResult, error) {
+func $(obj.name.value)Search$(key)(word string, limit int, offset int) (core.SearchResult, error) {
 	searchJson := `{
     "query" : {
         "query_string" :  {
@@ -382,6 +382,7 @@ func $(obj.name.value)Search$(key)(word string) (core.SearchResult, error) {
 	    }
     }
 }`
-	return core.SearchRequest("$(obj.name.value.lower())", "$(key.lower())", nil, searchJson)
+	args := map[string]interface{} {"from" : offset, "size": limit}
+	return core.SearchRequest("$(obj.name.value.lower())", "$(key.lower())", args, searchJson)
 }
 #end for
