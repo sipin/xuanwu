@@ -12,7 +12,6 @@ import (
 	"labix.org/v2/mgo"
 	"labix.org/v2/mgo/bson"
 	"github.com/sipin/gothrift/thrift"
-	"github.com/sipin/gorazor/gorazor"
 	#if $obj.need_search
 	"github.com/mattbaird/elastigo/core"
 	#end if
@@ -27,9 +26,9 @@ type $obj.name.value struct {
 	ID         bson.ObjectId `bson:"_id" thrift:"$field.name.value,$field.tag"`
 		#else
 	$field.name.value  $field.go_type `bson:"$field.name.value" thrift:"$field.name.value,$field.tag"`
-	_${field.name.value}Widget *gorazor.Widget
 		#end if
 	#end for
+	widgets map[string]*Widget
 }
 
 #for key, fields in $obj.search.iteritems()
@@ -41,16 +40,23 @@ type $(obj.name.value)Search$(key)Obj struct {
 #end for
 
 func New$(obj.name.value)() *$obj.name.value {
-	rval := &$obj.name.value{}
+	rval := new($obj.name.value)
 	rval.ID = bson.NewObjectId()
+	rval.widgets = make(map[string]*Widget, $len($obj.fields))
 	return rval
 }
 
 func New$(obj.name.value)FromBytes(data []byte) *$obj.name.value {
-	o := &$obj.name.value{}
+	o := new($obj.name.value)
 	transport := thrift.NewStreamTransportR(bytes.NewBuffer(data))
 	protocol := thrift.NewTCompactProtocol(transport)
 	o.Read(protocol)
+	return o
+}
+
+func New$(obj.name.value)WithParams(params map[string]string) *$obj.name.value {
+	o := new($obj.name.value)
+	o.ReadForm(params)
 	return o
 }
 
@@ -237,34 +243,40 @@ func (o *$obj.name.value) ReadForm(params map[string]string) {
 
 #for field in $obj.fields
 #if $field.name.value != "ID"
-func (o *$obj.name.value) ${field.name.value}Widget() *gorazor.Widget {
-	if o._${field.name.value}Widget == nil {
-		o._${field.name.value}Widget = &gorazor.Widget{
-				Label: "$field.label",
-			#if $field.type == "string"
-				Value : o.$field.name.value,
-			#else if $field.type == "i32"
-				Value : strconv.FormatInt(int64(o.$field.name.value), 10),
-			#else if $field.type == "i64"
-				Value : strconv.FormatInt(o.$field.name.value, 10),
-			#else if $field.type == "bool"
-				Value : strconv.FormatBool(o.$field.name.value),
-			#else
-			Change go.tmpl go support $field.type now!
-			#end if
-				Name: "$field.name.value",
-				PlaceHolder: "",
-				Type: "$field.type",
-			}
+func (o *$obj.name.value) ${field.name.value}Widget() *Widget {
+	name := "${field.name.value}"
+	ret, ok := o.widgets[name]
+	if !ok {
+		panic(fmt.Sprintf("%T %v must exists", o, "{field.name.value}"))
+	}
+	if ret == nil {
+		ret = &Widget{
+			Label: "$field.label",
+		#if $field.type == "string"
+			Value : o.$field.name.value,
+		#else if $field.type == "i32"
+			Value : strconv.FormatInt(int64(o.$field.name.value), 10),
+		#else if $field.type == "i64"
+			Value : strconv.FormatInt(o.$field.name.value, 10),
+		#else if $field.type == "bool"
+			Value : strconv.FormatBool(o.$field.name.value),
+		#else
+		Change go.tmpl go support $field.type now!
+		#end if
+			Name: "$field.name.value",
+			PlaceHolder: "",
+			Type: "$field.type",
+		}
+		o.widgets[name] = ret
 	}
 
-	return o._${field.name.value}Widget
+	return ret
 }
 #end if
 #end for
 
-func (o *$obj.name.value) Widgets() []*gorazor.Widget {
-	return []*gorazor.Widget{
+func (o *$obj.name.value) Widgets() []*Widget {
+	return []*Widget{
 #for field in $obj.fields
 #if $field.name.value != "ID"
 		o.${field.name.value}Widget(),
