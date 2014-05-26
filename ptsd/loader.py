@@ -11,13 +11,13 @@ class SymbolTable(dict):
   def __init__(self, thrift):
     for parent, node in thrift.walk():
       if isinstance(node, ast.Typedef):
-        self[node.name.value] = node.type
+        self[node.name.value] = node
       elif isinstance(node, ast.Enum):
         self[node.name.value] = node
       elif isinstance(node, ast.EnumDef):
         self[parent.name.value + '.' + node.name.value] = node.tag
       elif isinstance(node, ast.Const):
-        self[node.name.value] = node.value
+        self[node.name.value] = node
       elif isinstance(node, ast.Struct):
         self[node.name.value] = node
       elif isinstance(node, ast.Exception_):
