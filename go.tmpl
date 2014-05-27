@@ -246,10 +246,7 @@ func (o *$obj.name.value) ReadForm(params map[string]string) {
 func (o *$obj.name.value) ${field.name.value}Widget() *Widget {
 	name := "${field.name.value}"
 	ret, ok := o.widgets[name]
-	if !ok {
-		panic(fmt.Sprintf("%T %v must exists", o, "{field.name.value}"))
-	}
-	if ret == nil {
+	if !ok || ret==nil {
 		ret = &Widget{
 			Label: "$field.label",
 		#if $field.type == "string"
