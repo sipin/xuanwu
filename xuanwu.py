@@ -68,11 +68,17 @@ def get_search(obj):
 
 def transform_enum(enum):
 	name = enum.name.value
+	
+	tpl = '''
+const (
+#for i in $objs
+	${name.upper()}_$i.name.value.upper() int32 = $i.tag
+#end for
+)
+'''.strip()
+	t = Template(tpl, searchList=[{"name": name, "objs": enum.values}])
 
-	return '%s = Enum(%r, %r)' % (
-		 name,
-		 name,
-		 tuple(value.name.value for value in enum.values))
+	return str(t)
 
 
 def transform_type(field_type):
@@ -148,6 +154,7 @@ def transform_const(obj):
 def transform(module):
 	const = []
 	type_def = []
+	enum = []
 
 	for node in [i for i in module.values() if isinstance(i, ast.Typedef)]:
 		node.go_type = type_translate(node.type)
@@ -158,13 +165,14 @@ def transform(module):
 		if not isinstance(node, ast.Node):
 			continue
 		if isinstance(node, ast.Enum):
-			transform_enum(node)
+			enum.append(node)
 		elif isinstance(node, ast.Const):
 			const.append(transform_const(node))
 		elif isinstance(node, ast.Struct):
 			transform_struct(node)
 
 	name = ".".join(path.basename(thrift_file).split(".")[:-1])
+
 	if len(const) > 0:
 		tpl = open('go_const.tmpl', 'r').read()
 
@@ -174,6 +182,20 @@ def transform(module):
 		f = open(out_path + name + "/gen_const.go", "w")
 		f.write(str(t))
 		f.close()
+
+	if len(enum) > 0:
+		tpl = open('go_enum.tmpl', 'r').read()
+		t = Template(tpl, searchList=[{
+			"namespace": name,
+			"objs": enum,
+			"name": name,
+		}])
+		if not path.exists(out_path + name):
+			mkdir(out_path + name)
+		f = open(out_path + name + "/gen_enum.go", "w")
+		f.write(str(t))
+		f.close()
+
 	if len(type_def) > 0:
 		t = Template(typedef_tpl, searchList=[{"namespace": name, "objs": type_def}])
 		if name == "init":
