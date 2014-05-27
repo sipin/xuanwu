@@ -121,8 +121,8 @@ def transform_struct(obj):
 
 	for field in obj.fields:
 		add_properties(field)
-		field.type = str(field.type)
 		field.go_type = type_translate(field.type)
+		field.type = str(field.type)
 
 		if field.go_type != "string":
 			obj.need_strconv = True
