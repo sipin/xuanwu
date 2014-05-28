@@ -65,22 +65,6 @@ def get_search(obj):
 					search[search_key] = [field.name.value]
 	return search
 
-
-def transform_enum(enum):
-	name = enum.name.value
-	
-	tpl = '''
-const (
-#for i in $objs
-	${name.upper()}_$i.name.value.upper() int32 = $i.tag
-#end for
-)
-'''.strip()
-	t = Template(tpl, searchList=[{"name": name, "objs": enum.values}])
-
-	return str(t)
-
-
 def transform_type(field_type):
 	if isinstance(field_type, (ast.Byte, ast.I16, ast.I32, ast.I64)):
 		return 'Integer'
@@ -179,7 +163,7 @@ def transform(module):
 		t = Template(tpl, searchList=[{"namespace": name, "objs": const}])
 		if not path.exists(out_path + name):
 			mkdir(out_path + name)
-		f = open(out_path + name + "/gen_const.go", "w")
+		f = open(out_path + "%s/gen_%s_const.go" % (name, name), "w")
 		f.write(str(t))
 		f.close()
 
@@ -192,7 +176,7 @@ def transform(module):
 		}])
 		if not path.exists(out_path + name):
 			mkdir(out_path + name)
-		f = open(out_path + name + "/gen_enum.go", "w")
+		f = open(out_path + "%s/gen_%s_enum.go" % (name, name), "w")
 		f.write(str(t))
 		f.close()
 
@@ -203,7 +187,7 @@ def transform(module):
 		else:
 			if not path.exists(out_path + name):
 				mkdir(out_path + name)
-			write_path = name + "/gen_typedef.go"
+			write_path = "%s/gen_%s_typedef.go" % (name, name)
 		f = open(out_path + write_path, "w")
 		f.write(str(t))
 		f.close()
