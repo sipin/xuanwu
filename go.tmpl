@@ -355,6 +355,10 @@ func $(obj.name.value)FindByID(id string) (result *$obj.name.value, err error) {
 	session, col := db.GetCol("$obj.name.value")
 	defer session.Close()
 
+	if !bson.IsObjectIdHex(id) {
+		err = ErrInvalidObjectId
+		return
+	}
 	err = col.FindId(bson.ObjectIdHex(id)).One(&result)
 	return
 }

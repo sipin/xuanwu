@@ -3,6 +3,7 @@ package $namespace
 import (
 	//Official libs
 	"fmt"
+	"errors"
 
 	//3rd party libs
 	"github.com/sipin/gothrift/thrift"
@@ -13,3 +14,4 @@ var _ = thrift.ZERO
 var _ = fmt.Printf
 
 var GoUnusedProtection__ int
+var ErrInvalidObjectId = errors.New("Invalid input to ObjectIdHex")
