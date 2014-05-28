@@ -1,0 +1,32 @@
+package $namespace
+
+var (
+#for obj in $objs
+	#if obj.is_map
+
+	$obj.name = $obj.go_type {
+		#for k, v in obj.value.items()
+			#if $isinstance($v, list)
+		$k: {$(", ".join([str(i) for i in $v]))},
+			#else
+		$k: $v,
+			#end if
+		#end for
+	}
+
+	#elif obj.is_list
+
+	$obj.name = $obj.go_type {
+		#for v in $obj.value
+			#if $isinstance($v, list)
+		{$(", ".join([str(i) for i in $v]))},
+			#else
+		$v,
+			#end if
+		#end for
+	}
+	#else
+	$obj.name $obj.go_type = $obj.value
+	#end if
+#end for
+)

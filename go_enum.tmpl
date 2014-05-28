@@ -1,0 +1,10 @@
+package $namespace
+
+#for obj in $objs
+const (
+	#for item in $obj.values
+	${name.upper()}_${item.name.value.upper()} int32 = $item.tag
+	#end for
+)
+
+#end for
