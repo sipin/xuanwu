@@ -42,7 +42,6 @@ type $(obj.name.value)Search$(key)Obj struct {
 func New$(obj.name.value)() *$obj.name.value {
 	rval := new($obj.name.value)
 	rval.ID = bson.NewObjectId()
-	rval.widgets = make(map[string]*Widget, $len($obj.fields))
 	return rval
 }
 
@@ -58,6 +57,10 @@ func New$(obj.name.value)WithParams(params map[string]string) *$obj.name.value {
 	o := new($obj.name.value)
 	o.ReadForm(params)
 	return o
+}
+
+func (w *$(obj.name.value)) initWidget() {
+	w.widgets = make(map[string]*Widget, $len($obj.fields))
 }
 
 //Thrift Methods
@@ -263,6 +266,9 @@ func (o *$obj.name.value) ${field.name.value}Widget() *Widget {
 			Name: "$field.name.value",
 			PlaceHolder: "",
 			Type: "$field.type",
+		}
+		if o.widgets == nil {
+			o.initWidget()
 		}
 		o.widgets[name] = ret
 	}
