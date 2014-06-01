@@ -208,7 +208,6 @@ func (o *UserGroup) Widgets() []*Widget {
 //foreigh keys
 
 
-
 //Collection Manage methods
 
 func UserGroupFindOne(query interface{}, sortFields ...string) (result *UserGroup, err error) {

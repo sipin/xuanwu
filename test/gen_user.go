@@ -808,7 +808,6 @@ func (o *Organization) GetAllUser() (result []*User, err error) {
 	return UserFindAll(query)
 }
 
-
 //Collection Manage methods
 
 func UserFindOne(query interface{}, sortFields ...string) (result *User, err error) {

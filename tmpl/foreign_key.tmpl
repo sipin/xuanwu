@@ -1,0 +1,18 @@
+//foreigh keys
+
+#for field in $obj.fields
+	#if $field.foreign != ""
+func (p *$obj.name.value) Get$(field.foreign)() (result *$field.foreign, err error) {
+	return $(field.foreign)FindByID(p.$field.name.value)
+}
+
+func (p *$obj.name.value) Set$(field.foreign)(obj *$field.foreign) {
+	p.$field.name.value = obj.ID.Hex()
+}
+
+func (o *$field.foreign) GetAll$(obj.name.value)() (result []*$obj.name.value, err error) {
+	query := bson.M{"$(field.foreign)ID": o.ID.Hex()}
+	return $(obj.name.value)FindAll(query)
+}
+	#end if
+#end for

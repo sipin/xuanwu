@@ -1,0 +1,80 @@
+//Collection Manage methods
+
+func $(obj.name.value)FindOne(query interface{}, sortFields ...string) (result *$obj.name.value, err error) {
+	session, col := db.GetCol("$obj.name.value")
+	defer session.Close()
+
+	q := col.Find(query)
+
+	if sortFields == nil {
+		q.Sort("-_id")
+	} else {
+		q.Sort(sortFields...)
+	}
+
+	err = q.One(&result)
+	return
+}
+
+func $(obj.name.value)Find(query interface{}, limit int, offset int, sortFields ...string) (result []*$obj.name.value, err error) {
+	session, col := db.GetCol("$obj.name.value")
+	defer session.Close()
+
+	q := col.Find(query).Limit(limit).Skip(offset)
+
+	if sortFields == nil {
+		q.Sort("-_id")
+	} else {
+		q.Sort(sortFields...)
+	}
+
+	err = q.All(&result)
+	return
+}
+
+func $(obj.name.value)FindAll(query interface{}, sortFields ...string) (result []*$obj.name.value, err error) {
+	session, col := db.GetCol("$obj.name.value")
+	defer session.Close()
+
+	q := col.Find(query)
+
+	if sortFields == nil {
+		q.Sort("-_id")
+	} else {
+		q.Sort(sortFields...)
+	}
+
+	err = q.All(&result)
+	return
+}
+
+func $(obj.name.value)Count(query interface{}) (result int) {
+	session, col := db.GetCol("$obj.name.value")
+	defer session.Close()
+
+	result, _ = col.Find(query).Count()
+	return
+}
+
+func $(obj.name.value)FindByID(id string) (result *$obj.name.value, err error) {
+	session, col := db.GetCol("$obj.name.value")
+	defer session.Close()
+
+	if !bson.IsObjectIdHex(id) {
+		err = ErrInvalidObjectId
+		return
+	}
+	err = col.FindId(bson.ObjectIdHex(id)).One(&result)
+	return
+}
+
+func $(obj.name.value)RemoveByID(id string) (result *$obj.name.value, err error) {
+	session, col := db.GetCol("$obj.name.value")
+	defer session.Close()
+
+	err = col.RemoveId(bson.ObjectIdHex(id))
+	#for key, v in $obj.search.iteritems()
+	core.Delete("$(obj.name.value.lower())", "$(key.lower())", id, nil)
+	#end for
+	return
+}

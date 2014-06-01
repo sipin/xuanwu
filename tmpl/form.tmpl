@@ -1,0 +1,71 @@
+//Form methods
+
+func (o *$obj.name.value) ReadForm(params map[string]string) {
+#for field in $obj.fields
+#if $field.name.value != "ID"
+	if val, ok := params["$field.name.value"]; ok {
+	#if $field.type == "string"
+		o.$field.name.value = val
+	#else if $field.type == "i32"
+		intVal, _ := strconv.Atoi(val)
+		o.$field.name.value = int32(intVal)
+	#else if $field.type == "i64"
+		intVal, _ := strconv.ParseInt(val, 10, 64)
+		o.$field.name.value = intVal
+	#else if $field.type == "bool"
+		o.$field.name.value = (val != "")
+	#else
+	Change go.tmpl go support $field.type now!
+	#end if
+	#if $field.type == "bool"
+	} else {
+		o.$field.name.value = false	
+	#end if
+	}
+#end if
+#end for
+}
+
+#for field in $obj.fields
+#if $field.name.value != "ID"
+func (o *$obj.name.value) ${field.name.value}Widget() *Widget {
+	name := "${field.name.value}"
+	ret, ok := o.widgets[name]
+	if !ok || ret==nil {
+		ret = &Widget{
+			Label: "$field.label",
+		#if $field.type == "string"
+			Value : o.$field.name.value,
+		#else if $field.type == "i32"
+			Value : strconv.FormatInt(int64(o.$field.name.value), 10),
+		#else if $field.type == "i64"
+			Value : strconv.FormatInt(o.$field.name.value, 10),
+		#else if $field.type == "bool"
+			Value : strconv.FormatBool(o.$field.name.value),
+		#else
+		Change go.tmpl go support $field.type now!
+		#end if
+			Name: "$field.name.value",
+			PlaceHolder: "",
+			Type: "$field.type",
+		}
+		if o.widgets == nil {
+			o.initWidget()
+		}
+		o.widgets[name] = ret
+	}
+
+	return ret
+}
+#end if
+#end for
+
+func (o *$obj.name.value) Widgets() []*Widget {
+	return []*Widget{
+#for field in $obj.fields
+#if $field.name.value != "ID"
+		o.${field.name.value}Widget(),
+#end if
+#end for
+	}
+}

@@ -1,0 +1,16 @@
+// Search
+#for key, v in $obj.search.iteritems()
+func $(obj.name.value)Search$(key)(word string, limit int, offset int) (core.SearchResult, error) {
+	searchJson := `{
+    "query" : {
+        "query_string" :  {
+	      "default_operator": "OR",
+	      "fields": ` + `$(str(v).replace("'", '"'))` + `,
+	      "query": "` + word + `"
+	    }
+    }
+}`
+	args := map[string]interface{} {"from" : offset, "size": limit}
+	return core.SearchRequest("$(obj.name.value.lower())", "$(key.lower())", args, searchJson)
+}
+#end for
