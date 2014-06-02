@@ -6,20 +6,19 @@ import (
 	"fmt"
 
 	//3rd party libs
+	"github.com/sipin/gothrift/thrift"
 	"labix.org/v2/mgo"
 	"labix.org/v2/mgo/bson"
-	"github.com/sipin/gothrift/thrift"
 
 	//Own libs
 	"db"
 )
 
 type UserGroup struct {
-	ID         bson.ObjectId `bson:"_id" thrift:"ID,1"`
-	Name  string `bson:"Name" thrift:"Name,2"`
+	ID      bson.ObjectId `bson:"_id" thrift:"ID,1"`
+	Name    string        `bson:"Name" thrift:"Name,2"`
 	widgets map[string]*Widget
 }
-
 
 func NewUserGroup() *UserGroup {
 	rval := new(UserGroup)
@@ -174,8 +173,6 @@ func (o *UserGroup) Save() (info *mgo.ChangeInfo, err error) {
 		o.ID = bson.NewObjectId()
 	}
 
-
-
 	return col.UpsertId(o.ID, o)
 }
 
@@ -190,13 +187,13 @@ func (o *UserGroup) ReadForm(params map[string]string) {
 func (o *UserGroup) NameWidget() *Widget {
 	name := "Name"
 	ret, ok := o.widgets[name]
-	if !ok || ret==nil {
+	if !ok || ret == nil {
 		ret = &Widget{
-			Label: "Name",
-			Value : o.Name,
-			Name: "Name",
+			Label:       "Name",
+			Value:       o.Name,
+			Name:        "Name",
 			PlaceHolder: "",
-			Type: "string",
+			Type:        "string",
 		}
 		if o.widgets == nil {
 			o.initWidget()
@@ -214,7 +211,6 @@ func (o *UserGroup) Widgets() []*Widget {
 }
 
 //foreigh keys
-
 
 //Collection Manage methods
 

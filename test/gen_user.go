@@ -8,31 +8,31 @@ import (
 	"strings"
 
 	//3rd party libs
+	"github.com/mattbaird/elastigo/core"
+	"github.com/sipin/gothrift/thrift"
 	"labix.org/v2/mgo"
 	"labix.org/v2/mgo/bson"
-	"github.com/sipin/gothrift/thrift"
-	"github.com/mattbaird/elastigo/core"
 
 	//Own libs
 	"db"
 )
 
 type User struct {
-	ID         bson.ObjectId `bson:"_id" thrift:"ID,1"`
-	UserName  string `bson:"UserName" thrift:"UserName,2"`
-	Password  string `bson:"Password" thrift:"Password,3"`
-	Name  string `bson:"Name" thrift:"Name,4"`
-	Email  string `bson:"Email" thrift:"Email,5"`
-	Intro  string `bson:"Intro" thrift:"Intro,6"`
-	Picture  string `bson:"Picture" thrift:"Picture,7"`
-	Remark  string `bson:"Remark" thrift:"Remark,8"`
-	IsAdmin  bool `bson:"IsAdmin" thrift:"IsAdmin,9"`
-	UserGroupID  string `bson:"UserGroupID" thrift:"UserGroupID,10"`
-	Status  int32 `bson:"Status" thrift:"Status,11"`
-	PubInfoID  string `bson:"PubInfoID" thrift:"PubInfoID,12"`
-	OrganizationID  string `bson:"OrganizationID" thrift:"OrganizationID,13"`
-	Tags  []string `bson:"Tags" thrift:"Tags,14"`
-	widgets map[string]*Widget
+	ID             bson.ObjectId `bson:"_id" thrift:"ID,1"`
+	UserName       string        `bson:"UserName" thrift:"UserName,2"`
+	Password       string        `bson:"Password" thrift:"Password,3"`
+	Name           string        `bson:"Name" thrift:"Name,4"`
+	Email          string        `bson:"Email" thrift:"Email,5"`
+	Intro          string        `bson:"Intro" thrift:"Intro,6"`
+	Picture        string        `bson:"Picture" thrift:"Picture,7"`
+	Remark         string        `bson:"Remark" thrift:"Remark,8"`
+	IsAdmin        bool          `bson:"IsAdmin" thrift:"IsAdmin,9"`
+	UserGroupID    string        `bson:"UserGroupID" thrift:"UserGroupID,10"`
+	Status         int32         `bson:"Status" thrift:"Status,11"`
+	PubInfoID      string        `bson:"PubInfoID" thrift:"PubInfoID,12"`
+	OrganizationID string        `bson:"OrganizationID" thrift:"OrganizationID,13"`
+	Tags           []string      `bson:"Tags" thrift:"Tags,14"`
+	widgets        map[string]*Widget
 }
 
 type UserSearchSimpleObj struct {
@@ -42,7 +42,7 @@ type UserSearchNameObj struct {
 	Name string `json:"Name"`
 }
 type UserSearchUserObj struct {
-	Name string `json:"Name"`
+	Name  string `json:"Name"`
 	Intro string `json:"Intro"`
 }
 
@@ -592,7 +592,6 @@ func (o *User) Save() (info *mgo.ChangeInfo, err error) {
 		o.Intro,
 	})
 
-
 	return col.UpsertId(o.ID, o)
 }
 
@@ -623,7 +622,7 @@ func (o *User) ReadForm(params map[string]string) {
 	if val, ok := params["IsAdmin"]; ok {
 		o.IsAdmin = (val != "")
 	} else {
-		o.IsAdmin = false	
+		o.IsAdmin = false
 	}
 	if val, ok := params["UserGroupID"]; ok {
 		o.UserGroupID = val
@@ -646,13 +645,13 @@ func (o *User) ReadForm(params map[string]string) {
 func (o *User) UserNameWidget() *Widget {
 	name := "UserName"
 	ret, ok := o.widgets[name]
-	if !ok || ret==nil {
+	if !ok || ret == nil {
 		ret = &Widget{
-			Label: "用户名",
-			Value : o.UserName,
-			Name: "UserName",
+			Label:       "用户名",
+			Value:       o.UserName,
+			Name:        "UserName",
 			PlaceHolder: "",
-			Type: "string",
+			Type:        "string",
 		}
 		if o.widgets == nil {
 			o.initWidget()
@@ -665,13 +664,13 @@ func (o *User) UserNameWidget() *Widget {
 func (o *User) PasswordWidget() *Widget {
 	name := "Password"
 	ret, ok := o.widgets[name]
-	if !ok || ret==nil {
+	if !ok || ret == nil {
 		ret = &Widget{
-			Label: "密码",
-			Value : o.Password,
-			Name: "Password",
+			Label:       "密码",
+			Value:       o.Password,
+			Name:        "Password",
 			PlaceHolder: "",
-			Type: "string",
+			Type:        "string",
 		}
 		if o.widgets == nil {
 			o.initWidget()
@@ -684,13 +683,13 @@ func (o *User) PasswordWidget() *Widget {
 func (o *User) NameWidget() *Widget {
 	name := "Name"
 	ret, ok := o.widgets[name]
-	if !ok || ret==nil {
+	if !ok || ret == nil {
 		ret = &Widget{
-			Label: "姓名",
-			Value : o.Name,
-			Name: "Name",
+			Label:       "姓名",
+			Value:       o.Name,
+			Name:        "Name",
 			PlaceHolder: "",
-			Type: "string",
+			Type:        "string",
 		}
 		if o.widgets == nil {
 			o.initWidget()
@@ -703,13 +702,13 @@ func (o *User) NameWidget() *Widget {
 func (o *User) EmailWidget() *Widget {
 	name := "Email"
 	ret, ok := o.widgets[name]
-	if !ok || ret==nil {
+	if !ok || ret == nil {
 		ret = &Widget{
-			Label: "电邮",
-			Value : o.Email,
-			Name: "Email",
+			Label:       "电邮",
+			Value:       o.Email,
+			Name:        "Email",
 			PlaceHolder: "",
-			Type: "string",
+			Type:        "string",
 		}
 		if o.widgets == nil {
 			o.initWidget()
@@ -722,13 +721,13 @@ func (o *User) EmailWidget() *Widget {
 func (o *User) IntroWidget() *Widget {
 	name := "Intro"
 	ret, ok := o.widgets[name]
-	if !ok || ret==nil {
+	if !ok || ret == nil {
 		ret = &Widget{
-			Label: "介绍",
-			Value : o.Intro,
-			Name: "Intro",
+			Label:       "介绍",
+			Value:       o.Intro,
+			Name:        "Intro",
 			PlaceHolder: "",
-			Type: "string",
+			Type:        "string",
 		}
 		if o.widgets == nil {
 			o.initWidget()
@@ -741,13 +740,13 @@ func (o *User) IntroWidget() *Widget {
 func (o *User) PictureWidget() *Widget {
 	name := "Picture"
 	ret, ok := o.widgets[name]
-	if !ok || ret==nil {
+	if !ok || ret == nil {
 		ret = &Widget{
-			Label: "Picture",
-			Value : o.Picture,
-			Name: "Picture",
+			Label:       "Picture",
+			Value:       o.Picture,
+			Name:        "Picture",
 			PlaceHolder: "",
-			Type: "string",
+			Type:        "string",
 		}
 		if o.widgets == nil {
 			o.initWidget()
@@ -760,13 +759,13 @@ func (o *User) PictureWidget() *Widget {
 func (o *User) RemarkWidget() *Widget {
 	name := "Remark"
 	ret, ok := o.widgets[name]
-	if !ok || ret==nil {
+	if !ok || ret == nil {
 		ret = &Widget{
-			Label: "Remark",
-			Value : o.Remark,
-			Name: "Remark",
+			Label:       "Remark",
+			Value:       o.Remark,
+			Name:        "Remark",
 			PlaceHolder: "",
-			Type: "string",
+			Type:        "string",
 		}
 		if o.widgets == nil {
 			o.initWidget()
@@ -779,13 +778,13 @@ func (o *User) RemarkWidget() *Widget {
 func (o *User) IsAdminWidget() *Widget {
 	name := "IsAdmin"
 	ret, ok := o.widgets[name]
-	if !ok || ret==nil {
+	if !ok || ret == nil {
 		ret = &Widget{
-			Label: "IsAdmin",
-			Value : strconv.FormatBool(o.IsAdmin),
-			Name: "IsAdmin",
+			Label:       "IsAdmin",
+			Value:       strconv.FormatBool(o.IsAdmin),
+			Name:        "IsAdmin",
 			PlaceHolder: "",
-			Type: "bool",
+			Type:        "bool",
 		}
 		if o.widgets == nil {
 			o.initWidget()
@@ -798,13 +797,13 @@ func (o *User) IsAdminWidget() *Widget {
 func (o *User) UserGroupIDWidget() *Widget {
 	name := "UserGroupID"
 	ret, ok := o.widgets[name]
-	if !ok || ret==nil {
+	if !ok || ret == nil {
 		ret = &Widget{
-			Label: "UserGroupID",
-			Value : o.UserGroupID,
-			Name: "UserGroupID",
+			Label:       "UserGroupID",
+			Value:       o.UserGroupID,
+			Name:        "UserGroupID",
 			PlaceHolder: "",
-			Type: "string",
+			Type:        "string",
 		}
 		if o.widgets == nil {
 			o.initWidget()
@@ -817,13 +816,13 @@ func (o *User) UserGroupIDWidget() *Widget {
 func (o *User) StatusWidget() *Widget {
 	name := "Status"
 	ret, ok := o.widgets[name]
-	if !ok || ret==nil {
+	if !ok || ret == nil {
 		ret = &Widget{
-			Label: "Status",
-			Value : strconv.FormatInt(int64(o.Status), 10),
-			Name: "Status",
+			Label:       "Status",
+			Value:       strconv.FormatInt(int64(o.Status), 10),
+			Name:        "Status",
 			PlaceHolder: "",
-			Type: "i32",
+			Type:        "i32",
 		}
 		if o.widgets == nil {
 			o.initWidget()
@@ -836,13 +835,13 @@ func (o *User) StatusWidget() *Widget {
 func (o *User) PubInfoIDWidget() *Widget {
 	name := "PubInfoID"
 	ret, ok := o.widgets[name]
-	if !ok || ret==nil {
+	if !ok || ret == nil {
 		ret = &Widget{
-			Label: "PubInfoID",
-			Value : o.PubInfoID,
-			Name: "PubInfoID",
+			Label:       "PubInfoID",
+			Value:       o.PubInfoID,
+			Name:        "PubInfoID",
 			PlaceHolder: "",
-			Type: "string",
+			Type:        "string",
 		}
 		if o.widgets == nil {
 			o.initWidget()
@@ -855,13 +854,13 @@ func (o *User) PubInfoIDWidget() *Widget {
 func (o *User) OrganizationIDWidget() *Widget {
 	name := "OrganizationID"
 	ret, ok := o.widgets[name]
-	if !ok || ret==nil {
+	if !ok || ret == nil {
 		ret = &Widget{
-			Label: "OrganizationID",
-			Value : o.OrganizationID,
-			Name: "OrganizationID",
+			Label:       "OrganizationID",
+			Value:       o.OrganizationID,
+			Name:        "OrganizationID",
 			PlaceHolder: "",
-			Type: "string",
+			Type:        "string",
 		}
 		if o.widgets == nil {
 			o.initWidget()
@@ -874,13 +873,13 @@ func (o *User) OrganizationIDWidget() *Widget {
 func (o *User) TagsWidget() *Widget {
 	name := "Tags"
 	ret, ok := o.widgets[name]
-	if !ok || ret==nil {
+	if !ok || ret == nil {
 		ret = &Widget{
-			Label: "Tags",
-			Value : strings.Join(o.Tags, "\n"),
-			Name: "Tags",
+			Label:       "Tags",
+			Value:       strings.Join(o.Tags, "\n"),
+			Name:        "Tags",
 			PlaceHolder: "",
-			Type: "list<string>",
+			Type:        "list<string>",
 		}
 		if o.widgets == nil {
 			o.initWidget()
@@ -1040,7 +1039,7 @@ func UserSearchSimple(word string, limit int, offset int) (core.SearchResult, er
 	    }
     }
 }`
-	args := map[string]interface{} {"from" : offset, "size": limit}
+	args := map[string]interface{}{"from": offset, "size": limit}
 	return core.SearchRequest("user", "simple", args, searchJson)
 }
 func UserSearchName(word string, limit int, offset int) (core.SearchResult, error) {
@@ -1053,7 +1052,7 @@ func UserSearchName(word string, limit int, offset int) (core.SearchResult, erro
 	    }
     }
 }`
-	args := map[string]interface{} {"from" : offset, "size": limit}
+	args := map[string]interface{}{"from": offset, "size": limit}
 	return core.SearchRequest("user", "name", args, searchJson)
 }
 func UserSearchUser(word string, limit int, offset int) (core.SearchResult, error) {
@@ -1066,6 +1065,6 @@ func UserSearchUser(word string, limit int, offset int) (core.SearchResult, erro
 	    }
     }
 }`
-	args := map[string]interface{} {"from" : offset, "size": limit}
+	args := map[string]interface{}{"from": offset, "size": limit}
 	return core.SearchRequest("user", "user", args, searchJson)
 }

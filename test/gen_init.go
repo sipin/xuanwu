@@ -2,8 +2,8 @@ package models
 
 import (
 	//Official libs
-	"fmt"
 	"errors"
+	"fmt"
 
 	//3rd party libs
 	"github.com/sipin/gothrift/thrift"
