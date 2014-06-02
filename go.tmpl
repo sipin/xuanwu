@@ -101,28 +101,8 @@ func (p *$obj.name.value) Read(iprot thrift.TProtocol) error {
 }
 
 #for field in $obj.fields
-func (p *$obj.name.value) readField$(field.tag)(iprot thrift.TProtocol) error {
-	#if $field.type == "string"
-	if v, err := iprot.ReadString(); err != nil {
-	#else if $field.type == "i32"
-	if v, err := iprot.ReadI32(); err != nil {
-	#else if $field.type == "i64"
-	if v, err := iprot.ReadI64(); err != nil {
-	#else if $field.type == "bool"
-	if v, err := iprot.ReadBool(); err != nil {
-	#else
-	Change go.tmpl go support $field.type now!
-	#end if
-		return fmt.Errorf("error reading field $(field.tag): %s", err)
-	} else {
-		#if $field.name.value == "ID"
-		p.$field.name.value = bson.ObjectId(v)
-		#else
-		p.$field.name.value = v
-		#end if
-	}
-	return nil
-}
+	#set global $field = $field
+	#include "tmpl" + $os.sep + "field_" + $field.type + ".tmpl"
 #end for
 
 func (p *$obj.name.value) Write(oprot thrift.TProtocol) error {

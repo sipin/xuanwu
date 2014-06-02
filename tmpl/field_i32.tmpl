@@ -1,0 +1,8 @@
+func (p *$obj.name.value) readField$(field.tag)(iprot thrift.TProtocol) error {
+	if v, err := iprot.ReadI32(); err != nil {
+		return fmt.Errorf("error reading field $(field.tag): %s", err)
+	} else {
+		p.$field.name.value = v
+	}
+	return nil
+}

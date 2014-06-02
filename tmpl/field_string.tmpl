@@ -1,0 +1,12 @@
+func (p *$obj.name.value) readField$(field.tag)(iprot thrift.TProtocol) error {
+	if v, err := iprot.ReadString(); err != nil {
+		return fmt.Errorf("error reading field $(field.tag): %s", err)
+	} else {
+		#if $field.name.value == "ID"
+		p.$field.name.value = bson.ObjectId(v)
+		#else
+		p.$field.name.value = v
+		#end if
+	}
+	return nil
+}
