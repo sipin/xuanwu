@@ -1,0 +1,45 @@
+
+func (p *$obj.name.value) readField$(field.tag)(iprot thrift.TProtocol) error {
+	_, size, err := iprot.ReadListBegin()
+	if err != nil {
+		return fmt.Errorf("error reading list begin: %s")
+	}
+	tSlice := make([]string, 0, size)
+	p.$field.name.value = tSlice
+	for i := 0; i < size; i++ {
+		var _elem0 string
+		if v, err := iprot.ReadString(); err != nil {
+			return fmt.Errorf("error reading field 0: %s", err)
+		} else {
+			_elem0 = v
+		}
+		p.$field.name.value = append(p.$field.name.value, _elem0)
+	}
+	if err := iprot.ReadListEnd(); err != nil {
+		return fmt.Errorf("error reading list end: %s")
+	}
+	return nil
+}
+
+func (p *$obj.name.value) writeField$(field.tag)(oprot thrift.TProtocol) (err error) {
+	if p.$field.name.value != nil {
+		if err := oprot.WriteFieldBegin("$field.name.value", thrift.LIST, $(field.tag)); err != nil {
+			return fmt.Errorf("%T write field begin error $field.tag:$field.name.value: %s", p, err)
+		}
+		if err := oprot.WriteListBegin(thrift.STRING, len(p.$field.name.value)); err != nil {
+			return fmt.Errorf("error writing list begin: %s")
+		}
+		for _, v := range p.$field.name.value {
+			if err := oprot.WriteString(string(v)); err != nil {
+				return fmt.Errorf("%T. (0) field write error: %s", p, err)
+			}
+		}
+		if err := oprot.WriteListEnd(); err != nil {
+			return fmt.Errorf("error writing list end: %s")
+		}
+		if err := oprot.WriteFieldEnd(); err != nil {
+			return fmt.Errorf("%T write field end error $field.tag:$field.name.value: %s", p, err)
+		}
+	}
+	return err
+}

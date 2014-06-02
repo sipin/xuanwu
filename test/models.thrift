@@ -19,5 +19,6 @@ struct User {
 	11: i32 Status				//用户状态，0:禁用; 1:离线; 2:在线
 	12: string PubInfoID
 	13: string OrganizationID
+	14: list<string> Tags
 }
 

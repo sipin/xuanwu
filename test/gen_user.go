@@ -30,6 +30,7 @@ type User struct {
 	Status  int32 `bson:"Status" thrift:"Status,11"`
 	PubInfoID  string `bson:"PubInfoID" thrift:"PubInfoID,12"`
 	OrganizationID  string `bson:"OrganizationID" thrift:"OrganizationID,13"`
+	Tags  []string `bson:"Tags" thrift:"Tags,14"`
 	widgets map[string]*Widget
 }
 
@@ -47,7 +48,7 @@ type UserSearchUserObj struct {
 func NewUser() *User {
 	rval := new(User)
 	rval.ID = bson.NewObjectId()
-	rval.widgets = make(map[string]*Widget, 13)
+	rval.widgets = make(map[string]*Widget, 14)
 	return rval
 }
 
@@ -130,6 +131,10 @@ func (p *User) Read(iprot thrift.TProtocol) error {
 			}
 		case 13:
 			if err := p.readField13(iprot); err != nil {
+				return err
+			}
+		case 14:
+			if err := p.readField14(iprot); err != nil {
 				return err
 			}
 		default:
@@ -446,6 +451,51 @@ func (p *User) writeField13(oprot thrift.TProtocol) (err error) {
 	return err
 }
 
+func (p *User) readField14(iprot thrift.TProtocol) error {
+	_, size, err := iprot.ReadListBegin()
+	if err != nil {
+		return fmt.Errorf("error reading list begin: %s")
+	}
+	tSlice := make([]string, 0, size)
+	p.Tags = tSlice
+	for i := 0; i < size; i++ {
+		var _elem0 string
+		if v, err := iprot.ReadString(); err != nil {
+			return fmt.Errorf("error reading field 0: %s", err)
+		} else {
+			_elem0 = v
+		}
+		p.Tags = append(p.Tags, _elem0)
+	}
+	if err := iprot.ReadListEnd(); err != nil {
+		return fmt.Errorf("error reading list end: %s")
+	}
+	return nil
+}
+
+func (p *User) writeField14(oprot thrift.TProtocol) (err error) {
+	if p.Tags != nil {
+		if err := oprot.WriteFieldBegin("Tags", thrift.LIST, 14); err != nil {
+			return fmt.Errorf("%T write field begin error 14:Tags: %s", p, err)
+		}
+		if err := oprot.WriteListBegin(thrift.STRING, len(p.Tags)); err != nil {
+			return fmt.Errorf("error writing list begin: %s")
+		}
+		for _, v := range p.Tags {
+			if err := oprot.WriteString(string(v)); err != nil {
+				return fmt.Errorf("%T. (0) field write error: %s", p, err)
+			}
+		}
+		if err := oprot.WriteListEnd(); err != nil {
+			return fmt.Errorf("error writing list end: %s")
+		}
+		if err := oprot.WriteFieldEnd(); err != nil {
+			return fmt.Errorf("%T write field end error 14:Tags: %s", p, err)
+		}
+	}
+	return err
+}
+
 func (p *User) Write(oprot thrift.TProtocol) error {
 	if err := oprot.WriteStructBegin("User"); err != nil {
 		return fmt.Errorf("%T write struct begin error: %s", p, err)
@@ -487,6 +537,9 @@ func (p *User) Write(oprot thrift.TProtocol) error {
 		return err
 	}
 	if err := p.writeField13(oprot); err != nil {
+		return err
+	}
+	if err := p.writeField14(oprot); err != nil {
 		return err
 	}
 	if err := oprot.WriteFieldStop(); err != nil {
@@ -580,6 +633,9 @@ func (o *User) ReadForm(params map[string]string) {
 	}
 	if val, ok := params["OrganizationID"]; ok {
 		o.OrganizationID = val
+	}
+	if val, ok := params["Tags"]; ok {
+	Change go.tmpl go support list<string> now!
 	}
 }
 
@@ -775,6 +831,22 @@ func (o *User) OrganizationIDWidget() *Widget {
 
 	return ret
 }
+func (o *User) TagsWidget() *Widget {
+	name := "Tags"
+	ret, ok := o.widgets[name]
+	if !ok || ret==nil {
+		ret = &Widget{
+			Label: "Tags",
+		Change go.tmpl go support list<string> now!
+			Name: "Tags",
+			PlaceHolder: "",
+			Type: "list<string>",
+		}
+		o.widgets[name] = ret
+	}
+
+	return ret
+}
 
 func (o *User) Widgets() []*Widget {
 	return []*Widget{
@@ -790,6 +862,7 @@ func (o *User) Widgets() []*Widget {
 		o.StatusWidget(),
 		o.PubInfoIDWidget(),
 		o.OrganizationIDWidget(),
+		o.TagsWidget(),
 	}
 }
 
