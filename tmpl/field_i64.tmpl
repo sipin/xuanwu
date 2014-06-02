@@ -10,14 +10,14 @@ func (p *$obj.name.value) readField$(field.tag)(iprot thrift.TProtocol) error {
 
 func (p *$obj.name.value) writeField$(field.tag)(oprot thrift.TProtocol) (err error) {
 	if err := oprot.WriteFieldBegin("$field.name.value", thrift.I64, $field.tag); err != nil {
-		return fmt.Errorf("%T write field begin error $field.type:$field.name.value: %s", p, err)
+		return fmt.Errorf("%T write field begin error $field.tag:$field.name.value: %s", p, err)
 	}
 	if err := oprot.WriteI64(int64(p.$field.name.value)); err != nil {
-		return fmt.Errorf("%T.$field.name.value ($field.type) field write error: %s", p, err)
+		return fmt.Errorf("%T.$field.name.value ($field.tag) field write error: %s", p, err)
 	}
 
 	if err := oprot.WriteFieldEnd(); err != nil {
-		return fmt.Errorf("%T write field end error 1:ID: %s", p, err)
+		return fmt.Errorf("%T write field end error $field.tag:$field.name.value: %s", p, err)
 	}
 	return err
 }
