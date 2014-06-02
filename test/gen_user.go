@@ -5,6 +5,7 @@ import (
 	"bytes"
 	"fmt"
 	"strconv"
+	"strings"
 
 	//3rd party libs
 	"labix.org/v2/mgo"
@@ -638,7 +639,7 @@ func (o *User) ReadForm(params map[string]string) {
 		o.OrganizationID = val
 	}
 	if val, ok := params["Tags"]; ok {
-	Change go.tmpl go support list<string> now!
+		o.Tags = strings.Split(val, "\n")
 	}
 }
 
@@ -876,7 +877,7 @@ func (o *User) TagsWidget() *Widget {
 	if !ok || ret==nil {
 		ret = &Widget{
 			Label: "Tags",
-		Change go.tmpl go support list<string> now!
+			Value : strings.Join(o.Tags, "\n"),
 			Name: "Tags",
 			PlaceHolder: "",
 			Type: "list<string>",

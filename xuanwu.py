@@ -106,6 +106,7 @@ def transform_field(field, indent=0):
 
 def transform_struct(obj):
 	obj.need_strconv = False
+	obj.need_strings = False
 	obj.search = get_search(obj)
 	obj.need_search = len(obj.search) > 0
 
@@ -116,6 +117,8 @@ def transform_struct(obj):
 
 		if field.go_type != "string":
 			obj.need_strconv = True
+		if field.type == "list<string>":
+			obj.need_strings = True
 
 		field.foreign = ""
 		if field.name.value.endswith("ID"):

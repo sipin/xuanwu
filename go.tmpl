@@ -8,6 +8,9 @@ import (
 	#if $obj.need_strconv
 	"strconv"
 	#end if
+	#if $obj.need_strings
+	"strings"
+	#end if
 
 	//3rd party libs
 	"labix.org/v2/mgo"

@@ -14,6 +14,8 @@ func (o *$obj.name.value) ReadForm(params map[string]string) {
 		o.$field.name.value = intVal
 	#else if $field.type == "bool"
 		o.$field.name.value = (val != "")
+	#else if $field.type == "list<string>"
+		o.$field.name.value = strings.Split(val, "\n")
 	#else
 	Change go.tmpl go support $field.type now!
 	#end if
@@ -42,6 +44,8 @@ func (o *$obj.name.value) ${field.name.value}Widget() *Widget {
 			Value : strconv.FormatInt(o.$field.name.value, 10),
 		#else if $field.type == "bool"
 			Value : strconv.FormatBool(o.$field.name.value),
+		#else if $field.type == "list<string>"
+			Value : strings.Join(o.$field.name.value, "\n"),
 		#else
 		Change go.tmpl go support $field.type now!
 		#end if
