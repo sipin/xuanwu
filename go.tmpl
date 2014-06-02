@@ -99,7 +99,6 @@ func (p *$obj.name.value) Read(iprot thrift.TProtocol) error {
 	}
 	return nil
 }
-
 #for field in $obj.fields
 	#set global $field = $field
 	#include "tmpl" + $os.sep + "field_" + $field.type + ".tmpl"
@@ -122,42 +121,6 @@ func (p *$obj.name.value) Write(oprot thrift.TProtocol) error {
 	}
 	return nil
 }
-
-#for field in $obj.fields
-func (p *$obj.name.value) writeField$(field.tag)(oprot thrift.TProtocol) (err error) {
-	#if $field.type == "string"
-	if err := oprot.WriteFieldBegin("$field.name.value", thrift.STRING, $field.tag); err != nil {
-		return fmt.Errorf("%T write field begin error $field.type:$field.name.value: %s", p, err)
-	}
-	if err := oprot.WriteString(string(p.$field.name.value)); err != nil {
-	#else if $field.type == "i32"
-	if err := oprot.WriteFieldBegin("$field.name.value", thrift.I32, $field.tag); err != nil {
-		return fmt.Errorf("%T write field begin error $field.type:$field.name.value: %s", p, err)
-	}
-	if err := oprot.WriteI32(int32(p.$field.name.value)); err != nil {
-	#else if $field.type == "i64"
-	if err := oprot.WriteFieldBegin("$field.name.value", thrift.I64, $field.tag); err != nil {
-		return fmt.Errorf("%T write field begin error $field.type:$field.name.value: %s", p, err)
-	}
-	if err := oprot.WriteI64(int64(p.$field.name.value)); err != nil {
-	
-	#else if $field.type == "bool"
-	if err := oprot.WriteFieldBegin("$field.name.value", thrift.BOOL, 9); err != nil {
-		return fmt.Errorf("%T write field begin error 9:IsAdmin: %s", p, err)
-	}
-	if err := oprot.WriteBool(bool(p.$field.name.value)); err != nil {
-	#else
-	Change go.tmpl go support $field.type now!
-	#end if
-		return fmt.Errorf("%T.$field.name.value ($field.type) field write error: %s", p, err)
-	}
-
-	if err := oprot.WriteFieldEnd(); err != nil {
-		return fmt.Errorf("%T write field end error 1:ID: %s", p, err)
-	}
-	return err
-}
-#end for
 
 func (p *$obj.name.value) String() string {
 	if p == nil {
