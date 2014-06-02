@@ -24,7 +24,6 @@ type UserGroup struct {
 func NewUserGroup() *UserGroup {
 	rval := new(UserGroup)
 	rval.ID = bson.NewObjectId()
-	rval.widgets = make(map[string]*Widget, 2)
 	return rval
 }
 
@@ -40,6 +39,10 @@ func NewUserGroupWithParams(params map[string]string) *UserGroup {
 	o := new(UserGroup)
 	o.ReadForm(params)
 	return o
+}
+
+func (w *UserGroup) initWidget() {
+	w.widgets = make(map[string]*Widget, 2)
 }
 
 //Thrift Methods
@@ -194,6 +197,9 @@ func (o *UserGroup) NameWidget() *Widget {
 			Name: "Name",
 			PlaceHolder: "",
 			Type: "string",
+		}
+		if o.widgets == nil {
+			o.initWidget()
 		}
 		o.widgets[name] = ret
 	}

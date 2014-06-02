@@ -48,7 +48,6 @@ type UserSearchUserObj struct {
 func NewUser() *User {
 	rval := new(User)
 	rval.ID = bson.NewObjectId()
-	rval.widgets = make(map[string]*Widget, 14)
 	return rval
 }
 
@@ -64,6 +63,10 @@ func NewUserWithParams(params map[string]string) *User {
 	o := new(User)
 	o.ReadForm(params)
 	return o
+}
+
+func (w *User) initWidget() {
+	w.widgets = make(map[string]*Widget, 14)
 }
 
 //Thrift Methods
@@ -650,6 +653,9 @@ func (o *User) UserNameWidget() *Widget {
 			PlaceHolder: "",
 			Type: "string",
 		}
+		if o.widgets == nil {
+			o.initWidget()
+		}
 		o.widgets[name] = ret
 	}
 
@@ -665,6 +671,9 @@ func (o *User) PasswordWidget() *Widget {
 			Name: "Password",
 			PlaceHolder: "",
 			Type: "string",
+		}
+		if o.widgets == nil {
+			o.initWidget()
 		}
 		o.widgets[name] = ret
 	}
@@ -682,6 +691,9 @@ func (o *User) NameWidget() *Widget {
 			PlaceHolder: "",
 			Type: "string",
 		}
+		if o.widgets == nil {
+			o.initWidget()
+		}
 		o.widgets[name] = ret
 	}
 
@@ -697,6 +709,9 @@ func (o *User) EmailWidget() *Widget {
 			Name: "Email",
 			PlaceHolder: "",
 			Type: "string",
+		}
+		if o.widgets == nil {
+			o.initWidget()
 		}
 		o.widgets[name] = ret
 	}
@@ -714,6 +729,9 @@ func (o *User) IntroWidget() *Widget {
 			PlaceHolder: "",
 			Type: "string",
 		}
+		if o.widgets == nil {
+			o.initWidget()
+		}
 		o.widgets[name] = ret
 	}
 
@@ -729,6 +747,9 @@ func (o *User) PictureWidget() *Widget {
 			Name: "Picture",
 			PlaceHolder: "",
 			Type: "string",
+		}
+		if o.widgets == nil {
+			o.initWidget()
 		}
 		o.widgets[name] = ret
 	}
@@ -746,6 +767,9 @@ func (o *User) RemarkWidget() *Widget {
 			PlaceHolder: "",
 			Type: "string",
 		}
+		if o.widgets == nil {
+			o.initWidget()
+		}
 		o.widgets[name] = ret
 	}
 
@@ -761,6 +785,9 @@ func (o *User) IsAdminWidget() *Widget {
 			Name: "IsAdmin",
 			PlaceHolder: "",
 			Type: "bool",
+		}
+		if o.widgets == nil {
+			o.initWidget()
 		}
 		o.widgets[name] = ret
 	}
@@ -778,6 +805,9 @@ func (o *User) UserGroupIDWidget() *Widget {
 			PlaceHolder: "",
 			Type: "string",
 		}
+		if o.widgets == nil {
+			o.initWidget()
+		}
 		o.widgets[name] = ret
 	}
 
@@ -793,6 +823,9 @@ func (o *User) StatusWidget() *Widget {
 			Name: "Status",
 			PlaceHolder: "",
 			Type: "i32",
+		}
+		if o.widgets == nil {
+			o.initWidget()
 		}
 		o.widgets[name] = ret
 	}
@@ -810,6 +843,9 @@ func (o *User) PubInfoIDWidget() *Widget {
 			PlaceHolder: "",
 			Type: "string",
 		}
+		if o.widgets == nil {
+			o.initWidget()
+		}
 		o.widgets[name] = ret
 	}
 
@@ -826,6 +862,9 @@ func (o *User) OrganizationIDWidget() *Widget {
 			PlaceHolder: "",
 			Type: "string",
 		}
+		if o.widgets == nil {
+			o.initWidget()
+		}
 		o.widgets[name] = ret
 	}
 
@@ -841,6 +880,9 @@ func (o *User) TagsWidget() *Widget {
 			Name: "Tags",
 			PlaceHolder: "",
 			Type: "list<string>",
+		}
+		if o.widgets == nil {
+			o.initWidget()
 		}
 		o.widgets[name] = ret
 	}
