@@ -152,6 +152,14 @@ def transform(module):
 		if not isinstance(node, ast.Node):
 			continue
 		if isinstance(node, ast.Enum):
+			labels = []
+			for i in node.values:
+				label_anno = [j.value for j in i.annotations if j.name.value == "label"]
+				if len(label_anno) == 0:
+					labels.append('"%s"' % i.name)
+				else:
+					labels.append(label_anno[0])
+			node.labels = labels
 			enum.append(node)
 		elif isinstance(node, ast.Const):
 			const.append(transform_const(node))
