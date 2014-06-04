@@ -19,3 +19,7 @@ func (o *$obj.name.value) Save() (info *mgo.ChangeInfo, err error) {
 
 	return col.UpsertId(o.ID, o)
 }
+
+func $(obj.name.value)Col() (session *mgo.Session, col *mgo.Collection) {
+	return db.GetCol("$obj.name.value")
+}
