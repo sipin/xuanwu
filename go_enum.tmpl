@@ -5,12 +5,12 @@ var (
 	$obj.name.value = struct {
 		${",".join([item.name.value for item in obj.values])} int32
 } {
-		${",".join([str(i) for i in range(0, len(obj.values))])},
+		${",".join([str(item.tag) for item in obj.values])},
 	}
 
-	${obj.name.value}Label = []string {
-#for label in $obj.labels
-		$label,
+	${obj.name.value}Label = map[int32]string {
+#for key, label in $obj.labels.items()
+		$key: $label,
 #end for
 	}
 )
