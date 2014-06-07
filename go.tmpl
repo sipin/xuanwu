@@ -5,6 +5,9 @@ import (
 	//Official libs
 	"bytes"
 	"fmt"
+	#if $obj.need_enum
+	"$src_path/$namespace"
+	#end if
 	#if $obj.need_re
 	"regexp"
 	#end if

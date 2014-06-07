@@ -38,6 +38,16 @@ if len(sys.argv) != 3:
 namespace = ""
 thrift_file = sys.argv[1]
 out_path = sys.argv[2]
+
+
+try:
+	src_path = out_path.replace("\\", "/")
+	src_path = src_path[src_path.index("/src/")+5:]
+except ValueError:
+	print "output_folder_path should contains '/src/', for xuanwu to use absolute go path import"
+	sys.exit()
+
+
 if not out_path.endswith(path.sep):
 		out_path = out_path + path.sep
 
@@ -129,6 +139,7 @@ def transform_struct(obj):
 	obj.search = get_search(obj)
 	obj.need_search = len(obj.search) > 0
 	obj.need_re = False
+	obj.need_enum = False
 
 	for field in obj.fields:
 		add_properties(field)
@@ -138,6 +149,9 @@ def transform_struct(obj):
 
 		if hasattr(field, "rule"):
 			obj.need_re = True
+
+		if hasattr(field, "enums"):
+			obj.need_enum = True
 
 		if field.go_type != "string":
 			obj.need_strconv = True
@@ -149,7 +163,7 @@ def transform_struct(obj):
 			field.foreign = field.name.value[:-2]
 
 	tpl = open('go.tmpl', 'r').read()
-	t = Template(tpl, searchList=[{"namespace": namespace, "obj": obj}])
+	t = Template(tpl, searchList=[{"namespace": namespace, "obj": obj, "src_path": src_path}])
 	code = str(t)
 	f = open(out_path + 'gen_' + obj.name.value.lower() + ".go", "w")
 	f.write(code)
