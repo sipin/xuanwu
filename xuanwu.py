@@ -12,6 +12,16 @@ type_ref = dict(
 	i64 = "int64",
 	bool = "bool",
 )
+
+widget_types = set([
+	"text",
+	"richtext",
+	"password",
+	"radio",
+	"checkbox",
+	"select"
+])
+
 typedef = dict()
 typedef_tpl = '''
 package $namespace
@@ -46,9 +56,9 @@ def add_properties(field):
 	field.label = field.name.value
 	field.extra = []
 
+	# todo: add field name checking
 	for att in field.annotations:
-		if att.name.value.lower() == "label":
-			field.label = att.value.value
+		setattr(field, att.name.value.replace("-", "_"), att.value.value)
 
 def get_search(obj):
 	search = {}
@@ -64,6 +74,15 @@ def get_search(obj):
 				else:
 					search[search_key] = [field.name.value]
 	return search
+
+def get_widget_type(field):
+	for att in field.annotations:
+		if att.name.value.lower() == "widget":
+			if not att.value.value in widget_types:
+				raise Exception(field.name.value + " has invalid widget type: " + att.value.value)
+			return att.value.value
+			
+	return "text"
 
 def transform_type(field_type):
 	if isinstance(field_type, (ast.Byte, ast.I16, ast.I32, ast.I64)):
@@ -109,11 +128,16 @@ def transform_struct(obj):
 	obj.need_strings = False
 	obj.search = get_search(obj)
 	obj.need_search = len(obj.search) > 0
+	obj.need_re = False
 
 	for field in obj.fields:
 		add_properties(field)
 		field.go_type = type_translate(field.type)
 		field.type = str(field.type)
+		field.widget_type = get_widget_type(field)
+
+		if hasattr(field, "rule"):
+			obj.need_re = True
 
 		if field.go_type != "string":
 			obj.need_strconv = True

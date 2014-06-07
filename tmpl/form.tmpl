@@ -1,6 +1,10 @@
 //Form methods
 
-func (o *$obj.name.value) ReadForm(params map[string]string) {
+func (w *$(obj.name.value)) initWidget() {
+	w.widgets = make(map[string]*Widget, $len($obj.fields))
+}
+
+func (o *$obj.name.value) ReadForm(params map[string]string) (hasError bool) {
 #for field in $obj.fields
 #if $field.name.value != "ID"
 	if val, ok := params["$field.name.value"]; ok {
@@ -21,11 +25,39 @@ func (o *$obj.name.value) ReadForm(params map[string]string) {
 	#end if
 	#if $field.type == "bool"
 	} else {
-		o.$field.name.value = false	
+		o.$field.name.value = false
 	#end if
 	}
 #end if
 #end for
+	return o.ValidateData()
+}
+
+func (o *$obj.name.value) ValidateData() (hasError bool) {
+#for field in $obj.fields
+	#if field.required and hasattr(field, "rule")
+	if o.$field.name.value == "" {
+		hasError = true
+		o.${field.name.value}Widget().ErrorMsg = "$field.requiredMsg"
+	} else {
+		if !regexp.MustCompile(`$field.rule`).Match([]byte(o.$field.name.value)) {
+			hasError = true
+			o.${field.name.value}Widget().ErrorMsg = "$field.ruleMsg"
+		}
+	}
+	#else if field.required
+	if o.$field.name.value == "" {
+		o.${field.name.value}Widget().ErrorMsg = "$field.requiredMsg"
+		hasError = true
+	}
+	#else if hasattr(field, "rule")
+	if !regexp.MustCompile(`$field.rule`).Match([]byte(o.$field.name.value)) {
+		o.${field.name.value}Widget().ErrorMsg = "$field.ruleMsg"
+		hasError = true
+	}
+	#end if
+#end for
+	return
 }
 
 #for field in $obj.fields
