@@ -23,4 +23,5 @@ type Widget struct {
 	PlaceHolder string
 	Type        string
 	ErrorMsg    string
+	EnumData    map[int32]string
 }
