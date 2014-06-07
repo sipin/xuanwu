@@ -40,10 +40,6 @@ func NewUserGroupWithParams(params map[string]string) *UserGroup {
 	return o
 }
 
-func (w *UserGroup) initWidget() {
-	w.widgets = make(map[string]*Widget, 2)
-}
-
 //Thrift Methods
 
 func (p *UserGroup) Read(iprot thrift.TProtocol) error {
@@ -176,12 +172,25 @@ func (o *UserGroup) Save() (info *mgo.ChangeInfo, err error) {
 	return col.UpsertId(o.ID, o)
 }
 
+func UserGroupCol() (session *mgo.Session, col *mgo.Collection) {
+	return db.GetCol("UserGroup")
+}
+
 //Form methods
 
-func (o *UserGroup) ReadForm(params map[string]string) {
+func (w *UserGroup) initWidget() {
+	w.widgets = make(map[string]*Widget, 2)
+}
+
+func (o *UserGroup) ReadForm(params map[string]string) (hasError bool) {
 	if val, ok := params["Name"]; ok {
 		o.Name = val
 	}
+	return o.ValidateData()
+}
+
+func (o *UserGroup) ValidateData() (hasError bool) {
+	return
 }
 
 func (o *UserGroup) NameWidget() *Widget {
