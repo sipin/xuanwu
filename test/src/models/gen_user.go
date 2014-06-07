@@ -4,12 +4,12 @@ import (
 	//Official libs
 	"bytes"
 	"fmt"
+	"github.com/mattbaird/elastigo/core"
 	"regexp"
 	"strconv"
 	"strings"
 
 	//3rd party libs
-	"github.com/mattbaird/elastigo/core"
 	"github.com/sipin/gothrift/thrift"
 	"labix.org/v2/mgo"
 	"labix.org/v2/mgo/bson"

@@ -39,10 +39,9 @@ namespace = ""
 thrift_file = sys.argv[1]
 out_path = sys.argv[2]
 
-
 try:
 	src_path = out_path.replace("\\", "/")
-	src_path = src_path[src_path.index("/src/")+5:]
+	src_path = src_path[src_path.index("/src/")+5:].strip("/")
 except ValueError:
 	print "output_folder_path should contains '/src/', for xuanwu to use absolute go path import"
 	sys.exit()
@@ -134,12 +133,11 @@ def transform_field(field, indent=0):
 
 
 def transform_struct(obj):
-	obj.need_strconv = False
-	obj.need_strings = False
+	obj.imports = ["bytes", "fmt"]
+
 	obj.search = get_search(obj)
-	obj.need_search = len(obj.search) > 0
-	obj.need_re = False
-	obj.need_enum = False
+	if len(obj.search) > 0:
+		obj.imports.append("github.com/mattbaird/elastigo/core")
 
 	for field in obj.fields:
 		add_properties(field)
@@ -148,22 +146,24 @@ def transform_struct(obj):
 		field.widget_type = get_widget_type(field)
 
 		if hasattr(field, "rule"):
-			obj.need_re = True
+			obj.imports.append("regexp")
 
 		if hasattr(field, "enums"):
-			obj.need_enum = True
+			obj.imports.append(src_path + "/" + namespace)
 
 		if field.go_type != "string":
-			obj.need_strconv = True
+			obj.imports.append("strconv")
+
 		if field.type == "list<string>":
-			obj.need_strings = True
+			obj.imports.append("strings")
 
 		field.foreign = ""
 		if field.name.value.endswith("ID"):
 			field.foreign = field.name.value[:-2]
 
+	obj.imports = sorted(set(obj.imports))
 	tpl = open('go.tmpl', 'r').read()
-	t = Template(tpl, searchList=[{"namespace": namespace, "obj": obj, "src_path": src_path}])
+	t = Template(tpl, searchList=[{"namespace": namespace, "obj": obj}])
 	code = str(t)
 	f = open(out_path + 'gen_' + obj.name.value.lower() + ".go", "w")
 	f.write(code)
@@ -248,7 +248,7 @@ def main(thrift_idl):
 		print 'namespace go not found, please add `namespace go XXXX` to ' + thrift_file + " and retry"
 		sys.exit(1)
 
-	namespace = loader.namespace
+	namespace = str(loader.namespace)
 
 	tpl = open('go_package.tmpl', 'r').read()
 	t = Template(tpl, searchList=[{"namespace": namespace}])
