@@ -34,6 +34,11 @@ type Widget struct {
 	GetBindData	func() (data []*IDLabelPair)
 }
 
+type IStringFieldObj interface {
+	Id() string
+	GetFieldAsString(fieldKey string) (Value string)
+}
+
 var DateTimeLayout = "2006-01-02 15:04"
 
 func I64Time(c int64) string {
