@@ -808,7 +808,19 @@ func (o *User) UserGroupIDWidget() *Widget {
 			Value:       o.UserGroupID,
 			Name:        "UserGroupID",
 			PlaceHolder: "",
-			Type:        "text",
+			Type:        "select",
+			GetBindData: func() (data []*IDLabelPair) {
+				objs, _ := UserGroupFindAll(nil)
+				data = make([]*IDLabelPair, len(objs))
+				for i, obj := range objs {
+					data[i] = &IDLabelPair{
+						ID:    obj.ID.Hex(),
+						Label: obj.Name,
+					}
+				}
+
+				return
+			},
 		}
 		if o.widgets == nil {
 			o.initWidget()
@@ -827,7 +839,7 @@ func (o *User) StatusWidget() *Widget {
 			Value:       strconv.FormatInt(int64(o.Status), 10),
 			Name:        "Status",
 			PlaceHolder: "",
-			Type:        "radio",
+			Type:        "select",
 			EnumData:    models.UserStatusLabel,
 		}
 		if o.widgets == nil {

@@ -25,8 +25,8 @@ struct User {
 	7: string Picture
 	8: string Remark
 	9: bool IsAdmin (widget = "checkbox", label = "管理员")
-	10: string UserGroupID
-	11: i32 Status (label = "状态", widget = "radio", enums="UserStatus")
+	10: string UserGroupID (widget = "select", bindData = "UserGroup.Name")
+	11: i32 Status (label = "状态", widget = "select", enums="UserStatus")
 	12: string PubInfoID
 	13: string OrganizationID
 	14: string Department (label = "部门", widget = "selectPk", stringList="Departments")

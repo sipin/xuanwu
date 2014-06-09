@@ -16,6 +16,11 @@ var _ = fmt.Printf
 var GoUnusedProtection__ int
 var ErrInvalidObjectId = errors.New("Invalid input to ObjectIdHex")
 
+type IDLabelPair struct {
+	ID    string
+	Label string
+}
+
 type Widget struct {
 	Label       string
 	Value       string
@@ -25,4 +30,5 @@ type Widget struct {
 	ErrorMsg    string
 	EnumData    map[int32]string
 	StringList  []string
+	GetBindData func() (data []*IDLabelPair)
 }
