@@ -11,14 +11,22 @@ func (o *$obj.name.value) ReadForm(params map[string]string) (hasError bool) {
 	#if $field.type == "string"
 		o.$field.name.value = val
 	#else if $field.type == "i32" and $field.widget_type in ["datetime"]
-		intVal, _ := time.Parse(DateTimeLayout, val)
-		o.$field.name.value = int32(intVal.Unix())
+		if val == "" {
+			o.$field.name.value = 0
+		} else {
+			intVal, _ := time.Parse(DateTimeLayout, val)
+			o.$field.name.value = int32(intVal.Unix())
+		}
 	#else if $field.type == "i32"
 		intVal, _ := strconv.Atoi(val)
 		o.$field.name.value = int32(intVal)
 	#else if $field.type == "i64" and $field.widget_type in ["datetime"]
-		intVal, _ := time.Parse(DateTimeLayout, val)
-		o.$field.name.value = intVal.Unix()
+		if val == "" {
+			o.$field.name.value = 0
+		} else {
+			intVal, _ := time.Parse(DateTimeLayout, val)
+			o.$field.name.value = intVal.Unix()
+		}
 	#else if $field.type == "i64"
 		intVal, _ := strconv.ParseInt(val, 10, 64)
 		o.$field.name.value = intVal
