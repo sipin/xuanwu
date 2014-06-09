@@ -5,9 +5,9 @@ import (
 	"bytes"
 	"fmt"
 	"github.com/mattbaird/elastigo/core"
+	"models/models"
 	"regexp"
 	"strconv"
-	"strings"
 
 	//3rd party libs
 	"github.com/sipin/gothrift/thrift"
@@ -19,19 +19,21 @@ import (
 )
 
 type User struct {
-	ID          bson.ObjectId `bson:"_id" thrift:"ID,1"`
-	UserName    string        `bson:"UserName" thrift:"UserName,2"`
-	Password    string        `bson:"Password" thrift:"Password,3"`
-	Name        string        `bson:"Name" thrift:"Name,4"`
-	Email       string        `bson:"Email" thrift:"Email,5"`
-	Intro       string        `bson:"Intro" thrift:"Intro,6"`
-	Picture     string        `bson:"Picture" thrift:"Picture,7"`
-	Remark      string        `bson:"Remark" thrift:"Remark,8"`
-	IsAdmin     bool          `bson:"IsAdmin" thrift:"IsAdmin,9"`
-	UserGroupID string        `bson:"UserGroupID" thrift:"UserGroupID,10"`
-	Status      int32         `bson:"Status" thrift:"Status,11"`
-	Tags        []string      `bson:"Tags" thrift:"Tags,12"`
-	widgets     map[string]*Widget
+	ID             bson.ObjectId `bson:"_id" thrift:"ID,1"`
+	UserName       string        `bson:"UserName" thrift:"UserName,2"`
+	Password       string        `bson:"Password" thrift:"Password,3"`
+	Name           string        `bson:"Name" thrift:"Name,4"`
+	Email          string        `bson:"Email" thrift:"Email,5"`
+	Intro          string        `bson:"Intro" thrift:"Intro,6"`
+	Picture        string        `bson:"Picture" thrift:"Picture,7"`
+	Remark         string        `bson:"Remark" thrift:"Remark,8"`
+	IsAdmin        bool          `bson:"IsAdmin" thrift:"IsAdmin,9"`
+	UserGroupID    string        `bson:"UserGroupID" thrift:"UserGroupID,10"`
+	Status         int32         `bson:"Status" thrift:"Status,11"`
+	PubInfoID      string        `bson:"PubInfoID" thrift:"PubInfoID,12"`
+	OrganizationID string        `bson:"OrganizationID" thrift:"OrganizationID,13"`
+	Department     string        `bson:"Department" thrift:"Department,14"`
+	widgets        map[string]*Widget
 }
 
 type UserSearchSimpleObj struct {
@@ -126,6 +128,14 @@ func (p *User) Read(iprot thrift.TProtocol) error {
 			}
 		case 12:
 			if err := p.readField12(iprot); err != nil {
+				return err
+			}
+		case 13:
+			if err := p.readField13(iprot); err != nil {
+				return err
+			}
+		case 14:
+			if err := p.readField14(iprot); err != nil {
 				return err
 			}
 		default:
@@ -397,46 +407,70 @@ func (p *User) writeField11(oprot thrift.TProtocol) (err error) {
 }
 
 func (p *User) readField12(iprot thrift.TProtocol) error {
-	_, size, err := iprot.ReadListBegin()
-	if err != nil {
-		return fmt.Errorf("error reading list begin: %s")
-	}
-	tSlice := make([]string, 0, size)
-	p.Tags = tSlice
-	for i := 0; i < size; i++ {
-		var _elem0 string
-		if v, err := iprot.ReadString(); err != nil {
-			return fmt.Errorf("error reading field 0: %s", err)
-		} else {
-			_elem0 = v
-		}
-		p.Tags = append(p.Tags, _elem0)
-	}
-	if err := iprot.ReadListEnd(); err != nil {
-		return fmt.Errorf("error reading list end: %s")
+	if v, err := iprot.ReadString(); err != nil {
+		return fmt.Errorf("error reading field 12: %s", err)
+	} else {
+		p.PubInfoID = v
 	}
 	return nil
 }
 
 func (p *User) writeField12(oprot thrift.TProtocol) (err error) {
-	if p.Tags != nil {
-		if err := oprot.WriteFieldBegin("Tags", thrift.LIST, 12); err != nil {
-			return fmt.Errorf("%T write field begin error 12:Tags: %s", p, err)
-		}
-		if err := oprot.WriteListBegin(thrift.STRING, len(p.Tags)); err != nil {
-			return fmt.Errorf("error writing list begin: %s")
-		}
-		for _, v := range p.Tags {
-			if err := oprot.WriteString(string(v)); err != nil {
-				return fmt.Errorf("%T. (0) field write error: %s", p, err)
-			}
-		}
-		if err := oprot.WriteListEnd(); err != nil {
-			return fmt.Errorf("error writing list end: %s")
-		}
-		if err := oprot.WriteFieldEnd(); err != nil {
-			return fmt.Errorf("%T write field end error 12:Tags: %s", p, err)
-		}
+	if err := oprot.WriteFieldBegin("PubInfoID", thrift.STRING, 12); err != nil {
+		return fmt.Errorf("%T write field begin error 12:PubInfoID: %s", p, err)
+	}
+	if err := oprot.WriteString(string(p.PubInfoID)); err != nil {
+		return fmt.Errorf("%T.PubInfoID (12) field write error: %s", p, err)
+	}
+
+	if err := oprot.WriteFieldEnd(); err != nil {
+		return fmt.Errorf("%T write field end error 12:PubInfoID: %s", p, err)
+	}
+	return err
+}
+
+func (p *User) readField13(iprot thrift.TProtocol) error {
+	if v, err := iprot.ReadString(); err != nil {
+		return fmt.Errorf("error reading field 13: %s", err)
+	} else {
+		p.OrganizationID = v
+	}
+	return nil
+}
+
+func (p *User) writeField13(oprot thrift.TProtocol) (err error) {
+	if err := oprot.WriteFieldBegin("OrganizationID", thrift.STRING, 13); err != nil {
+		return fmt.Errorf("%T write field begin error 13:OrganizationID: %s", p, err)
+	}
+	if err := oprot.WriteString(string(p.OrganizationID)); err != nil {
+		return fmt.Errorf("%T.OrganizationID (13) field write error: %s", p, err)
+	}
+
+	if err := oprot.WriteFieldEnd(); err != nil {
+		return fmt.Errorf("%T write field end error 13:OrganizationID: %s", p, err)
+	}
+	return err
+}
+
+func (p *User) readField14(iprot thrift.TProtocol) error {
+	if v, err := iprot.ReadString(); err != nil {
+		return fmt.Errorf("error reading field 14: %s", err)
+	} else {
+		p.Department = v
+	}
+	return nil
+}
+
+func (p *User) writeField14(oprot thrift.TProtocol) (err error) {
+	if err := oprot.WriteFieldBegin("Department", thrift.STRING, 14); err != nil {
+		return fmt.Errorf("%T write field begin error 14:Department: %s", p, err)
+	}
+	if err := oprot.WriteString(string(p.Department)); err != nil {
+		return fmt.Errorf("%T.Department (14) field write error: %s", p, err)
+	}
+
+	if err := oprot.WriteFieldEnd(); err != nil {
+		return fmt.Errorf("%T write field end error 14:Department: %s", p, err)
 	}
 	return err
 }
@@ -479,6 +513,12 @@ func (p *User) Write(oprot thrift.TProtocol) error {
 		return err
 	}
 	if err := p.writeField12(oprot); err != nil {
+		return err
+	}
+	if err := p.writeField13(oprot); err != nil {
+		return err
+	}
+	if err := p.writeField14(oprot); err != nil {
 		return err
 	}
 	if err := oprot.WriteFieldStop(); err != nil {
@@ -537,7 +577,7 @@ func UserCol() (session *mgo.Session, col *mgo.Collection) {
 //Form methods
 
 func (w *User) initWidget() {
-	w.widgets = make(map[string]*Widget, 12)
+	w.widgets = make(map[string]*Widget, 14)
 }
 
 func (o *User) ReadForm(params map[string]string) (hasError bool) {
@@ -574,8 +614,14 @@ func (o *User) ReadForm(params map[string]string) (hasError bool) {
 		intVal, _ := strconv.Atoi(val)
 		o.Status = int32(intVal)
 	}
-	if val, ok := params["Tags"]; ok {
-		o.Tags = strings.Split(val, "\n")
+	if val, ok := params["PubInfoID"]; ok {
+		o.PubInfoID = val
+	}
+	if val, ok := params["OrganizationID"]; ok {
+		o.OrganizationID = val
+	}
+	if val, ok := params["Department"]; ok {
+		o.Department = val
 	}
 	return o.ValidateData()
 }
@@ -593,7 +639,7 @@ func (o *User) ValidateData() (hasError bool) {
 		hasError = true
 		o.EmailWidget().ErrorMsg = "请输入电邮"
 	} else {
-		if !regexp.MustCompile(``).Match([]byte(o.Email)) {
+		if !regexp.MustCompile(`^[a-z0-9._%+\-]+@[a-z0-9.\-]+\.[a-z]{2,4}$`).Match([]byte(o.Email)) {
 			hasError = true
 			o.EmailWidget().ErrorMsg = "电邮格式不正确"
 		}
@@ -610,7 +656,7 @@ func (o *User) UserNameWidget() *Widget {
 			Value:       o.UserName,
 			Name:        "UserName",
 			PlaceHolder: "",
-			Type:        "string",
+			Type:        "text",
 		}
 		if o.widgets == nil {
 			o.initWidget()
@@ -629,7 +675,7 @@ func (o *User) PasswordWidget() *Widget {
 			Value:       o.Password,
 			Name:        "Password",
 			PlaceHolder: "",
-			Type:        "string",
+			Type:        "password",
 		}
 		if o.widgets == nil {
 			o.initWidget()
@@ -648,7 +694,7 @@ func (o *User) NameWidget() *Widget {
 			Value:       o.Name,
 			Name:        "Name",
 			PlaceHolder: "",
-			Type:        "string",
+			Type:        "text",
 		}
 		if o.widgets == nil {
 			o.initWidget()
@@ -667,7 +713,7 @@ func (o *User) EmailWidget() *Widget {
 			Value:       o.Email,
 			Name:        "Email",
 			PlaceHolder: "",
-			Type:        "string",
+			Type:        "text",
 		}
 		if o.widgets == nil {
 			o.initWidget()
@@ -686,7 +732,7 @@ func (o *User) IntroWidget() *Widget {
 			Value:       o.Intro,
 			Name:        "Intro",
 			PlaceHolder: "",
-			Type:        "string",
+			Type:        "text",
 		}
 		if o.widgets == nil {
 			o.initWidget()
@@ -705,7 +751,7 @@ func (o *User) PictureWidget() *Widget {
 			Value:       o.Picture,
 			Name:        "Picture",
 			PlaceHolder: "",
-			Type:        "string",
+			Type:        "text",
 		}
 		if o.widgets == nil {
 			o.initWidget()
@@ -724,7 +770,7 @@ func (o *User) RemarkWidget() *Widget {
 			Value:       o.Remark,
 			Name:        "Remark",
 			PlaceHolder: "",
-			Type:        "string",
+			Type:        "text",
 		}
 		if o.widgets == nil {
 			o.initWidget()
@@ -743,7 +789,7 @@ func (o *User) IsAdminWidget() *Widget {
 			Value:       strconv.FormatBool(o.IsAdmin),
 			Name:        "IsAdmin",
 			PlaceHolder: "",
-			Type:        "bool",
+			Type:        "checkbox",
 		}
 		if o.widgets == nil {
 			o.initWidget()
@@ -762,7 +808,7 @@ func (o *User) UserGroupIDWidget() *Widget {
 			Value:       o.UserGroupID,
 			Name:        "UserGroupID",
 			PlaceHolder: "",
-			Type:        "string",
+			Type:        "text",
 		}
 		if o.widgets == nil {
 			o.initWidget()
@@ -781,7 +827,8 @@ func (o *User) StatusWidget() *Widget {
 			Value:       strconv.FormatInt(int64(o.Status), 10),
 			Name:        "Status",
 			PlaceHolder: "",
-			Type:        "i32",
+			Type:        "radio",
+			EnumData:    models.UserStatusLabel,
 		}
 		if o.widgets == nil {
 			o.initWidget()
@@ -791,16 +838,55 @@ func (o *User) StatusWidget() *Widget {
 
 	return ret
 }
-func (o *User) TagsWidget() *Widget {
-	name := "Tags"
+func (o *User) PubInfoIDWidget() *Widget {
+	name := "PubInfoID"
 	ret, ok := o.widgets[name]
 	if !ok || ret == nil {
 		ret = &Widget{
-			Label:       "Tags",
-			Value:       strings.Join(o.Tags, "\n"),
-			Name:        "Tags",
+			Label:       "PubInfoID",
+			Value:       o.PubInfoID,
+			Name:        "PubInfoID",
 			PlaceHolder: "",
-			Type:        "list<string>",
+			Type:        "text",
+		}
+		if o.widgets == nil {
+			o.initWidget()
+		}
+		o.widgets[name] = ret
+	}
+
+	return ret
+}
+func (o *User) OrganizationIDWidget() *Widget {
+	name := "OrganizationID"
+	ret, ok := o.widgets[name]
+	if !ok || ret == nil {
+		ret = &Widget{
+			Label:       "OrganizationID",
+			Value:       o.OrganizationID,
+			Name:        "OrganizationID",
+			PlaceHolder: "",
+			Type:        "text",
+		}
+		if o.widgets == nil {
+			o.initWidget()
+		}
+		o.widgets[name] = ret
+	}
+
+	return ret
+}
+func (o *User) DepartmentWidget() *Widget {
+	name := "Department"
+	ret, ok := o.widgets[name]
+	if !ok || ret == nil {
+		ret = &Widget{
+			Label:       "部门",
+			Value:       o.Department,
+			Name:        "Department",
+			PlaceHolder: "",
+			Type:        "selectPk",
+			StringList:  models.Departments,
 		}
 		if o.widgets == nil {
 			o.initWidget()
@@ -823,7 +909,9 @@ func (o *User) Widgets() []*Widget {
 		o.IsAdminWidget(),
 		o.UserGroupIDWidget(),
 		o.StatusWidget(),
-		o.TagsWidget(),
+		o.PubInfoIDWidget(),
+		o.OrganizationIDWidget(),
+		o.DepartmentWidget(),
 	}
 }
 
@@ -839,6 +927,30 @@ func (p *User) SetUserGroup(obj *UserGroup) {
 
 func (o *UserGroup) GetAllUser() (result []*User, err error) {
 	query := bson.M{"UserGroupID": o.ID.Hex()}
+	return UserFindAll(query)
+}
+func (p *User) GetPubInfo() (result *PubInfo, err error) {
+	return PubInfoFindByID(p.PubInfoID)
+}
+
+func (p *User) SetPubInfo(obj *PubInfo) {
+	p.PubInfoID = obj.ID.Hex()
+}
+
+func (o *PubInfo) GetAllUser() (result []*User, err error) {
+	query := bson.M{"PubInfoID": o.ID.Hex()}
+	return UserFindAll(query)
+}
+func (p *User) GetOrganization() (result *Organization, err error) {
+	return OrganizationFindByID(p.OrganizationID)
+}
+
+func (p *User) SetOrganization(obj *Organization) {
+	p.OrganizationID = obj.ID.Hex()
+}
+
+func (o *Organization) GetAllUser() (result []*User, err error) {
+	query := bson.M{"OrganizationID": o.ID.Hex()}
 	return UserFindAll(query)
 }
 
@@ -905,7 +1017,7 @@ func UserFindByID(id string) (result *User, err error) {
 	defer session.Close()
 
 	if !bson.IsObjectIdHex(id) {
-		err = ErrInvalidObjectId
+		err = mgo.ErrNotFound
 		return
 	}
 	err = col.FindId(bson.ObjectIdHex(id)).One(&result)
@@ -916,6 +1028,10 @@ func UserRemoveByID(id string) (result *User, err error) {
 	session, col := db.GetCol("User")
 	defer session.Close()
 
+	if !bson.IsObjectIdHex(id) {
+		err = mgo.ErrNotFound
+		return
+	}
 	err = col.RemoveId(bson.ObjectIdHex(id))
 	core.Delete("user", "simple", id, nil)
 	core.Delete("user", "name", id, nil)

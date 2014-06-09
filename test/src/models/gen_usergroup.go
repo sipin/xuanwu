@@ -202,7 +202,7 @@ func (o *UserGroup) NameWidget() *Widget {
 			Value:       o.Name,
 			Name:        "Name",
 			PlaceHolder: "",
-			Type:        "string",
+			Type:        "text",
 		}
 		if o.widgets == nil {
 			o.initWidget()
@@ -284,7 +284,7 @@ func UserGroupFindByID(id string) (result *UserGroup, err error) {
 	defer session.Close()
 
 	if !bson.IsObjectIdHex(id) {
-		err = ErrInvalidObjectId
+		err = mgo.ErrNotFound
 		return
 	}
 	err = col.FindId(bson.ObjectIdHex(id)).One(&result)
@@ -295,6 +295,10 @@ func UserGroupRemoveByID(id string) (result *UserGroup, err error) {
 	session, col := db.GetCol("UserGroup")
 	defer session.Close()
 
+	if !bson.IsObjectIdHex(id) {
+		err = mgo.ErrNotFound
+		return
+	}
 	err = col.RemoveId(bson.ObjectIdHex(id))
 	return
 }
