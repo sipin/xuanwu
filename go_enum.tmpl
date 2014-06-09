@@ -1,5 +1,13 @@
 package $namespace
 
+import (
+	"strconv"
+	"encoding/json"
+)
+
+var _ = strconv.Itoa
+var _ = json.Marshal
+
 #for obj in $objs
 var (
 	$obj.name.value = struct {
@@ -13,5 +21,28 @@ var (
 		$key: $label,
 #end for
 	}
+	${obj.name.value}JSON string
+	${obj.name.value}LabelJSON string
 )
 #end for
+
+func init() {
+	var ret []byte
+	var err error
+#for obj in $objs
+	{
+		ret, _ = json.Marshal(${obj.name.value})
+		${obj.name.value}JSON = string(ret)
+		tmp := make(map[string]string, len(${obj.name.value}Label))
+		for k, v := range ${obj.name.value}Label {
+			tmp[strconv.Itoa(int(k))] = v
+		}
+		ret, err = json.Marshal(tmp)
+		if err != nil {
+			panic(err)
+		}
+		${obj.name.value}LabelJSON = string(ret)
+	}
+	
+#end for
+}

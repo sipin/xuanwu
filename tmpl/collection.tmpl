@@ -61,7 +61,7 @@ func $(obj.name.value)FindByID(id string) (result *$obj.name.value, err error) {
 	defer session.Close()
 
 	if !bson.IsObjectIdHex(id) {
-		err = ErrInvalidObjectId
+		err = mgo.ErrNotFound
 		return
 	}
 	err = col.FindId(bson.ObjectIdHex(id)).One(&result)
@@ -72,6 +72,10 @@ func $(obj.name.value)RemoveByID(id string) (result *$obj.name.value, err error)
 	session, col := db.GetCol("$obj.name.value")
 	defer session.Close()
 
+	if !bson.IsObjectIdHex(id) {
+		err = mgo.ErrNotFound
+		return
+	}
 	err = col.RemoveId(bson.ObjectIdHex(id))
 	#for key, v in $obj.search.iteritems()
 	core.Delete("$(obj.name.value.lower())", "$(key.lower())", id, nil)
