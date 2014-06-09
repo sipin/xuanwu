@@ -20,7 +20,9 @@ widget_types = set([
 	"radio",
 	"checkbox",
 	"select",
-	"selectPk"
+	"selectPk",
+	"datetime",
+	"photos"
 ])
 
 typedef = dict()
@@ -159,11 +161,14 @@ def transform_struct(obj):
 		if hasattr(field, "enums"):
 			obj.imports.append(src_path + "/" + namespace)
 
-		if field.go_type != "string":
+		if field.type in ["i32", "i64", "bool"] and field.widget_type not in ["date", "time", "datetime"]:
 			obj.imports.append("strconv")
 
 		if field.type == "list<string>":
 			obj.imports.append("strings")
+
+		if field.widget_type in ["date", "time", "datetime"]:
+			obj.imports.append("time")
 
 		field.foreign = ""
 		if field.name.value.endswith("ID"):
