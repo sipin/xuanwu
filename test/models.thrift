@@ -11,8 +11,8 @@ enum UserStatus {
 	Online (label="在线")
 }
 
-const list<string> Departments = [
-	"宣传部", "办公室", "工作室",
+const list<string> Genders = [
+	"男", "女",
 ]
 
 struct User {
@@ -29,6 +29,6 @@ struct User {
 	11: i32 Status (label = "状态", widget = "select", enums="UserStatus")
 	12: string PubInfoID
 	13: string OrganizationID
-	14: string Department (label = "部门", widget = "selectPk", stringList="Departments")
+	14: string Gender (label = "部门", widget = "selectPk", stringList="Genders")
 }
 

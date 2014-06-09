@@ -32,7 +32,7 @@ type User struct {
 	Status         int32         `bson:"Status" thrift:"Status,11"`
 	PubInfoID      string        `bson:"PubInfoID" thrift:"PubInfoID,12"`
 	OrganizationID string        `bson:"OrganizationID" thrift:"OrganizationID,13"`
-	Department     string        `bson:"Department" thrift:"Department,14"`
+	Gender         string        `bson:"Gender" thrift:"Gender,14"`
 	widgets        map[string]*Widget
 }
 
@@ -456,21 +456,21 @@ func (p *User) readField14(iprot thrift.TProtocol) error {
 	if v, err := iprot.ReadString(); err != nil {
 		return fmt.Errorf("error reading field 14: %s", err)
 	} else {
-		p.Department = v
+		p.Gender = v
 	}
 	return nil
 }
 
 func (p *User) writeField14(oprot thrift.TProtocol) (err error) {
-	if err := oprot.WriteFieldBegin("Department", thrift.STRING, 14); err != nil {
-		return fmt.Errorf("%T write field begin error 14:Department: %s", p, err)
+	if err := oprot.WriteFieldBegin("Gender", thrift.STRING, 14); err != nil {
+		return fmt.Errorf("%T write field begin error 14:Gender: %s", p, err)
 	}
-	if err := oprot.WriteString(string(p.Department)); err != nil {
-		return fmt.Errorf("%T.Department (14) field write error: %s", p, err)
+	if err := oprot.WriteString(string(p.Gender)); err != nil {
+		return fmt.Errorf("%T.Gender (14) field write error: %s", p, err)
 	}
 
 	if err := oprot.WriteFieldEnd(); err != nil {
-		return fmt.Errorf("%T write field end error 14:Department: %s", p, err)
+		return fmt.Errorf("%T write field end error 14:Gender: %s", p, err)
 	}
 	return err
 }
@@ -620,8 +620,8 @@ func (o *User) ReadForm(params map[string]string) (hasError bool) {
 	if val, ok := params["OrganizationID"]; ok {
 		o.OrganizationID = val
 	}
-	if val, ok := params["Department"]; ok {
-		o.Department = val
+	if val, ok := params["Gender"]; ok {
+		o.Gender = val
 	}
 	return o.ValidateData()
 }
@@ -888,17 +888,17 @@ func (o *User) OrganizationIDWidget() *Widget {
 
 	return ret
 }
-func (o *User) DepartmentWidget() *Widget {
-	name := "Department"
+func (o *User) GenderWidget() *Widget {
+	name := "Gender"
 	ret, ok := o.widgets[name]
 	if !ok || ret == nil {
 		ret = &Widget{
 			Label:       "部门",
-			Value:       o.Department,
-			Name:        "Department",
+			Value:       o.Gender,
+			Name:        "Gender",
 			PlaceHolder: "",
 			Type:        "selectPk",
-			StringList:  models.Departments,
+			StringList:  models.Genders,
 		}
 		if o.widgets == nil {
 			o.initWidget()
@@ -923,7 +923,7 @@ func (o *User) Widgets() []*Widget {
 		o.StatusWidget(),
 		o.PubInfoIDWidget(),
 		o.OrganizationIDWidget(),
-		o.DepartmentWidget(),
+		o.GenderWidget(),
 	}
 }
 
