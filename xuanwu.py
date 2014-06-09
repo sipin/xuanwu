@@ -66,7 +66,6 @@ def type_translate(obj):
 
 def add_properties(field):
 	field.label = field.name.value
-	field.extra = []
 
 	# todo: add field name checking
 	for att in field.annotations:
