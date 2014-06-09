@@ -121,6 +121,46 @@ func (o *$obj.name.value) ${field.name.value}Widget() *Widget {
 #end if
 #end for
 
+func (o *$obj.name.value) GetListedLabels() []*IDLabelPair {
+	return []*IDLabelPair{
+		#for field in $obj.listedFields
+		&IDLabelPair {
+			ID : "$field.name.value",
+			Label : "$field.label",
+		},
+		#end for
+	}
+}
+
+func (o *$obj.name.value) GetFieldAsString(fieldKey string) (Value string) {
+	switch fieldKey {
+#for field in $obj.fields
+#if $field.name.value != "ID"
+	case "$field.name.value":
+	#if $field.type == "string"
+		Value = o.$field.name.value
+	#else if $field.type == "i32" and $field.widget_type in ["datetime"]
+		Value = I32Time(o.$field.name.value)
+	#else if $field.type == "i32" 
+		Value = strconv.FormatInt(int64(o.$field.name.value), 10)
+	#else if $field.type == "i64" and $field.widget_type in ["datetime"]
+		Value = I64Time(o.$field.name.value)
+	#else if $field.type == "i64" 
+		Value = strconv.FormatInt(o.$field.name.value, 10)
+	#else if $field.type == "bool"
+		Value = strconv.FormatBool(o.$field.name.value)
+	#else if $field.type == "list<string>"
+		Value = strings.Join(o.$field.name.value, "\n")
+	#else
+	Change go.tmpl go support $field.type now!
+	#end if
+#end if
+#end for
+	}
+	return
+}
+
+
 func (o *$obj.name.value) Widgets() []*Widget {
 	return []*Widget{
 #for field in $obj.fields
