@@ -20,7 +20,8 @@ widget_types = set([
 	"radio",
 	"checkbox",
 	"select",
-	"selectPk"
+	"selectPk",
+	"selectKv"
 ])
 
 typedef = dict()
@@ -69,6 +70,13 @@ def add_properties(field):
 	# todo: add field name checking
 	for att in field.annotations:
 		setattr(field, att.name.value.replace("-", "_"), att.value.value)
+
+	if hasattr(field, "bindData"):
+		col, label = field.bindData.split(".")
+		tpl = open('tmpl/field_getBindData.tmpl', 'r').read()
+
+		t = Template(tpl, searchList=[{"col": col, "label": label}])
+		field.bindData = str(t)
 
 def get_search(obj):
 	search = {}

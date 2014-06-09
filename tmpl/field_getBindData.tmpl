@@ -1,0 +1,12 @@
+func () (data []*IDLabelPair) {
+	objs, _ := $(col)FindAll(nil)
+	data = make([]*IDLabelPair, len(objs))
+	for i, obj := range(objs) {
+		data[i] = &IDLabelPair {
+			ID : obj.ID.Hex(),
+			Label : obj.$label,
+		}
+	}
+
+	return
+}
