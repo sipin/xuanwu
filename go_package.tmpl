@@ -39,6 +39,7 @@ type IXuanWuObj interface {
 	GetLabel() string
 	GetListedLabels() []*IDLabelPair
 	GetFieldAsString(fieldKey string) (Value string)
+	Widgets() []*Widget
 }
 
 var DateTimeLayout = "2006-01-02 15:04"
