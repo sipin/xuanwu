@@ -83,7 +83,7 @@ func (o *$obj.name.value) ${field.name.value}Widget() *Widget {
 		#end if
 			Name: "$field.name.value",
 			PlaceHolder: "",
-			Type: "$field.type",
+			Type: "$field.widget_type",
 		#if hasattr($field, "enums")
 			EnumData : $(namespace).$(field.enums)Label,
 		#end if
