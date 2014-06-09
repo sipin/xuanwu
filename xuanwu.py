@@ -148,12 +148,17 @@ def transform_struct(obj):
 	if len(obj.search) > 0:
 		obj.imports.append("github.com/mattbaird/elastigo/core")
 
+	obj.label = obj.name.value
 	obj.listedFields = []
 	listedFields = []
 	idField = obj.fields[0]
 	add_properties(idField)
+	
 	if hasattr(idField, "listedFields"):
 		listedFields = [f.strip() for f in idField.listedFields.split(",")]
+
+	if hasattr(idField, "label"):
+		obj.label = idField.label
 
 	for field in obj.fields:
 		add_properties(field)

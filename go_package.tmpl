@@ -34,8 +34,10 @@ type Widget struct {
 	GetBindData	func() (data []*IDLabelPair)
 }
 
-type IStringFieldObj interface {
+type IXuanWuObj interface {
 	Id() string
+	GetLabel() string
+	GetListedLabels() []*IDLabelPair
 	GetFieldAsString(fieldKey string) (Value string)
 }
 
