@@ -19,7 +19,8 @@ widget_types = set([
 	"password",
 	"radio",
 	"checkbox",
-	"select"
+	"select",
+	"selectPk"
 ])
 
 typedef = dict()
