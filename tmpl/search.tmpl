@@ -14,3 +14,11 @@ func $(obj.name.value)Search$(key)(word string, limit int, offset int) (core.Sea
 	return core.SearchRequest("$(obj.name.value.lower())", "$(key.lower())", args, searchJson)
 }
 #end for
+
+func (o *$obj.name.value) HasSimpleSearch() bool {
+#if $obj.search.has_key("Simple")
+	return true
+#else
+	return false
+#end if
+}

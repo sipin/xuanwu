@@ -36,6 +36,7 @@ type Widget struct {
 
 type IXuanWuObj interface {
 	Id() string
+	HasSimpleSearch() bool
 	GetLabel() string
 	GetListedLabels() []*IDLabelPair
 	GetFieldAsString(fieldKey string) (Value string)
