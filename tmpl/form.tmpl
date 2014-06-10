@@ -19,6 +19,11 @@ func (o *$obj.name.value) ReadForm(params map[string]string) (hasError bool) {
 		}
 	#else if $field.type == "i32"
 		intVal, _ := strconv.Atoi(val)
+		#if hasattr(field, "stringList")
+		if intVal <= 0 || intVal >= len(o.${field.name.value}Widget().StringList) {
+			intVal = 0
+		}
+		#end if
 		o.$field.name.value = int32(intVal)
 	#else if $field.type == "i64" and $field.widget_type in ["datetime"]
 		if val == "" {
@@ -60,10 +65,15 @@ func (o *$obj.name.value) ValidateData() (hasError bool) {
 		}
 	}
 	#else if field.required
+		#if $field.type == "string"
 	if o.$field.name.value == "" {
+		#elif $field.type in ["i32", "i64"]
+	if o.$field.name.value == 0 {
+		#end if
 		o.${field.name.value}Widget().ErrorMsg = "$field.requiredMsg"
 		hasError = true
 	}
+	
 	#else if hasattr(field, "rule")
 	if !regexp.MustCompile(`$field.rule`).Match([]byte(o.$field.name.value)) {
 		o.${field.name.value}Widget().ErrorMsg = "$field.ruleMsg"
@@ -105,7 +115,7 @@ func (o *$obj.name.value) ${field.name.value}Widget() *Widget {
 		#if hasattr($field, "enums")
 			EnumData : $(namespace).$(field.enums)Label,
 		#else if hasattr($field, "stringList")
-			StringList : $(namespace).$field.stringList,
+			StringList : $(filename).$field.stringList,
 		#else if hasattr($field, "bindData")
 			GetBindData : $field.bindData,
 		#end if
