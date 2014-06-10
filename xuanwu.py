@@ -41,6 +41,7 @@ if len(sys.argv) != 3:
 namespace = ""
 thrift_file = sys.argv[1]
 out_path = sys.argv[2]
+filename = ".".join(path.basename(thrift_file).split(".")[:-1])
 
 try:
 	src_path = out_path.replace("\\", "/")
@@ -181,6 +182,12 @@ def transform_struct(obj):
 		if hasattr(field, "enums"):
 			obj.imports.append(src_path + "/" + namespace)
 
+		if hasattr(field, "stringList"):
+			import_module = filename
+			if src_path:
+				import_module = src_path + "/" + import_module
+			obj.imports.append(import_module)
+
 		if field.type in ["i32", "i64", "bool"] and field.widget_type not in ["date", "time", "datetime"]:
 			obj.imports.append("strconv")
 
@@ -196,7 +203,7 @@ def transform_struct(obj):
 
 	obj.imports = sorted(set(obj.imports))
 	tpl = open('go.tmpl', 'r').read()
-	t = Template(tpl, searchList=[{"namespace": namespace, "obj": obj}])
+	t = Template(tpl, searchList=[{"namespace": namespace, "filename": filename, "obj": obj}])
 	code = str(t)
 	f = open(out_path + 'gen_' + obj.name.value.lower() + ".go", "w")
 	f.write(code)
@@ -236,39 +243,37 @@ def transform(module):
 		elif isinstance(node, ast.Struct):
 			transform_struct(node)
 
-	name = ".".join(path.basename(thrift_file).split(".")[:-1])
-
 	if len(const) > 0:
 		tpl = open('go_const.tmpl', 'r').read()
 
-		t = Template(tpl, searchList=[{"namespace": name, "objs": const}])
-		if not path.exists(out_path + name):
-			mkdir(out_path + name)
-		f = open(out_path + "%s/gen_%s_const.go" % (name, name), "w")
+		t = Template(tpl, searchList=[{"namespace": filename, "objs": const}])
+		if not path.exists(out_path + filename):
+			mkdir(out_path + filename)
+		f = open(out_path + "%s/gen_%s_const.go" % (filename, filename), "w")
 		f.write(str(t))
 		f.close()
 
 	if len(enum) > 0:
 		tpl = open('go_enum.tmpl', 'r').read()
 		t = Template(tpl, searchList=[{
-			"namespace": name,
+			"namespace": filename,
 			"objs": enum,
-			"name": name,
+			"name": filename,
 		}])
-		if not path.exists(out_path + name):
-			mkdir(out_path + name)
-		f = open(out_path + "%s/gen_%s_enum.go" % (name, name), "w")
+		if not path.exists(out_path + filename):
+			mkdir(out_path + filename)
+		f = open(out_path + "%s/gen_%s_enum.go" % (filename, filename), "w")
 		f.write(str(t))
 		f.close()
 
 	if len(type_def) > 0:
-		t = Template(typedef_tpl, searchList=[{"namespace": name, "objs": type_def}])
-		if name == "init":
+		t = Template(typedef_tpl, searchList=[{"namespace": filename, "objs": type_def}])
+		if filename == "init":
 			write_path = "gen_init.go"
 		else:
-			if not path.exists(out_path + name):
-				mkdir(out_path + name)
-			write_path = "%s/gen_%s_typedef.go" % (name, name)
+			if not path.exists(out_path + filename):
+				mkdir(out_path + filename)
+			write_path = "%s/gen_%s_typedef.go" % (filename, filename)
 		f = open(out_path + write_path, "w")
 		f.write(str(t))
 		f.close()
