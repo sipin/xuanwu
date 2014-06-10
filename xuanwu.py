@@ -82,6 +82,10 @@ def get_search(obj):
 	search = {}
 	
 	for field in obj.fields:
+		if field.name.value == "ID" and hasattr(field, "search"):
+			search["Simple"] = [f.strip() for f in field.search.split(",")]
+			continue
+
 		for att in field.annotations:
 			if att.name.value.lower() == "search":
 				if str(field.type) != "string":
@@ -142,6 +146,9 @@ def transform_field(field, indent=0):
 
 
 def transform_struct(obj):
+	idField = obj.fields[0]
+	add_properties(idField)
+
 	obj.imports = ["bytes", "fmt"]
 
 	obj.search = get_search(obj)
@@ -151,8 +158,6 @@ def transform_struct(obj):
 	obj.label = obj.name.value
 	obj.listedFields = []
 	listedFields = []
-	idField = obj.fields[0]
-	add_properties(idField)
 	
 	if hasattr(idField, "listedFields"):
 		listedFields = [f.strip() for f in idField.listedFields.split(",")]
