@@ -22,7 +22,7 @@ widget_types = set([
 	"select",
 	"selectPk",
 	"datetime",
-	"photos"
+	"photo"
 ])
 
 typedef = dict()
