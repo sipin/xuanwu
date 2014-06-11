@@ -909,6 +909,52 @@ func (o *User) GenderWidget() *Widget {
 	return ret
 }
 
+func (o *User) GetListedLabels() []*IDLabelPair {
+	return []*IDLabelPair{}
+}
+
+func (o *User) Id() string {
+	return o.ID.Hex()
+}
+
+func (o *User) GetLabel() string {
+	return "ID"
+}
+
+func (o *User) GetFieldAsString(fieldKey string) (Value string) {
+	switch fieldKey {
+	case "ID":
+		Value = o.ID.Hex()
+	case "UserName":
+		Value = o.UserName
+	case "Password":
+		Value = o.Password
+	case "Name":
+		Value = o.Name
+	case "Email":
+		Value = o.Email
+	case "Intro":
+		Value = o.Intro
+	case "Picture":
+		Value = o.Picture
+	case "Remark":
+		Value = o.Remark
+	case "IsAdmin":
+		Value = strconv.FormatBool(o.IsAdmin)
+	case "UserGroupID":
+		Value = o.UserGroupID
+	case "Status":
+		Value = strconv.FormatInt(int64(o.Status), 10)
+	case "PubInfoID":
+		Value = o.PubInfoID
+	case "OrganizationID":
+		Value = o.OrganizationID
+	case "Gender":
+		Value = o.Gender
+	}
+	return
+}
+
 func (o *User) Widgets() []*Widget {
 	return []*Widget{
 		o.UserNameWidget(),
@@ -1090,4 +1136,8 @@ func UserSearchUser(word string, limit int, offset int) (core.SearchResult, erro
 }`
 	args := map[string]interface{}{"from": offset, "size": limit}
 	return core.SearchRequest("user", "user", args, searchJson)
+}
+
+func (o *User) HasSimpleSearch() bool {
+	return true
 }

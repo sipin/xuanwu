@@ -213,6 +213,28 @@ func (o *UserGroup) NameWidget() *Widget {
 	return ret
 }
 
+func (o *UserGroup) GetListedLabels() []*IDLabelPair {
+	return []*IDLabelPair{}
+}
+
+func (o *UserGroup) Id() string {
+	return o.ID.Hex()
+}
+
+func (o *UserGroup) GetLabel() string {
+	return "ID"
+}
+
+func (o *UserGroup) GetFieldAsString(fieldKey string) (Value string) {
+	switch fieldKey {
+	case "ID":
+		Value = o.ID.Hex()
+	case "Name":
+		Value = o.Name
+	}
+	return
+}
+
 func (o *UserGroup) Widgets() []*Widget {
 	return []*Widget{
 		o.NameWidget(),
@@ -304,3 +326,7 @@ func UserGroupRemoveByID(id string) (result *UserGroup, err error) {
 }
 
 // Search
+
+func (o *UserGroup) HasSimpleSearch() bool {
+	return false
+}
