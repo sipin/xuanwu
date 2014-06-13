@@ -14,6 +14,11 @@ import (
 	"db"
 )
 
+func init() {
+}
+
+var UserGroupTableName = "UserGroup"
+
 type UserGroup struct {
 	ID      bson.ObjectId `bson:"_id" thrift:"ID,1"`
 	Name    string        `bson:"Name" thrift:"Name,2"`
@@ -233,6 +238,16 @@ func (o *UserGroup) GetFieldAsString(fieldKey string) (Value string) {
 		Value = o.Name
 	}
 	return
+}
+
+type UserGroupWidget struct {
+	Name *Widget
+}
+
+func (o *UserGroup) WidgetStruct() *UserGroupWidget {
+	return &UserGroupWidget{
+		Name: o.NameWidget(),
+	}
 }
 
 func (o *UserGroup) Widgets() []*Widget {

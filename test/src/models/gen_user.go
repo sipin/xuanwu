@@ -18,6 +18,21 @@ import (
 	"db"
 )
 
+func init() {
+	{
+		err := collection.EnsureIndex(mgo.Index{
+			Key:    []string{UserName},
+			Unique: true,
+			Sparse: true,
+		})
+		if err != nil {
+			panic(err)
+		}
+	}
+}
+
+var UserTableName = "User"
+
 type User struct {
 	ID             bson.ObjectId `bson:"_id" thrift:"ID,1"`
 	UserName       string        `bson:"UserName" thrift:"UserName,2"`
@@ -631,10 +646,12 @@ func (o *User) ValidateData() (hasError bool) {
 		o.UserNameWidget().ErrorMsg = "请输入用户名"
 		hasError = true
 	}
+
 	if o.Password == "" {
 		o.PasswordWidget().ErrorMsg = "请输入密码"
 		hasError = true
 	}
+
 	if o.Email == "" {
 		hasError = true
 		o.EmailWidget().ErrorMsg = "请输入电邮"
@@ -657,6 +674,7 @@ func (o *User) UserNameWidget() *Widget {
 			Name:        "UserName",
 			PlaceHolder: "",
 			Type:        "text",
+			Required:    true,
 		}
 		if o.widgets == nil {
 			o.initWidget()
@@ -676,6 +694,7 @@ func (o *User) PasswordWidget() *Widget {
 			Name:        "Password",
 			PlaceHolder: "",
 			Type:        "password",
+			Required:    true,
 		}
 		if o.widgets == nil {
 			o.initWidget()
@@ -714,6 +733,7 @@ func (o *User) EmailWidget() *Widget {
 			Name:        "Email",
 			PlaceHolder: "",
 			Type:        "text",
+			Required:    true,
 		}
 		if o.widgets == nil {
 			o.initWidget()
@@ -953,6 +973,40 @@ func (o *User) GetFieldAsString(fieldKey string) (Value string) {
 		Value = o.Gender
 	}
 	return
+}
+
+type UserWidget struct {
+	UserName       *Widget
+	Password       *Widget
+	Name           *Widget
+	Email          *Widget
+	Intro          *Widget
+	Picture        *Widget
+	Remark         *Widget
+	IsAdmin        *Widget
+	UserGroupID    *Widget
+	Status         *Widget
+	PubInfoID      *Widget
+	OrganizationID *Widget
+	Gender         *Widget
+}
+
+func (o *User) WidgetStruct() *UserWidget {
+	return &UserWidget{
+		UserName:       o.UserNameWidget(),
+		Password:       o.PasswordWidget(),
+		Name:           o.NameWidget(),
+		Email:          o.EmailWidget(),
+		Intro:          o.IntroWidget(),
+		Picture:        o.PictureWidget(),
+		Remark:         o.RemarkWidget(),
+		IsAdmin:        o.IsAdminWidget(),
+		UserGroupID:    o.UserGroupIDWidget(),
+		Status:         o.StatusWidget(),
+		PubInfoID:      o.PubInfoIDWidget(),
+		OrganizationID: o.OrganizationIDWidget(),
+		Gender:         o.GenderWidget(),
+	}
 }
 
 func (o *User) Widgets() []*Widget {

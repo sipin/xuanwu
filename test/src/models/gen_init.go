@@ -4,6 +4,7 @@ import (
 	//Official libs
 	"errors"
 	"fmt"
+	"strconv"
 	"time"
 
 	//3rd party libs
@@ -22,6 +23,12 @@ type IDLabelPair struct {
 	Label string
 }
 
+func WidgetDisable(ws ...*Widget) {
+	for _, w := range ws {
+		w.Disable()
+	}
+}
+
 type Widget struct {
 	Label       string
 	Value       string
@@ -31,7 +38,35 @@ type Widget struct {
 	ErrorMsg    string
 	EnumData    map[int32]string
 	StringList  []string
+	Required    bool
+	Disabled    bool
 	GetBindData func() (data []*IDLabelPair)
+}
+
+func (w *Widget) Disable() {
+	w.Disabled = true
+}
+func (w *Widget) String() string {
+
+	if idx, err := strconv.Atoi(w.Value); err == nil {
+		if w.StringList != nil {
+			return w.StringList[idx]
+		}
+		if w.EnumData != nil {
+			return w.EnumData[int32(idx)]
+		}
+	}
+
+	if w.GetBindData != nil {
+		datas := w.GetBindData()
+		for _, data := range datas {
+			if w.Value == data.ID {
+				return data.Label
+			}
+		}
+	}
+
+	return w.Value
 }
 
 type IXuanWuObj interface {

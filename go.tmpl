@@ -16,6 +16,34 @@ import (
 	"db"
 )
 
+func init() {
+	#if len([i for i in $obj.fields if hasattr(i, "index")]) > 0
+	db.SetOnFinishInit(init${obj.name.value}Index)
+	#end if
+}
+
+#if len([i for i in $obj.fields if hasattr(i, "index")]) > 0
+func init${obj.name.value}Index() {
+	session, collection := db.GetCol(${obj.name.value}TableName)
+	defer session.Close()
+	#for field in $obj.fields
+	#if hasattr(field, "index")
+
+	if err := collection.EnsureIndex(mgo.Index{
+			Key: []string{"${field.name}"},
+			#if field.index == "unique"
+			Unique: true,
+			#end if
+			Sparse: true,
+		}); err != nil {
+		panic(err)
+	}
+	
+	#end if
+	#end for
+}
+#end if
+
 var ${obj.name.value}TableName = "${obj.name.value}"
 
 type $obj.name.value struct {
