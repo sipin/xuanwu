@@ -21,8 +21,10 @@ widget_types = set([
 	"checkbox",
 	"select",
 	"selectPk",
+	"date",
 	"datetime",
-	"photo"
+	"photo",
+	"photos",
 ])
 
 typedef = dict()
