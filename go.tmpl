@@ -16,6 +16,8 @@ import (
 	"db"
 )
 
+var ${obj.name.value}TableName = "${obj.name.value}"
+
 type $obj.name.value struct {
 	#for field in $obj.fields
 		#if $field.name.value == "ID"
