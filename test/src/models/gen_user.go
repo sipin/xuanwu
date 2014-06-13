@@ -19,16 +19,21 @@ import (
 )
 
 func init() {
-	{
-		err := collection.EnsureIndex(mgo.Index{
-			Key:    []string{UserName},
-			Unique: true,
-			Sparse: true,
-		})
-		if err != nil {
-			panic(err)
-		}
+	db.SetOnFinishInit(initUserIndex)
+}
+
+func initUserIndex() {
+	session, collection := db.GetCol(UserTableName)
+	defer session.Close()
+
+	if err := collection.EnsureIndex(mgo.Index{
+		Key:    []string{"UserName"},
+		Unique: true,
+		Sparse: true,
+	}); err != nil {
+		panic(err)
 	}
+
 }
 
 var UserTableName = "User"
