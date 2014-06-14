@@ -181,10 +181,7 @@ def transform_struct(obj):
 		if hasattr(field, "rule"):
 			obj.imports.append("regexp")
 
-		if hasattr(field, "enums"):
-			obj.imports.append(src_path + "/" + namespace)
-
-		if hasattr(field, "stringList"):
+		if hasattr(field, "stringList") or hasattr(field, "enums"):
 			import_module = filename
 			if src_path:
 				import_module = src_path + "/" + import_module
