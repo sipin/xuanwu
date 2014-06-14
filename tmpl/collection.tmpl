@@ -6,15 +6,24 @@ func $(obj.name.value)FindOne(query interface{}, sortFields ...string) (result *
 
 	q := col.Find(query)
 
-	if sortFields == nil {
-		q.Sort("-_id")
-	} else {
-		q.Sort(sortFields...)
-	}
+	$(obj.name.value.lower())Sort(q, sortFields)
 
 	err = q.One(&result)
 	return
 }
+
+func $(obj.name.value.lower())Sort(q *mgo.Query, sortFields []string) {
+	if len(sortFields) > 0 {
+		q.Sort(sortFields...)
+		return
+	}
+
+	#if len([i for i in $obj.fields if str(i.name)=="Index"]) > 0
+	q.Sort("Index", "-_id")
+	#else
+	q.Sort("-_id")
+	#end if
+} 
 
 func $(obj.name.value)Find(query interface{}, limit int, offset int, sortFields ...string) (result []*$obj.name.value, err error) {
 	session, col := db.GetCol("$obj.name.value")
@@ -22,11 +31,7 @@ func $(obj.name.value)Find(query interface{}, limit int, offset int, sortFields 
 
 	q := col.Find(query).Limit(limit).Skip(offset)
 
-	if sortFields == nil {
-		q.Sort("-_id")
-	} else {
-		q.Sort(sortFields...)
-	}
+	$(obj.name.value.lower())Sort(q, sortFields)
 
 	err = q.All(&result)
 	return
@@ -38,11 +43,7 @@ func $(obj.name.value)FindAll(query interface{}, sortFields ...string) (result [
 
 	q := col.Find(query)
 
-	if sortFields == nil {
-		q.Sort("-_id")
-	} else {
-		q.Sort(sortFields...)
-	}
+	$(obj.name.value.lower())Sort(q, sortFields)
 
 	err = q.All(&result)
 	return
