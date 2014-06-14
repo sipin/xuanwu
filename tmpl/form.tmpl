@@ -113,7 +113,7 @@ func (o *$obj.name.value) ${field.name.value}Widget() *Widget {
 			PlaceHolder: "",
 			Type: "$field.widget_type",
 		#if hasattr($field, "enums")
-			EnumData : $(namespace).$(field.enums)Label,
+			EnumData : $(filename).$(field.enums)Label,
 		#else if hasattr($field, "stringList")
 			StringList : $(filename).$field.stringList,
 		#else if hasattr($field, "bindData")

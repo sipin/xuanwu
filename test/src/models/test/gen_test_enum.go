@@ -1,4 +1,4 @@
-package models
+package test
 
 import (
 	"encoding/json"

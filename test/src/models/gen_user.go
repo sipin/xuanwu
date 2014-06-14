@@ -5,7 +5,7 @@ import (
 	"bytes"
 	"fmt"
 	"github.com/mattbaird/elastigo/core"
-	"models/models"
+	"models/test"
 	"regexp"
 	"strconv"
 
@@ -900,7 +900,7 @@ func (o *User) StatusWidget() *Widget {
 			Name:        "Status",
 			PlaceHolder: "",
 			Type:        "select",
-			EnumData:    models.UserStatusLabel,
+			EnumData:    test.UserStatusLabel,
 		}
 		if o.widgets == nil {
 			o.initWidget()
@@ -958,7 +958,7 @@ func (o *User) GenderWidget() *Widget {
 			Name:        "Gender",
 			PlaceHolder: "",
 			Type:        "selectPk",
-			StringList:  models.Genders,
+			StringList:  test.Genders,
 		}
 		if o.widgets == nil {
 			o.initWidget()
