@@ -53,6 +53,7 @@ type User struct {
 	PubInfoID      string        `bson:"PubInfoID" thrift:"PubInfoID,12"`
 	OrganizationID string        `bson:"OrganizationID" thrift:"OrganizationID,13"`
 	Gender         string        `bson:"Gender" thrift:"Gender,14"`
+	Index          int32         `bson:"Index" thrift:"Index,15"`
 	widgets        map[string]*Widget
 }
 
@@ -156,6 +157,10 @@ func (p *User) Read(iprot thrift.TProtocol) error {
 			}
 		case 14:
 			if err := p.readField14(iprot); err != nil {
+				return err
+			}
+		case 15:
+			if err := p.readField15(iprot); err != nil {
 				return err
 			}
 		default:
@@ -495,6 +500,29 @@ func (p *User) writeField14(oprot thrift.TProtocol) (err error) {
 	return err
 }
 
+func (p *User) readField15(iprot thrift.TProtocol) error {
+	if v, err := iprot.ReadI32(); err != nil {
+		return fmt.Errorf("error reading field 15: %s", err)
+	} else {
+		p.Index = v
+	}
+	return nil
+}
+
+func (p *User) writeField15(oprot thrift.TProtocol) (err error) {
+	if err := oprot.WriteFieldBegin("Index", thrift.I32, 15); err != nil {
+		return fmt.Errorf("%T write field begin error 15:Index: %s", p, err)
+	}
+	if err := oprot.WriteI32(int32(p.Index)); err != nil {
+		return fmt.Errorf("%T.Index (15) field write error: %s", p, err)
+	}
+
+	if err := oprot.WriteFieldEnd(); err != nil {
+		return fmt.Errorf("%T write field end error 15:Index: %s", p, err)
+	}
+	return err
+}
+
 func (p *User) Write(oprot thrift.TProtocol) error {
 	if err := oprot.WriteStructBegin("User"); err != nil {
 		return fmt.Errorf("%T write struct begin error: %s", p, err)
@@ -539,6 +567,9 @@ func (p *User) Write(oprot thrift.TProtocol) error {
 		return err
 	}
 	if err := p.writeField14(oprot); err != nil {
+		return err
+	}
+	if err := p.writeField15(oprot); err != nil {
 		return err
 	}
 	if err := oprot.WriteFieldStop(); err != nil {
@@ -597,7 +628,7 @@ func UserCol() (session *mgo.Session, col *mgo.Collection) {
 //Form methods
 
 func (w *User) initWidget() {
-	w.widgets = make(map[string]*Widget, 14)
+	w.widgets = make(map[string]*Widget, 15)
 }
 
 func (o *User) ReadForm(params map[string]string) (hasError bool) {
@@ -642,6 +673,10 @@ func (o *User) ReadForm(params map[string]string) (hasError bool) {
 	}
 	if val, ok := params["Gender"]; ok {
 		o.Gender = val
+	}
+	if val, ok := params["Index"]; ok {
+		intVal, _ := strconv.Atoi(val)
+		o.Index = int32(intVal)
 	}
 	return o.ValidateData()
 }
@@ -933,6 +968,25 @@ func (o *User) GenderWidget() *Widget {
 
 	return ret
 }
+func (o *User) IndexWidget() *Widget {
+	name := "Index"
+	ret, ok := o.widgets[name]
+	if !ok || ret == nil {
+		ret = &Widget{
+			Label:       "Index",
+			Value:       strconv.FormatInt(int64(o.Index), 10),
+			Name:        "Index",
+			PlaceHolder: "",
+			Type:        "text",
+		}
+		if o.widgets == nil {
+			o.initWidget()
+		}
+		o.widgets[name] = ret
+	}
+
+	return ret
+}
 
 func (o *User) GetListedLabels() []*IDLabelPair {
 	return []*IDLabelPair{}
@@ -976,6 +1030,8 @@ func (o *User) GetFieldAsString(fieldKey string) (Value string) {
 		Value = o.OrganizationID
 	case "Gender":
 		Value = o.Gender
+	case "Index":
+		Value = strconv.FormatInt(int64(o.Index), 10)
 	}
 	return
 }
@@ -994,6 +1050,7 @@ type UserWidget struct {
 	PubInfoID      *Widget
 	OrganizationID *Widget
 	Gender         *Widget
+	Index          *Widget
 }
 
 func (o *User) WidgetStruct() *UserWidget {
@@ -1011,6 +1068,7 @@ func (o *User) WidgetStruct() *UserWidget {
 		PubInfoID:      o.PubInfoIDWidget(),
 		OrganizationID: o.OrganizationIDWidget(),
 		Gender:         o.GenderWidget(),
+		Index:          o.IndexWidget(),
 	}
 }
 
@@ -1029,6 +1087,7 @@ func (o *User) Widgets() []*Widget {
 		o.PubInfoIDWidget(),
 		o.OrganizationIDWidget(),
 		o.GenderWidget(),
+		o.IndexWidget(),
 	}
 }
 
@@ -1079,14 +1138,19 @@ func UserFindOne(query interface{}, sortFields ...string) (result *User, err err
 
 	q := col.Find(query)
 
-	if sortFields == nil {
-		q.Sort("-_id")
-	} else {
-		q.Sort(sortFields...)
-	}
+	userSort(q, sortFields)
 
 	err = q.One(&result)
 	return
+}
+
+func userSort(q *mgo.Query, sortFields []string) {
+	if len(sortFields) > 0 {
+		q.Sort(sortFields...)
+		return
+	}
+
+	q.Sort("Index", "-_id")
 }
 
 func UserFind(query interface{}, limit int, offset int, sortFields ...string) (result []*User, err error) {
@@ -1095,11 +1159,7 @@ func UserFind(query interface{}, limit int, offset int, sortFields ...string) (r
 
 	q := col.Find(query).Limit(limit).Skip(offset)
 
-	if sortFields == nil {
-		q.Sort("-_id")
-	} else {
-		q.Sort(sortFields...)
-	}
+	userSort(q, sortFields)
 
 	err = q.All(&result)
 	return
@@ -1111,11 +1171,7 @@ func UserFindAll(query interface{}, sortFields ...string) (result []*User, err e
 
 	q := col.Find(query)
 
-	if sortFields == nil {
-		q.Sort("-_id")
-	} else {
-		q.Sort(sortFields...)
-	}
+	userSort(q, sortFields)
 
 	err = q.All(&result)
 	return

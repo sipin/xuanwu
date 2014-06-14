@@ -266,14 +266,19 @@ func UserGroupFindOne(query interface{}, sortFields ...string) (result *UserGrou
 
 	q := col.Find(query)
 
-	if sortFields == nil {
-		q.Sort("-_id")
-	} else {
-		q.Sort(sortFields...)
-	}
+	usergroupSort(q, sortFields)
 
 	err = q.One(&result)
 	return
+}
+
+func usergroupSort(q *mgo.Query, sortFields []string) {
+	if len(sortFields) > 0 {
+		q.Sort(sortFields...)
+		return
+	}
+
+	q.Sort("-_id")
 }
 
 func UserGroupFind(query interface{}, limit int, offset int, sortFields ...string) (result []*UserGroup, err error) {
@@ -282,11 +287,7 @@ func UserGroupFind(query interface{}, limit int, offset int, sortFields ...strin
 
 	q := col.Find(query).Limit(limit).Skip(offset)
 
-	if sortFields == nil {
-		q.Sort("-_id")
-	} else {
-		q.Sort(sortFields...)
-	}
+	usergroupSort(q, sortFields)
 
 	err = q.All(&result)
 	return
@@ -298,11 +299,7 @@ func UserGroupFindAll(query interface{}, sortFields ...string) (result []*UserGr
 
 	q := col.Find(query)
 
-	if sortFields == nil {
-		q.Sort("-_id")
-	} else {
-		q.Sort(sortFields...)
-	}
+	usergroupSort(q, sortFields)
 
 	err = q.All(&result)
 	return

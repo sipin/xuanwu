@@ -30,5 +30,6 @@ struct User {
 	12: string PubInfoID
 	13: string OrganizationID
 	14: string Gender (label = "部门", widget = "selectPk", stringList="Genders")
+	15: i32 Index
 }
 
