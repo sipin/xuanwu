@@ -1,7 +1,7 @@
 //mongo methods
 
 func (o *$obj.name.value) Save() (info *mgo.ChangeInfo, err error) {
-	session, col := db.GetCol("$obj.name.value")
+	session, col := ${obj.name.value}Col()
 	defer session.Close()
 
 	if o.ID == "" {
@@ -20,6 +20,18 @@ func (o *$obj.name.value) Save() (info *mgo.ChangeInfo, err error) {
 	return col.UpsertId(o.ID, o)
 }
 
+func (o *$obj.name.value) Sync() (err error) {
+	session, col := ${obj.name.value}Col()
+	defer session.Close()
+
+	_, err = col.Find(o).Apply(mgo.Change{
+		Update: o,
+		Upsert: true,
+		ReturnNew: true,
+	}, o)
+	return
+}
+
 func $(obj.name.value)Col() (session *mgo.Session, col *mgo.Collection) {
-	return db.GetCol("$obj.name.value")
+	return db.GetCol(${obj.name.value}TableName)
 }

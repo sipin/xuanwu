@@ -69,6 +69,13 @@ func $(obj.name.value)FindByID(id string) (result *$obj.name.value, err error) {
 	return
 }
 
+func $(obj.name.value)RemoveAll(query interface{}) (info *mgo.ChangeInfo, err error) {
+	session, col := db.GetCol("$obj.name.value")
+	defer session.Close()
+
+	return col.RemoveAll(query)
+}
+
 func $(obj.name.value)RemoveByID(id string) (result *$obj.name.value, err error) {
 	session, col := db.GetCol("$obj.name.value")
 	defer session.Close()

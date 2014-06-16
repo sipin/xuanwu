@@ -49,7 +49,7 @@ var ${obj.name.value}TableName = "${obj.name.value}"
 type $obj.name.value struct {
 	#for field in $obj.fields
 		#if $field.name.value == "ID"
-	ID         bson.ObjectId `bson:"_id" thrift:"$field.name.value,$field.tag"`
+	ID         bson.ObjectId `bson:"_id,omitempty" thrift:"$field.name.value,$field.tag"`
 		#else
 	$field.name.value  $field.go_type `bson:"$field.name.value" thrift:"$field.name.value,$field.tag"`
 		#end if
