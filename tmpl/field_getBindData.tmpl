@@ -1,11 +1,18 @@
 func () (data []*IDLabelPair) {
 	objs, _ := $(col)FindAll(nil)
-	data = make([]*IDLabelPair, len(objs))
-	for i, obj := range(objs) {
-		data[i] = &IDLabelPair {
+	length := len(objs)
+	#if hasattr($field.const_value, 'value')
+	length += 1
+	#end if
+	data = make([]*IDLabelPair, 0, length)
+	#if hasattr($field.const_value, 'value')
+	data = append(data, &IDLabelPair {"", ""})
+	#end if
+	for _, obj := range(objs) {
+		data = append(data, &IDLabelPair {
 			ID : obj.ID.Hex(),
 			Label : obj.$label,
-		}
+		})
 	}
 
 	return

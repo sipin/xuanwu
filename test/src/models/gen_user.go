@@ -39,7 +39,7 @@ func initUserIndex() {
 var UserTableName = "User"
 
 type User struct {
-	ID             bson.ObjectId `bson:"_id" thrift:"ID,1"`
+	ID             bson.ObjectId `bson:"_id,omitempty" thrift:"ID,1"`
 	UserName       string        `bson:"UserName" thrift:"UserName,2"`
 	Password       string        `bson:"Password" thrift:"Password,3"`
 	Name           string        `bson:"Name" thrift:"Name,4"`
@@ -600,7 +600,7 @@ func (p *User) ToBytes() []byte {
 //mongo methods
 
 func (o *User) Save() (info *mgo.ChangeInfo, err error) {
-	session, col := db.GetCol("User")
+	session, col := UserCol()
 	defer session.Close()
 
 	if o.ID == "" {
@@ -621,8 +621,20 @@ func (o *User) Save() (info *mgo.ChangeInfo, err error) {
 	return col.UpsertId(o.ID, o)
 }
 
+func (o *User) Sync() (err error) {
+	session, col := UserCol()
+	defer session.Close()
+
+	_, err = col.Find(o).Apply(mgo.Change{
+		Update:    o,
+		Upsert:    true,
+		ReturnNew: true,
+	}, o)
+	return
+}
+
 func UserCol() (session *mgo.Session, col *mgo.Collection) {
-	return db.GetCol("User")
+	return db.GetCol(UserTableName)
 }
 
 //Form methods
@@ -871,12 +883,15 @@ func (o *User) UserGroupIDWidget() *Widget {
 			Type:        "select",
 			GetBindData: func() (data []*IDLabelPair) {
 				objs, _ := UserGroupFindAll(nil)
-				data = make([]*IDLabelPair, len(objs))
-				for i, obj := range objs {
-					data[i] = &IDLabelPair{
+				length := len(objs)
+				length += 1
+				data = make([]*IDLabelPair, 0, length)
+				data = append(data, &IDLabelPair{"", ""})
+				for _, obj := range objs {
+					data = append(data, &IDLabelPair{
 						ID:    obj.ID.Hex(),
 						Label: obj.Name,
-					}
+					})
 				}
 
 				return
@@ -1195,6 +1210,13 @@ func UserFindByID(id string) (result *User, err error) {
 	}
 	err = col.FindId(bson.ObjectIdHex(id)).One(&result)
 	return
+}
+
+func UserRemoveAll(query interface{}) (info *mgo.ChangeInfo, err error) {
+	session, col := db.GetCol("User")
+	defer session.Close()
+
+	return col.RemoveAll(query)
 }
 
 func UserRemoveByID(id string) (result *User, err error) {

@@ -78,8 +78,8 @@ def add_properties(field):
 		col, label = field.bindData.split(".")
 		tpl = open('tmpl/field_getBindData.tmpl', 'r').read()
 
-		t = Template(tpl, searchList=[{"col": col, "label": label}])
-		field.bindData = str(t)
+		t = Template(tpl, searchList=[{"field": field, "col": col, "label": label}])
+		field.bindData = str(t).strip()
 
 def get_search(obj):
 	search = {}

@@ -20,7 +20,7 @@ func init() {
 var UserGroupTableName = "UserGroup"
 
 type UserGroup struct {
-	ID      bson.ObjectId `bson:"_id" thrift:"ID,1"`
+	ID      bson.ObjectId `bson:"_id,omitempty" thrift:"ID,1"`
 	Name    string        `bson:"Name" thrift:"Name,2"`
 	widgets map[string]*Widget
 }
@@ -167,7 +167,7 @@ func (p *UserGroup) ToBytes() []byte {
 //mongo methods
 
 func (o *UserGroup) Save() (info *mgo.ChangeInfo, err error) {
-	session, col := db.GetCol("UserGroup")
+	session, col := UserGroupCol()
 	defer session.Close()
 
 	if o.ID == "" {
@@ -177,8 +177,20 @@ func (o *UserGroup) Save() (info *mgo.ChangeInfo, err error) {
 	return col.UpsertId(o.ID, o)
 }
 
+func (o *UserGroup) Sync() (err error) {
+	session, col := UserGroupCol()
+	defer session.Close()
+
+	_, err = col.Find(o).Apply(mgo.Change{
+		Update:    o,
+		Upsert:    true,
+		ReturnNew: true,
+	}, o)
+	return
+}
+
 func UserGroupCol() (session *mgo.Session, col *mgo.Collection) {
-	return db.GetCol("UserGroup")
+	return db.GetCol(UserGroupTableName)
 }
 
 //Form methods
@@ -323,6 +335,13 @@ func UserGroupFindByID(id string) (result *UserGroup, err error) {
 	}
 	err = col.FindId(bson.ObjectIdHex(id)).One(&result)
 	return
+}
+
+func UserGroupRemoveAll(query interface{}) (info *mgo.ChangeInfo, err error) {
+	session, col := db.GetCol("UserGroup")
+	defer session.Close()
+
+	return col.RemoveAll(query)
 }
 
 func UserGroupRemoveByID(id string) (result *UserGroup, err error) {
