@@ -100,6 +100,7 @@ def main(thrift_idl):
             f.write(res)
             f.close()
 
+            print "generate: {}".format(outfile)
             ## update init.go in controller
             updateController(out_path)
 
