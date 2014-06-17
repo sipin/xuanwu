@@ -18,6 +18,19 @@ filename = ".".join(path.basename(thrift_file).split(".")[:-1])
 if not out_path.endswith(path.sep):
     out_path = out_path + path.sep
 
+def updateController(out_path):
+    subdirs = [o for o in os.listdir(out_path) if os.path.isdir(os.path.join(out_path, o))]
+    content = "package controller\n\nimport (\n"
+    for x in subdirs:
+        l = "\t_ \"controller/{0}\"\n".format(x)
+        content = content + l
+
+    content = content + ")\n"
+    f = open(out_path + "init.go", "w")
+    f.write(content)
+    f.close()
+
+
 outDir = out_path.split(path.sep)[-2]
 
 def getViewDir(urlBase):
@@ -29,7 +42,7 @@ def getViewDir(urlBase):
 
 def getControlDir(urlBase):
     outdir = out_path + \
-      (path.sep).join(urlBase.split(path.sep)[:-1]) + path.sep
+      urlBase.split(path.sep)[-2] + path.sep
     if not os.path.exists(outdir):
         os.makedirs(outdir)
     return outdir
@@ -74,21 +87,20 @@ def main(thrift_idl):
         elif len(urlBase) == 0:
             pass
         else:
-            for field in obj.fields:
-                add_properties(field)
-            t = Template(tpl, searchList=[{"obj": obj}])
-            res = str(t)
-            outfile = getViewDir(urlBase) + "gen_" + obj.name.value.lower() + ".go"
-
+            outDir = urlBase.split(path.sep)[-2]
             t = Template(crud, searchList=[{"namespace": outDir,
                                             "className": obj.name.value,
                                             "classLabel": labelName,
                                             "urlBase": urlBase,
                                             }])
             res = str(t)
-            outfile = out_path + "gen_" + obj.name.value.lower() + ".go"
+            writeDir = getControlDir(urlBase)
+            outfile = writeDir + "gen_" + obj.name.value.lower() + ".go"
             f = open(outfile, "w")
             f.write(res)
             f.close()
+
+            ## update init.go in controller
+            updateController(out_path)
 
 main(thrift_file)
