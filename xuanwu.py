@@ -81,6 +81,9 @@ def add_properties(field):
 		t = Template(tpl, searchList=[{"field": field, "col": col, "label": label}])
 		field.bindData = str(t).strip()
 
+	if field.required and not hasattr(field, "requiredMsg"):
+		field.requiredMsg = "请输入" + field.label
+
 def get_search(obj):
 	search = {}
 	
