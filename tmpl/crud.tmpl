@@ -2,7 +2,7 @@ package $namespace
 
 import (
 	//Official libs
-	// "fmt"
+	"strconv"
 
 	//Own libs
 	"admin"
@@ -36,6 +36,10 @@ func $(className)Index(ctx *admin.AdminContext) (html string) {
 	total := models.$(className)Count(nil)
 	limit := 20
 	offset := 0
+	if val, ok := ctx.Params["offset"]; ok {
+		offset, _ = strconv.Atoi(val)
+	}
+
 	var obj *models.$(className)
 	var objs []*models.$(className)
 
