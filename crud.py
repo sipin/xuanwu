@@ -18,6 +18,8 @@ filename = ".".join(path.basename(thrift_file).split(".")[:-1])
 if not out_path.endswith(path.sep):
     out_path = out_path + path.sep
 
+outDir = out_path.split(path.sep)[-1]
+
 def getViewDir(urlBase):
     outdir = out_path + "tpl/" + \
       (path.sep).join(urlBase.split(path.sep)[:-1]) + path.sep
@@ -86,13 +88,13 @@ def main(thrift_idl):
             res = str(t)
             outfile = getViewDir(urlBase) + "gen_" + obj.name.value.lower() + ".go"
 
-            t = Template(crud, searchList=[{"namespace": namespace,
+            t = Template(crud, searchList=[{"namespace": outDir,
                                             "className": obj.name.value,
                                             "classLabel": labelName,
                                             "urlBase": urlBase,
                                             }])
             res = str(t)
-            outfile = getControlDir(urlBase) + "gen_" + obj.name.value.lower() + ".go"
+            outfile = out_path + "gen_" + obj.name.value.lower() + ".go"
             f = open(outfile, "w")
             f.write(res)
             f.close()
