@@ -85,7 +85,23 @@ func (o *$obj.name.value) ValidateData() (hasError bool) {
 }
 
 #for field in $obj.fields
-#if $field.name.value != "ID"
+#if $field.name.value == "ID"
+func (o *$obj.name.value) IDWidget() *Widget {
+	name := "${field.name.value}"
+	ret, ok := o.widgets[name]
+	if !ok || ret==nil {
+		ret = &Widget{
+			Value: o.Id(),
+		}
+		if o.widgets == nil {
+			o.initWidget()
+		}
+		o.widgets[name] = ret
+	}
+
+	return ret
+}
+#else
 func (o *$obj.name.value) ${field.name.value}Widget() *Widget {
 	name := "${field.name.value}"
 	ret, ok := o.widgets[name]
@@ -182,18 +198,14 @@ func (o *$obj.name.value) GetFieldAsString(fieldKey string) (Value string) {
 
 type ${obj.name.value}Widget struct {
 #for field in $obj.fields
-#if $field.name.value != "ID"
 	${field.name.value} *Widget
-#end if
 #end for
 }
 
 func (o *$obj.name.value) WidgetStruct() *${obj.name.value}Widget {
 	return &${obj.name.value}Widget{
 #for field in $obj.fields
-#if $field.name.value != "ID"
 	${field.name.value}: o.${field.name.value}Widget(),
-#end if
 #end for
 	}
 }

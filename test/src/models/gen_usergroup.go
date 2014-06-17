@@ -210,6 +210,21 @@ func (o *UserGroup) ValidateData() (hasError bool) {
 	return
 }
 
+func (o *UserGroup) IDWidget() *Widget {
+	name := "ID"
+	ret, ok := o.widgets[name]
+	if !ok || ret == nil {
+		ret = &Widget{
+			Value: o.Id(),
+		}
+		if o.widgets == nil {
+			o.initWidget()
+		}
+		o.widgets[name] = ret
+	}
+
+	return ret
+}
 func (o *UserGroup) NameWidget() *Widget {
 	name := "Name"
 	ret, ok := o.widgets[name]
@@ -253,11 +268,13 @@ func (o *UserGroup) GetFieldAsString(fieldKey string) (Value string) {
 }
 
 type UserGroupWidget struct {
+	ID   *Widget
 	Name *Widget
 }
 
 func (o *UserGroup) WidgetStruct() *UserGroupWidget {
 	return &UserGroupWidget{
+		ID:   o.IDWidget(),
 		Name: o.NameWidget(),
 	}
 }
@@ -323,6 +340,36 @@ func UserGroupCount(query interface{}) (result int) {
 
 	result, _ = col.Find(query).Count()
 	return
+}
+
+func UserGroupFindByIDs(id []string) (result []*UserGroup, err error) {
+	session, col := db.GetCol("UserGroup")
+	defer session.Close()
+
+	ids := make([]bson.ObjectId, 0, len(id))
+	for _, i := range id {
+		if bson.IsObjectIdHex(i) {
+			ids = append(ids, bson.ObjectIdHex(i))
+		}
+	}
+	err = col.Find(db.M{"_id": db.M{"$in": ids}}).All(&result)
+	return
+}
+
+func UserGroupToIDList(ms []*UserGroup) []string {
+	ret := make([]string, len(ms))
+	for idx, m := range ms {
+		ret[idx] = m.GetFieldAsString("ID")
+	}
+	return ret
+}
+
+func UserGroupToMap(ms []*UserGroup) map[string]*UserGroup {
+	ret := make(map[string]*UserGroup, len(ms))
+	for _, m := range ms {
+		ret[m.Id()] = m
+	}
+	return ret
 }
 
 func UserGroupFindByID(id string) (result *UserGroup, err error) {
