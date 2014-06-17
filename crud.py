@@ -56,13 +56,11 @@ def main(thrift_idl):
     thrift = Parser().parse(source)
 
     ## generate view files
-    for obj in thrift.body:
-        for field in obj.fields:
-            add_properties(field)
+    # for obj in thrift.body:
+    #     for field in obj.fields:
+    #         add_properties(field)
 
-        t = Template(tpl, searchList=[{"obj": obj}])
-        code = unicode(t)
-        outdir = getViewDir()
+    #     t = Template(tpl, searchList=[{"obj": obj}])
         ##print code.encode("utf8")
 
     ## generate controller files
