@@ -121,8 +121,10 @@ func (o *$obj.name.value) ${field.name.value}Widget() *Widget {
 			Value : I32Time(o.$field.name.value),
 		#else if $field.type == "i32" 
 			Value : strconv.FormatInt(int64(o.$field.name.value), 10),
-		#else if $field.type == "i64" and $field.widget_type in ["datetime"]
+		#else if $field.type == "i64" and $field.widget_type == "datetime"
 			Value : I64Time(o.$field.name.value),
+		#else if $field.type == "i64" and $field.widget_type == "date"
+			Value : I64Date(o.$field.name.value),
 		#else if $field.type == "i64" 
 			Value : strconv.FormatInt(o.$field.name.value, 10),
 		#else if $field.type == "bool"
@@ -183,12 +185,14 @@ func (o *$obj.name.value) GetFieldAsString(fieldKey string) (Value string) {
 		Value = o.ID.Hex()
 	#else if $field.type == "string"
 		Value = o.$field.name.value
-	#else if $field.type == "i32" and $field.widget_type in ["datetime"]
+	#else if $field.type == "i32" and $field.widget_type == "datetime"
 		Value = I32Time(o.$field.name.value)
 	#else if $field.type == "i32" 
 		Value = strconv.FormatInt(int64(o.$field.name.value), 10)
-	#else if $field.type == "i64" and $field.widget_type in ["datetime"]
+	#else if $field.type == "i64" and $field.widget_type == "datetime"
 		Value = I64Time(o.$field.name.value)
+	#else if $field.type == "i64" and $field.widget_type == "date"
+		Value = I64Date(o.$field.name.value)
 	#else if $field.type == "i64" 
 		Value = strconv.FormatInt(o.$field.name.value, 10)
 	#else if $field.type == "bool"

@@ -87,6 +87,13 @@ func I64Time(c int64) string {
 	return time.Unix(c, 0).Format(DateTimeLayout)
 }
 
+func I64Date(c int64) string {
+	if c == 0 {
+		return ""
+	}
+	return time.Unix(c, 0).Format(DateLayout)
+}
+
 func I32Time(c int32) string {
 	return I64Time(int64(c))
 }
