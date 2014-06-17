@@ -21,7 +21,7 @@ func init() {
 	web.Post("$(urlBase)/delete", $(className)DeletePost)
 }
 
-func getSearch(q string, limit int, offset int) (objs []*models.$(className)) {
+func getSearch$(className)(q string, limit int, offset int) (objs []*models.$(className)) {
 	out, _ := models.$(className)SearchSimple(q, limit, offset)
 
 	for _, hit := range out.Hits.Hits {
@@ -41,7 +41,7 @@ func $(className)Index(ctx *admin.AdminContext) (html string) {
 
 	q, is_search := ctx.Params["q"]
 	if is_search {
-		objs = getSearch(q, limit, offset)
+		objs = getSearch$(className)(q, limit, offset)
 	} else {
 		objs, _ = models.$(className)Find(nil, limit, offset)
 	}

@@ -18,7 +18,7 @@ filename = ".".join(path.basename(thrift_file).split(".")[:-1])
 if not out_path.endswith(path.sep):
     out_path = out_path + path.sep
 
-outDir = out_path.split(path.sep)[-1]
+outDir = out_path.split(path.sep)[-2]
 
 def getViewDir(urlBase):
     outdir = out_path + "tpl/" + \
