@@ -57,14 +57,6 @@ def main(thrift_idl):
     crud = open('tmpl/crud.tmpl', 'r').read().decode("utf8")
     thrift = Parser().parse(source)
 
-    ## generate view files
-    # for obj in thrift.body:
-    #     for field in obj.fields:
-    #         add_properties(field)
-
-    #     t = Template(tpl, searchList=[{"obj": obj}])
-        ##print code.encode("utf8")
-
     ## generate controller files
     for obj in thrift.body:
         labelName = ""
