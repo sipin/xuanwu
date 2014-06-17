@@ -30,15 +30,7 @@ def updateController(out_path):
     f.write(content)
     f.close()
 
-
 outDir = out_path.split(path.sep)[-2]
-
-def getViewDir(urlBase):
-    outdir = out_path + "tpl/" + \
-      (path.sep).join(urlBase.split(path.sep)[:-1]) + path.sep
-    if not os.path.exists(outdir):
-        os.makedirs(outdir)
-    return outdir
 
 def getControlDir(urlBase):
     outdir = out_path + \

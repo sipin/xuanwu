@@ -203,6 +203,10 @@ def transform_struct(obj):
 		if field.name.value.endswith("ID"):
 			field.foreign = field.name.value[:-2]
 
+	obj.toList = [i.name.value for i in obj.fields if hasattr(i, "toList")]
+	if "ID" not in obj.toList:
+		obj.toList.append("ID")
+
 	obj.imports = sorted(set(obj.imports))
 	tpl = open('go.tmpl', 'r').read()
 	t = Template(tpl, searchList=[{"namespace": namespace, "filename": filename, "obj": obj}])

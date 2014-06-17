@@ -90,9 +90,8 @@ func $(className)CreatePost(ctx *admin.AdminContext) (html string) {
 }
 
 func $(className)View(ctx *admin.AdminContext) (html string) {
-	// user, _ := models.UserFindByID(ctx.Params["id"])
-	// return tpl.Edit(user)
-	return
+	obj, _ := models.$(className)FindByID(ctx.Params["id"])
+	return autoTpl.View(obj)
 }
 
 func $(className)Edit(ctx *admin.AdminContext) (html string) {
