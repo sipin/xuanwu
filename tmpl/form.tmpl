@@ -32,6 +32,13 @@ func (o *$obj.name.value) ReadForm(params map[string]string) (hasError bool) {
 			intVal, _ := time.Parse(DateTimeLayout, val)
 			o.$field.name.value = intVal.Unix()
 		}
+	#else if $field.type == "i64" and $field.widget_type in ["date"]
+		if val == "" {
+			o.$field.name.value = 0
+		} else {
+			intVal, _ := time.Parse(DateLayout, val)
+			o.$field.name.value = intVal.Unix()
+		}
 	#else if $field.type == "i64"
 		intVal, _ := strconv.ParseInt(val, 10, 64)
 		o.$field.name.value = intVal
