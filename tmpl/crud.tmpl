@@ -8,7 +8,18 @@ import (
 	"admin"
 	autoTpl "tpl/auto"
 	"zfw/models"
+	"github.com/sipin/web"
 )
+
+func init() {
+	web.Get("$(urlBase)/index", $(className)Index)
+	web.Get("$(urlBase)/view", $(className)View)
+	web.Get("$(urlBase)/create", $(className)Create)
+	web.Post("$(urlBase)/create", $(className)CreatePost)
+	web.Get("$(urlBase)/edit", $(className)Edit)
+	web.Post("$(urlBase)/edit", $(className)EditPost)
+	web.Post("$(urlBase)/delete", $(className)DeletePost)
+}
 
 func getSearch(q string, limit int, offset int) (objs []*models.$(className)) {
 	out, _ := models.$(className)SearchSimple(q, limit, offset)
