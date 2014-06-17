@@ -26,7 +26,7 @@ def updateController(out_path):
         content = content + l
 
     content = content + ")\n"
-    f = open(out_path + "init.go", "w")
+    f = open(out_path + "gen_init.go", "w")
     f.write(content)
     f.close()
 
