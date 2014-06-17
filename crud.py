@@ -67,6 +67,8 @@ def main(thrift_idl):
     for obj in thrift.body:
         labelName = ""
         urlBase = ""
+        if not hasattr(obj, "fields"):
+            continue
         for field in obj.fields:
             if field.name.value == "ID":
                 labelName = fieldElem(field, "label")
