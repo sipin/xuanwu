@@ -716,6 +716,21 @@ func (o *User) ValidateData() (hasError bool) {
 	return
 }
 
+func (o *User) IDWidget() *Widget {
+	name := "ID"
+	ret, ok := o.widgets[name]
+	if !ok || ret == nil {
+		ret = &Widget{
+			Value: o.Id(),
+		}
+		if o.widgets == nil {
+			o.initWidget()
+		}
+		o.widgets[name] = ret
+	}
+
+	return ret
+}
 func (o *User) UserNameWidget() *Widget {
 	name := "UserName"
 	ret, ok := o.widgets[name]
@@ -1052,6 +1067,7 @@ func (o *User) GetFieldAsString(fieldKey string) (Value string) {
 }
 
 type UserWidget struct {
+	ID             *Widget
 	UserName       *Widget
 	Password       *Widget
 	Name           *Widget
@@ -1070,6 +1086,7 @@ type UserWidget struct {
 
 func (o *User) WidgetStruct() *UserWidget {
 	return &UserWidget{
+		ID:             o.IDWidget(),
 		UserName:       o.UserNameWidget(),
 		Password:       o.PasswordWidget(),
 		Name:           o.NameWidget(),
@@ -1198,6 +1215,36 @@ func UserCount(query interface{}) (result int) {
 
 	result, _ = col.Find(query).Count()
 	return
+}
+
+func UserFindByIDs(id []string) (result []*User, err error) {
+	session, col := db.GetCol("User")
+	defer session.Close()
+
+	ids := make([]bson.ObjectId, 0, len(id))
+	for _, i := range id {
+		if bson.IsObjectIdHex(i) {
+			ids = append(ids, bson.ObjectIdHex(i))
+		}
+	}
+	err = col.Find(db.M{"_id": db.M{"$in": ids}}).All(&result)
+	return
+}
+
+func UserToIDList(ms []*User) []string {
+	ret := make([]string, len(ms))
+	for idx, m := range ms {
+		ret[idx] = m.GetFieldAsString("ID")
+	}
+	return ret
+}
+
+func UserToMap(ms []*User) map[string]*User {
+	ret := make(map[string]*User, len(ms))
+	for _, m := range ms {
+		ret[m.Id()] = m
+	}
+	return ret
 }
 
 func UserFindByID(id string) (result *User, err error) {
