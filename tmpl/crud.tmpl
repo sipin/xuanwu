@@ -46,6 +46,7 @@ func $(className)Index(ctx *admin.AdminContext) (html string) {
 	q, is_search := ctx.Params["q"]
 	if is_search {
 		objs = getSearch$(className)(q, limit, offset)
+		total = len(objs)
 	} else {
 		objs, _ = models.$(className)Find(nil, limit, offset)
 	}
