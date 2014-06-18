@@ -83,6 +83,9 @@ def add_properties(field):
 		t = Template(tpl, searchList=[{"field": field, "col": col, "label": label}])
 		field.bindData = str(t).strip()
 
+	if not hasattr(field, "placeholder"):
+		field.placeholder = ""
+
 	if field.required and not hasattr(field, "requiredMsg"):
 		field.requiredMsg = "请输入" + field.label
 
@@ -111,7 +114,9 @@ def get_widget_type(field):
 			if not att.value.value in widget_types:
 				raise Exception(field.name.value + " has invalid widget type: " + att.value.value)
 			return att.value.value
-			
+		if att.name.value.lower() == "dm":
+			field.placeholder = att.value.value
+			return "dm"
 	return "text"
 
 def transform_type(field_type):

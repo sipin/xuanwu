@@ -135,7 +135,7 @@ func (o *$obj.name.value) ${field.name.value}Widget() *Widget {
 		Change go.tmpl go support $field.type now!
 		#end if
 			Name: "$field.name.value",
-			PlaceHolder: "",
+			PlaceHolder: "$field.placeholder",
 			Type: "$field.widget_type",
 		#if hasattr($field, "enums")
 			EnumData : $(filename).$(field.enums)Label,
