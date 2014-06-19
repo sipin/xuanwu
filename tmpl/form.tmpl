@@ -184,7 +184,12 @@ func (o *$obj.name.value) GetFieldAsString(fieldKey string) (Value string) {
 	#if $field.name.value == "ID"
 		Value = o.ID.Hex()
 	#else if $field.type == "string"
-		Value = o.$field.name.value
+	        widget := o.${field.name.value}Widget()
+		if widget.Type == "select" {
+		   Value = widget.String()
+		} else {
+		   Value = o.$field.name.value
+		}
 	#else if $field.type == "i32" and $field.widget_type == "datetime"
 		Value = I32Time(o.$field.name.value)
 	#else if $field.type == "i32"
