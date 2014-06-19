@@ -29,6 +29,12 @@ func WidgetDisable(ws ...*Widget) {
 	}
 }
 
+func WidgetHidden(ws ...*Widget) {
+	for _, w := range ws {
+		w.Hidden()
+	}
+}
+
 type Widget struct {
 	Label       string
 	Value       string
@@ -40,13 +46,19 @@ type Widget struct {
 	StringList  []string
 	Required    bool
 	Disabled    bool
+	Hidden      bool
 	GetBindData	func() (data []*IDLabelPair)
 }
 func (w *Widget) Disable() {
 	w.Disabled = true
 }
+
+func (w *Widget) Hidden() {
+	w.Hidden = true
+}
+
 func (w *Widget) String() string {
-	
+
 	if idx, err := strconv.Atoi(w.Value); err == nil {
 		if w.StringList != nil {
 			return w.StringList[idx]
