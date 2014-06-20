@@ -146,6 +146,12 @@ func (o *$obj.name.value) ${field.name.value}Widget() *Widget {
 		#else if $field.required
 			Required: true,
 		#end if
+		#if hasattr($field, "disable")
+		        Disabled: $field.disable,
+		#end if
+		#if hasattr($field, "hidden")
+		        Hidden: $field.hidden,
+		#end if
 		}
 		if o.widgets == nil {
 			o.initWidget()

@@ -91,7 +91,7 @@ def add_properties(field):
 
 def get_search(obj):
 	search = {}
-	
+
 	for field in obj.fields:
 		if field.name.value == "ID" and hasattr(field, "search"):
 			search["Simple"] = [f.strip() for f in field.search.split(",")]
@@ -171,7 +171,7 @@ def transform_struct(obj):
 	obj.label = obj.name.value
 	obj.listedFields = []
 	listedFields = []
-	
+
 	if hasattr(idField, "listedFields"):
 		listedFields = [f.strip() for f in idField.listedFields.split(",")]
 
