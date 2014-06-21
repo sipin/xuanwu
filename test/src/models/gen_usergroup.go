@@ -413,3 +413,7 @@ func UserGroupRemoveByID(id string) (result *UserGroup, err error) {
 func (o *UserGroup) HasSimpleSearch() bool {
 	return false
 }
+
+func (o *UserGroup) TypeName() string {
+	return UserGroupTableName
+}

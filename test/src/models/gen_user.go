@@ -1400,3 +1400,7 @@ func (o *User) ViewUrl(id string) string {
 func (o *User) GetContent() string {
 	return o.Content
 }
+
+func (o *User) TypeName() string {
+	return UserTableName
+}
