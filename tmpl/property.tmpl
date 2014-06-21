@@ -7,9 +7,9 @@ func (o *$obj.name.value) ViewUrl(id string) string {
 }
 #end if
 
-#if hasattr(i, "content")
-func (o *$obj.name.value) GetContent() string {
-	return o.$i.content
+#if hasattr(i, "summary")
+func (o *$obj.name.value) GetSummary() string {
+	return o.$i.summary
 }
 #end if
 

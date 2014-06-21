@@ -1397,7 +1397,7 @@ func (o *User) ViewUrl(id string) string {
 	return "/admin/user/" + id
 }
 
-func (o *User) GetContent() string {
+func (o *User) GetSummary() string {
 	return o.Content
 }
 

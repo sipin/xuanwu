@@ -16,7 +16,7 @@ const list<string> Genders = [
 ]
 
 struct User {
-	1: string ID (viewUrl="/admin/user/", content="Content")
+	1: string ID (viewUrl="/admin/user/", summary="Content")
 	2: required string UserName (label = "用户名", search = "Simple", requiredMsg = "请输入用户名", index="unique")
 	3: required string Password (label = "密码", widget = "password", requiredMsg = "请输入密码")
 	4: string Name  (label = "姓名", search = "Name", search = "User-10")
