@@ -66,34 +66,52 @@ def main(thrift_idl):
     for obj in thrift.body:
         labelName = ""
         urlBase = ""
+        obj.filterFields = []
+        obj.imports = []
+
         if not hasattr(obj, "fields"):
             continue
-        for field in obj.fields:
-            if field.name.value == "ID":
-                labelName = fieldElem(field, "label")
-                urlBase = fieldElem(field, "baseurl")
-                break
 
-        if len(labelName) == 0:
-            pass
-        elif len(urlBase) == 0:
-            pass
-        else:
-            outDir = urlBase.split(path.sep)[-2]
-            t = Template(crud, searchList=[{"namespace": outDir,
-                                            "className": obj.name.value,
-                                            "classLabel": labelName,
-                                            "urlBase": urlBase,
-                                            }])
-            res = str(t)
-            writeDir = getControlDir(urlBase)
-            outfile = writeDir + "gen_" + obj.name.value.lower() + ".go"
-            f = open(outfile, "w")
-            f.write(res)
-            f.close()
+        idField = obj.fields[0]
+        labelName = fieldElem(idField, "label")
+        urlBase = fieldElem(idField, "baseurl")
 
-            print "generate: {}".format(outfile)
-            ## update init.go in controller
-            updateController(out_path)
+        if labelName == "" or urlBase == "":
+            continue
+
+        filterFields = fieldElem(idField, "filterfields")
+        if filterFields != "":
+            filterFields = [f.strip() for f in filterFields.split(",")]
+        for fieldname in filterFields:
+            for field in obj.fields:
+                if field.name.value == fieldname:
+                    obj.filterFields.append(field)
+
+        # make sure all field in filter fields exists
+        if len(filterFields) > len(obj.filterFields):
+            foundFields = [field.name.value for field in obj.filterFields if field.name.value in filterFields]
+            missingFields = [field for field in filterFields if field not in foundFields]
+            raise Exception("missing filterFields: " + str(missingFields))
+
+        if len(obj.filterFields) > 0:
+            obj.imports.append("labix.org/v2/mgo/bson")
+
+        outDir = urlBase.split(path.sep)[-2]
+        t = Template(crud, searchList=[{"namespace": outDir,
+                                        "className": obj.name.value,
+                                        "classLabel": labelName,
+                                        "urlBase": urlBase,
+                                        "obj": obj,
+                                        }])
+        res = str(t)
+        writeDir = getControlDir(urlBase)
+        outfile = writeDir + "gen_" + obj.name.value.lower() + ".go"
+        f = open(outfile, "w")
+        f.write(res)
+        f.close()
+
+        print "generate: {}".format(outfile)
+        ## update init.go in controller
+        updateController(out_path)
 
 main(thrift_file)
