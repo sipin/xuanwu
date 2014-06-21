@@ -1,0 +1,17 @@
+#for i in $obj.fields
+#if i.name.value == "ID"
+
+#if hasattr(i, "viewUrl")
+func (o *$obj.name.value) ViewUrl(id string) string {
+	return "$i.viewUrl" + id
+}
+#end if
+
+#if hasattr(i, "content")
+func (o *$obj.name.value) GetContent() string {
+	return o.$i.content
+}
+#end if
+
+#end if
+#end for

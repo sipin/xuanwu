@@ -1035,33 +1035,100 @@ func (o *User) GetFieldAsString(fieldKey string) (Value string) {
 	case "ID":
 		Value = o.ID.Hex()
 	case "UserName":
-		Value = o.UserName
+		widget := o.UserNameWidget()
+		if widget.Type == "select" {
+			Value = widget.String()
+		} else {
+			Value = o.UserName
+		}
 	case "Password":
-		Value = o.Password
+		widget := o.PasswordWidget()
+		if widget.Type == "select" {
+			Value = widget.String()
+		} else {
+			Value = o.Password
+		}
 	case "Name":
-		Value = o.Name
+		widget := o.NameWidget()
+		if widget.Type == "select" {
+			Value = widget.String()
+		} else {
+			Value = o.Name
+		}
 	case "Email":
-		Value = o.Email
+		widget := o.EmailWidget()
+		if widget.Type == "select" {
+			Value = widget.String()
+		} else {
+			Value = o.Email
+		}
 	case "Intro":
-		Value = o.Intro
+		widget := o.IntroWidget()
+		if widget.Type == "select" {
+			Value = widget.String()
+		} else {
+			Value = o.Intro
+		}
 	case "Picture":
-		Value = o.Picture
+		widget := o.PictureWidget()
+		if widget.Type == "select" {
+			Value = widget.String()
+		} else {
+			Value = o.Picture
+		}
 	case "Remark":
-		Value = o.Remark
+		widget := o.RemarkWidget()
+		if widget.Type == "select" {
+			Value = widget.String()
+		} else {
+			Value = o.Remark
+		}
 	case "IsAdmin":
 		Value = strconv.FormatBool(o.IsAdmin)
 	case "UserGroupID":
-		Value = o.UserGroupID
+		widget := o.UserGroupIDWidget()
+		if widget.Type == "select" {
+			Value = widget.String()
+		} else {
+			Value = o.UserGroupID
+		}
 	case "Status":
-		Value = strconv.FormatInt(int64(o.Status), 10)
+		widget := o.StatusWidget()
+		if widget.Type == "select" {
+			idx := int32(o.Status)
+			Value = widget.StringList[idx]
+		} else {
+			Value = strconv.FormatInt(int64(o.Status), 10)
+		}
 	case "PubInfoID":
-		Value = o.PubInfoID
+		widget := o.PubInfoIDWidget()
+		if widget.Type == "select" {
+			Value = widget.String()
+		} else {
+			Value = o.PubInfoID
+		}
 	case "OrganizationID":
-		Value = o.OrganizationID
+		widget := o.OrganizationIDWidget()
+		if widget.Type == "select" {
+			Value = widget.String()
+		} else {
+			Value = o.OrganizationID
+		}
 	case "Gender":
-		Value = o.Gender
+		widget := o.GenderWidget()
+		if widget.Type == "select" {
+			Value = widget.String()
+		} else {
+			Value = o.Gender
+		}
 	case "Index":
-		Value = strconv.FormatInt(int64(o.Index), 10)
+		widget := o.IndexWidget()
+		if widget.Type == "select" {
+			idx := int32(o.Index)
+			Value = widget.StringList[idx]
+		} else {
+			Value = strconv.FormatInt(int64(o.Index), 10)
+		}
 	}
 	return
 }
@@ -1324,4 +1391,12 @@ func UserSearchUser(word string, limit int, offset int) (core.SearchResult, erro
 
 func (o *User) HasSimpleSearch() bool {
 	return true
+}
+
+func (o *User) ViewUrl(id string) string {
+	return "/admin/user/" + id
+}
+
+func (o *User) GetContent() string {
+	return o.Content
 }

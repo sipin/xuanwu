@@ -29,6 +29,12 @@ func WidgetDisable(ws ...*Widget) {
 	}
 }
 
+func WidgetHidden(ws ...*Widget) {
+	for _, w := range ws {
+		w.Hide()
+	}
+}
+
 type Widget struct {
 	Label       string
 	Value       string
@@ -40,12 +46,18 @@ type Widget struct {
 	StringList  []string
 	Required    bool
 	Disabled    bool
+	Hidden      bool
 	GetBindData func() (data []*IDLabelPair)
 }
 
 func (w *Widget) Disable() {
 	w.Disabled = true
 }
+
+func (w *Widget) Hide() {
+	w.Hidden = true
+}
+
 func (w *Widget) String() string {
 
 	if idx, err := strconv.Atoi(w.Value); err == nil {
@@ -79,12 +91,20 @@ type IXuanWuObj interface {
 }
 
 var DateTimeLayout = "2006-01-02 15:04"
+var DateLayout = "2006-01-02"
 
 func I64Time(c int64) string {
 	if c == 0 {
 		return ""
 	}
 	return time.Unix(c, 0).Format(DateTimeLayout)
+}
+
+func I64Date(c int64) string {
+	if c == 0 {
+		return ""
+	}
+	return time.Unix(c, 0).Format(DateLayout)
 }
 
 func I32Time(c int32) string {
