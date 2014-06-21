@@ -169,20 +169,25 @@ def transform_struct(obj):
 		obj.imports.append("github.com/mattbaird/elastigo/core")
 
 	obj.label = obj.name.value
+	
 	obj.listedFields = []
-	listedFields = []
-
 	if hasattr(idField, "listedFields"):
 		listedFields = [f.strip() for f in idField.listedFields.split(",")]
+		for fieldname in listedFields:
+			for field in obj.fields:
+				if field.name.value == fieldname:
+					obj.listedFields.append(field)
+
+		if len(listedFields) > len(obj.listedFields):
+			foundFields = [field.name.value for field in obj.listedFields if field.name.value in listedFields]
+			missingFields = [field for field in listedFields if field not in foundFields]
+			raise Exception("missing listedFields: " + str(missingFields))
 
 	if hasattr(idField, "label"):
 		obj.label = idField.label
 
 	for field in obj.fields:
 		add_properties(field)
-
-		if field.name.value in listedFields:
-			obj.listedFields.append(field)
 
 		field.go_type = type_translate(field.type)
 		field.type = str(field.type)
