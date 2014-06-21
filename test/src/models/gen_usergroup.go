@@ -262,7 +262,12 @@ func (o *UserGroup) GetFieldAsString(fieldKey string) (Value string) {
 	case "ID":
 		Value = o.ID.Hex()
 	case "Name":
-		Value = o.Name
+		widget := o.NameWidget()
+		if widget.Type == "select" {
+			Value = widget.String()
+		} else {
+			Value = o.Name
+		}
 	}
 	return
 }
