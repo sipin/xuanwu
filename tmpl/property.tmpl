@@ -13,5 +13,9 @@ func (o *$obj.name.value) GetContent() string {
 }
 #end if
 
+func (o *$obj.name.value) TypeName() string {
+	return ${obj.name.value}TableName
+}
+
 #end if
 #end for
