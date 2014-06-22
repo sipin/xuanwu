@@ -18,6 +18,7 @@ func init() {
 	web.Post("$(urlBase)/create", $(className)CreatePost)
 	web.Get("$(urlBase)/edit", $(className)Edit)
 	web.Post("$(urlBase)/edit", $(className)EditPost)
+	web.Post("$(urlBase)/view", $(className)ViewPost)
 	web.Post("$(urlBase)/delete", $(className)DeletePost)
 }
 
@@ -110,6 +111,24 @@ func $(className)Edit(ctx *admin.AdminContext) (html string) {
 	}
 
 	return autoTpl.Edit(obj)
+}
+
+func $(className)ViewPost(ctx *admin.AdminContext) (html string) {
+	obj, _ := models.$(className)FindByID(ctx.Params["id"])
+
+	hasError := obj.ReadForm(ctx.Params)
+
+	if hasError {
+		ctx.SetSession("$(className)View", obj.ToBytes())
+		ctx.Redirect("edit?id=" + obj.Id())
+		return
+	}
+
+	obj.Save()
+	ctx.ClearSession("$(className)View")
+	ctx.SetFlashNotice("修改成功")
+	ctx.Redirect("index")
+	return
 }
 
 func $(className)EditPost(ctx *admin.AdminContext) (html string) {
