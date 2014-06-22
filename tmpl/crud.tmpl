@@ -4,6 +4,11 @@ import (
 	//Official libs
 	"strconv"
 
+	//3rd party libs
+	#for item in $obj.imports
+	"$item"
+	#end for
+
 	//Own libs
 	"admin"
 	autoTpl "tpl/auto"
@@ -49,7 +54,17 @@ func $(className)Index(ctx *admin.AdminContext) (html string) {
 		objs = getSearch$(className)(q, limit, offset)
 		total = len(objs)
 	} else {
+		#if len($obj.filterFields) == 0
 		objs, _ = models.$(className)Find(nil, limit, offset)
+		#else
+		query := bson.M{}
+		#for field in $obj.filterFields
+		if val, ok := ctx.Params["$field.name.value"]; ok {
+			query["$field.name.value"] = val
+		}
+		#end for
+		objs, _ = models.$(className)Find(query, limit, offset)
+		#end if
 	}
 
 	stupidGoInterface := make([]models.IXuanWuObj, len(objs))
