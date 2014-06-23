@@ -26,7 +26,11 @@ widget_types = set([
 	"datetime",
 	"photo",
 	"photos",
-	"files"
+	"files",
+	"droplist",
+	"combobox",
+	"hidden",
+	"time",
 ])
 
 typedef = dict()

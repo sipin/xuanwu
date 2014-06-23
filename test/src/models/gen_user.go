@@ -26,12 +26,19 @@ func initUserIndex() {
 	session, collection := db.GetCol(UserTableName)
 	defer session.Close()
 
+reEnsureUserName:
 	if err := collection.EnsureIndex(mgo.Index{
 		Key:    []string{"UserName"},
 		Unique: true,
 		Sparse: true,
 	}); err != nil {
-		panic(err)
+		println("error ensureIndex User UserName", err.Error())
+		err = collection.DropIndex("UserName")
+		if err != nil {
+			panic(err)
+		}
+		goto reEnsureUserName
+
 	}
 
 }
