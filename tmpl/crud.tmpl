@@ -46,6 +46,10 @@ func $(className)Index(ctx *admin.AdminContext) (html string) {
 		offset, _ = strconv.Atoi(val)
 	}
 
+	if val, ok := ctx.Params["limit"]; ok {
+		limit, _ = strconv.Atoi(val)
+	}
+
 	var obj *models.$(className)
 	var objs []*models.$(className)
 
