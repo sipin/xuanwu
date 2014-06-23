@@ -156,13 +156,18 @@ def transform_field(field, indent=0):
 		raise ValueError('Cannot have required field with default values.')
 	return line
 
-
+class ListField:
+	pass
 
 def transform_struct(obj):
 	idField = obj.fields[0]
 	add_properties(idField)
 
+	for field in obj.fields:
+		add_properties(field)
+
 	obj.imports = ["bytes", "fmt"]
+	obj.listedFieldStrings = []
 
 	obj.search = get_search(obj)
 	if len(obj.search) > 0:
@@ -174,9 +179,28 @@ def transform_struct(obj):
 	if hasattr(idField, "listedFields"):
 		listedFields = [f.strip() for f in idField.listedFields.split(",")]
 		for fieldname in listedFields:
-			for field in obj.fields:
-				if field.name.value == fieldname:
-					obj.listedFields.append(field)
+			if "." in fieldname:
+				objName, objField = fieldname.split(".")
+				for field in obj.fields:
+					if field.name.value.endswith("ID") and field.name.value[:-2] == objName:
+						f = ListField()
+						f.label = field.label
+						f.key = fieldname
+						obj.listedFields.append(f)
+
+						fs = ListField()
+						fs.key = fieldname
+						fs.objName = objName
+						fs.objField = objField
+						obj.listedFieldStrings.append(fs)
+			else:
+				for field in obj.fields:
+					if field.name.value == fieldname:
+						f = ListField()
+						f.label = field.label
+						f.key = fieldname
+						obj.listedFields.append(f)
+
 
 		if len(listedFields) > len(obj.listedFields):
 			foundFields = [field.name.value for field in obj.listedFields if field.name.value in listedFields]
@@ -187,8 +211,6 @@ def transform_struct(obj):
 		obj.label = idField.label
 
 	for field in obj.fields:
-		add_properties(field)
-
 		field.go_type = type_translate(field.type)
 		field.type = str(field.type)
 		field.widget_type = get_widget_type(field)

@@ -168,7 +168,7 @@ func (o *$obj.name.value) GetListedLabels() []*IDLabelPair {
 	return []*IDLabelPair{
 		#for field in $obj.listedFields
 		&IDLabelPair {
-			ID : "$field.name.value",
+			ID : "$field.key",
 			Label : "$field.label",
 		},
 		#end for
@@ -185,6 +185,14 @@ func (o *$obj.name.value) GetLabel() string {
 
 func (o *$obj.name.value) GetFieldAsString(fieldKey string) (Value string) {
 	switch fieldKey {
+#for field in $obj.listedFieldStrings
+	case "$field.key":
+		f, err := o.Get$(field.objName)()
+		if err != nil {
+			return
+		}
+		Value = f.$(field.objField)
+#end for
 #for field in $obj.fields
 	case "$field.name.value":
 	#if $field.name.value == "ID"
