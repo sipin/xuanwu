@@ -37,6 +37,7 @@ reEnsure${field.name}:
 		#end if
 		Sparse: true,
 	}); err != nil {
+		println("error ensureIndex $obj.name.value $field.name", err.Error())
 		err = collection.DropIndex("${field.name}")
 		if err != nil {
 			panic(err)
