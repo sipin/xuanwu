@@ -29,14 +29,20 @@ func init${obj.name.value}Index() {
 	#for field in $obj.fields
 	#if hasattr(field, "index")
 
+reEnsure${field.name}:
 	if err := collection.EnsureIndex(mgo.Index{
-			Key: []string{"${field.name}"},
-			#if field.index == "unique"
-			Unique: true,
-			#end if
-			Sparse: true,
-		}); err != nil {
-		panic(err)
+		Key: []string{"${field.name}"},
+		#if field.index == "unique"
+		Unique: true,
+		#end if
+		Sparse: true,
+	}); err != nil {
+		err = collection.DropIndex("${field.name}")
+		if err != nil {
+			panic(err)
+		}
+		goto reEnsure${field.name}
+		
 	}
 
 	#end if
