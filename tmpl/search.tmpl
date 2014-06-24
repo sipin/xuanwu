@@ -15,6 +15,13 @@ func $(obj.name.value)Search$(key)(word string, limit int, offset int) (core.Sea
 }
 #end for
 
+// SearchPurge
+func $(obj.name.value)SearchPurge() {
+#for key, v in $obj.search.iteritems()
+	core.Delete("$(obj.name.value.lower())", "$(key.lower())", "", nil)
+#end for
+}
+
 func (o *$obj.name.value) HasSimpleSearch() bool {
 #if $obj.search.has_key("Simple")
 	return true
