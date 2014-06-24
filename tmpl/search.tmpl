@@ -27,11 +27,24 @@ func $(obj.name.value)Search$(key)(word string, limit int, offset int) (core.Sea
 }
 #end for
 
-// SearchPurge
 func $(obj.name.value)SearchPurge() {
 #for key, v in $obj.search.iteritems()
 	core.Delete("$(obj.name.value.lower())", "$(key.lower())", "", nil)
 #end for
+}
+
+func $(obj.name.value)SearchRebuild() {
+	$(obj.name.value)SearchPurge()
+	total := $(obj.name.value)Count(nil)
+	step := 100
+	start := 0
+	for start < total {
+		objs, _ := $(obj.name.value)Find(nil, step, start)
+		for _, o := range objs {
+			o.IndexSearch()
+		}
+		start += len(objs)
+	}
 }
 
 func (o *$obj.name.value) HasSimpleSearch() bool {
