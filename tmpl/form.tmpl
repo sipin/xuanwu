@@ -153,7 +153,7 @@ func (o *$obj.name.value) ${field.name.value}Widget() *Widget {
 		        Hidden: $field.hidden,
 		#end if
 		#if hasattr($field, "readonly")
-		        readonly: $field.readonly,
+		        Readonly: $field.readonly,
 		#end if
 		}
 		if o.widgets == nil {
