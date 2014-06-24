@@ -8,14 +8,7 @@ func (o *$obj.name.value) Save() (info *mgo.ChangeInfo, err error) {
 		o.ID = bson.NewObjectId()
 	}
 
-	#for key, fields in $obj.search.iteritems()
-	core.Index("$(obj.name.value.lower())", "$(key.lower())", o.ID.Hex(), nil, $(obj.name.value)Search$(key)Obj{
-		#for field in fields
-		o.$(field),
-		#end for
-	})
-	#end for
-
+	o.IndexSearch()
 
 	return col.UpsertId(o.ID, o)
 }

@@ -1,3 +1,15 @@
+//Index Search
+func (o *$obj.name.value) IndexSearch() () {
+	#for key, fields in $obj.search.iteritems()
+	core.Index("$(obj.name.value.lower())", "$(key.lower())", o.ID.Hex(), nil, $(obj.name.value)Search$(key)Obj{
+		#for field in fields
+		o.$(field),
+		#end for
+	})
+	#end for
+}
+
+
 // Search
 #for key, v in $obj.search.iteritems()
 func $(obj.name.value)Search$(key)(word string, limit int, offset int) (core.SearchResult, error) {
