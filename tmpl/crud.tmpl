@@ -28,7 +28,7 @@ func init() {
 }
 
 func getSearch$(className)(q string, limit int, offset int) (objs []*models.$(className)) {
-	out, _ := models.$(className)SearchSimple(q, limit, offset)
+	out, _ := models.$(className)Search(q, limit, offset)
 
 	for _, hit := range out.Hits.Hits {
 		obj, _ := models.$(className)FindByID(hit.Id)
