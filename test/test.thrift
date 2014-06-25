@@ -17,11 +17,11 @@ const list<string> Genders = [
 
 struct User {
 	1: string ID (viewUrl="/admin/user/", summary="Content")
-	2: required string UserName (label = "用户名", search = "Simple", requiredMsg = "请输入用户名", index="unique")
+	2: required string UserName (label = "用户名", requiredMsg = "请输入用户名", index="unique")
 	3: required string Password (label = "密码", widget = "password", requiredMsg = "请输入密码")
-	4: string Name  (label = "姓名", search = "Name", search = "User-10")
+	4: string Name  (label = "姓名")
 	5: required string Email (label = "电邮", rule="^[a-z0-9._%+\-]+@[a-z0-9.\-]+\.[a-z]{2,4}$", ruleMsg="电邮格式不正确", requiredMsg = "请输入电邮")
-	6: string Intro (label = "介绍", search = "User-2")
+	6: string Intro (label = "介绍")
 	7: string Picture
 	8: string Remark
 	9: bool IsAdmin (widget = "checkbox", label = "管理员")
