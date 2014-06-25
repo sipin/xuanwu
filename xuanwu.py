@@ -94,22 +94,23 @@ def add_properties(field):
 		field.requiredMsg = "请输入" + field.label
 
 def get_search(obj):
-	search = {}
+	search = None
 
 	for field in obj.fields:
 		if field.name.value == "ID" and hasattr(field, "search"):
-			search["Simple"] = [f.strip() for f in field.search.split(",")]
-			continue
+			search = [f.strip() for f in field.search.split(",")]
 
-		for att in field.annotations:
-			if att.name.value.lower() == "search":
-				if str(field.type) != "string":
-					raise Exception(obj.name.value + ":" + field.name.value + " must be string to be searchable")
-				search_key = att.value.value.split("-")[0]
-				if search.has_key(search_key):
-					search[search_key].append(field.name.value)
-				else:
-					search[search_key] = [field.name.value]
+	if search == None:
+		return search
+
+	for fieldName in search:
+		try:
+			field = obj.fieldMap[fieldName]
+			if str(field.type) != "string":
+				raise Exception(obj.name.value + " has non-string searchField: " + searchField)
+		except KeyError:
+			raise Exception(obj.name.value + " has invalid searchField: " + searchField)
+
 	return search
 
 def get_widget_type(field):
@@ -167,14 +168,16 @@ def transform_struct(obj):
 	idField = obj.fields[0]
 	add_properties(idField)
 
+	obj.fieldMap = {}
 	for field in obj.fields:
 		add_properties(field)
+		obj.fieldMap[field.name.value] = field
 
 	obj.imports = ["bytes", "fmt"]
 	obj.listedFieldStrings = []
 
 	obj.search = get_search(obj)
-	if len(obj.search) > 0:
+	if obj.search != None:
 		obj.imports.append("github.com/mattbaird/elastigo/core")
 
 	obj.label = obj.name.value

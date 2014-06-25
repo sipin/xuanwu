@@ -117,8 +117,8 @@ func $(obj.name.value)RemoveByID(id string) (result *$obj.name.value, err error)
 		return
 	}
 	err = col.RemoveId(bson.ObjectIdHex(id))
-	#for key, v in $obj.search.iteritems()
-	core.Delete("$(obj.name.value.lower())", "$(key.lower())", id, nil)
-	#end for
+	#if $obj.search != None
+	core.Delete("$(obj.name.value.lower())", "simple", id, nil)
+	#end if
 	return
 }

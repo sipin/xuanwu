@@ -7,9 +7,9 @@ func (o *$obj.name.value) Save() (info *mgo.ChangeInfo, err error) {
 	if o.ID == "" {
 		o.ID = bson.NewObjectId()
 	}
-
+#if $obj.search != None
 	o.IndexSearch()
-
+#end if
 	return col.UpsertId(o.ID, o)
 }
 

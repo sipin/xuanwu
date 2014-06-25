@@ -83,7 +83,7 @@ func (w *Widget) String() string {
 
 type IXuanWuObj interface {
 	Id() string
-	HasSimpleSearch() bool
+	IsSearchEnabled() bool
 	GetLabel() string
 	GetListedLabels() []*IDLabelPair
 	GetFieldAsString(fieldKey string) (Value string)
