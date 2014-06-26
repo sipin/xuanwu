@@ -48,6 +48,7 @@ type Widget struct {
 	Disabled    bool
 	Hidden      bool
 	Readonly    bool
+	IsList      bool
 	GetBindData	func() (data []*IDLabelPair)
 }
 func (w *Widget) Disable() {

@@ -14,7 +14,8 @@ func (o *$obj.name.value) ReadForm(params map[string]string) (hasError bool) {
 		if val == "" {
 			o.$field.name.value = 0
 		} else {
-			intVal, _ := time.Parse(DateTimeLayout, val)
+		        loc, _ := time.LoadLocation("Local")
+			intVal, _ := time.ParseInLocation(DateTimeLayout, val, loc)
 			o.$field.name.value = int32(intVal.Unix())
 		}
 	#else if $field.type == "i32"
@@ -29,14 +30,16 @@ func (o *$obj.name.value) ReadForm(params map[string]string) (hasError bool) {
 		if val == "" {
 			o.$field.name.value = 0
 		} else {
-			intVal, _ := time.Parse(DateTimeLayout, val)
+		        loc, _ := time.LoadLocation("Local")
+			intVal, _ := time.ParseInLocation(DateTimeLayout, val, loc)
 			o.$field.name.value = intVal.Unix()
 		}
 	#else if $field.type == "i64" and $field.widget_type in ["date"]
 		if val == "" {
 			o.$field.name.value = 0
 		} else {
-			intVal, _ := time.Parse(DateLayout, val)
+		        loc, _ := time.LoadLocation("Local")
+			intVal, _ := time.ParseInLocation(DateTimeLayout, val, loc)
 			o.$field.name.value = intVal.Unix()
 		}
 	#else if $field.type == "i64"
@@ -131,6 +134,7 @@ func (o *$obj.name.value) ${field.name.value}Widget() *Widget {
 			Value : strconv.FormatBool(o.$field.name.value),
 		#else if $field.type == "list<string>"
 			Value : strings.Join(o.$field.name.value, "\n"),
+			IsList : true,
 		#else
 		Change go.tmpl go support $field.type now!
 		#end if
