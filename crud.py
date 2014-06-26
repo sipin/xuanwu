@@ -39,12 +39,6 @@ def getControlDir(urlBase):
         os.makedirs(outdir)
     return outdir
 
-def add_properties(field):
-    field.label = field.name.value
-    for att in field.annotations:
-        if att.name.value.lower() == "label":
-            field.label = att.value.value
-
 
 def fieldElem(field, key):
     for att in field.annotations:
