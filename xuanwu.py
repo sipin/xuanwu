@@ -173,6 +173,9 @@ def transform_struct(obj):
 	obj.fieldMap = {}
 	for field in obj.fields:
 		add_properties(field)
+		field.go_type = type_translate(field.type)
+		field.type = str(field.type)
+		field.widget_type = get_widget_type(field)
 		obj.fieldMap[field.name.value] = field
 
 	obj.imports = ["bytes", "fmt"]
@@ -216,14 +219,35 @@ def transform_struct(obj):
 			missingFields = [field for field in listedFields if field not in foundFields]
 			raise Exception(thrift_file + " " + obj.name.value + " missing listedFields: " + str(missingFields))
 
+	obj.filterFields = []
+	obj.termKeys = []
+	obj.dateKeys = []
+	if hasattr(idField, "filterFields"):
+		filterFields = [f.strip() for f in idField.filterFields.split(",")]
+		for fieldname in filterFields:
+			for field in obj.fields:
+				if field.name.value == fieldname:
+					f = ListField()
+					f.label = field.label
+					f.key = fieldname
+					obj.filterFields.append(f)
+					if field.widget_type in ["date", "time", "datetime"]:
+						obj.dateKeys.append(fieldname + "Start")
+						obj.dateKeys.append(fieldname + "End")
+					elif field.type == "string":
+						obj.termKeys.apend(fieldname)
+					else:
+						raise Exception(thrift_file + " " + obj.name.value + " invalid filterFields: " + str(missingFields))			
+
+		if len(filterFields) > len(obj.filterFields):
+			foundFields = [field.name.value for field in obj.filterFields if field.name.value in filterFields]
+			missingFields = [field for field in filterFields if field not in foundFields]
+			raise Exception(thrift_file + " " + obj.name.value + " missing filterFields: " + str(missingFields))
+
 	if hasattr(idField, "label"):
 		obj.label = idField.label
 
 	for field in obj.fields:
-		field.go_type = type_translate(field.type)
-		field.type = str(field.type)
-		field.widget_type = get_widget_type(field)
-
 		if hasattr(field, "rule"):
 			obj.imports.append("regexp")
 

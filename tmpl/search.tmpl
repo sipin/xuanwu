@@ -1,39 +1,62 @@
 //Search
 #if $obj.search != None
-type $(obj.name.value)SearchObj struct {
+type $(obj.name.value)SearchIndexObj struct {
 	#for field in $obj.search
 	$field string `json:"$(field)"`
+	#end for
+	#for listField in $obj.filterFields
+	#if $obj.fieldMap[listField.key].type == "string"
+	$listField.key string `json:"$(listField.key)"`
+	#else if  $obj.fieldMap[listField.key].type == "i64"
+	$listField.key int64 `json:"$(listField.key)"`
+	#else
+	$listField.key has unsupported filter type 
+	#end if
 	#end for
 }
 
 func (o *$obj.name.value) IndexSearch() () {
-	core.Index("$(obj.name.value.lower())", "simple", o.ID.Hex(), nil, $(obj.name.value)SearchObj{
+	core.Index("$(obj.name.value.lower())", "simple", o.ID.Hex(), nil, $(obj.name.value)SearchIndexObj{
 		#for field in $obj.search
 		o.$(field),
+		#end for
+		#for field in $obj.filterFields
+		o.$(field.key),
 		#end for
 	})
 }
 
-func $(obj.name.value)GetSearchObj(word string) map[string]interface {} {
-	//todo: should be able to cache struct
-	queryString := make(map[string]interface{})
-	queryString["default_operator"] = "OR"
-	queryString["fields"] = []string{
-		#for field in $obj.search
-		"$(field)",
-		#end for
-	}
-	queryString["query"] = word
-	query := make(map[string]interface{})
-	query["query_string"] = queryString
-
-	args := make(map[string]interface{})
-	args["query"] = query
-	return args
+var $(obj.name.value)SearchFileds = []string{
+	#for field in $obj.search
+	"$(field)",
+	#end for
 }
 
+var $(obj.name.value)SearchTermKeys = map[string]bool{
+	#for field in $obj.termKeys
+	"$(field)": true,
+	#end for
+}
+
+var $(obj.name.value)SearchDateKeys = map[string]bool{
+	#for field in $obj.dateKeys
+	#if field.endswith("Start")
+	"$(field)": true,
+	#else
+	"$(field)": false,
+	#end if
+	#end for
+}
+
+func $(obj.name.value)SearchWithParams(word string, params map[string]string, limit int, offset int) (core.SearchResult, error) {
+	searchObj := getSearchObj(word, $(obj.name.value)SearchFileds, params, $(obj.name.value)SearchTermKeys, $(obj.name.value)SearchDateKeys)
+	args := map[string]interface{} {"from" : offset, "size": limit}
+	return core.SearchRequest("$(obj.name.value.lower())", "simple", args, searchObj)
+}
+
+
 func $(obj.name.value)Search(word string, limit int, offset int) (core.SearchResult, error) {
-	searchObj := $(obj.name.value)GetSearchObj(word)
+	searchObj := getQuery("query_string", getQueryString(word, $(obj.name.value)SearchFileds))
 	args := map[string]interface{} {"from" : offset, "size": limit}
 	return core.SearchRequest("$(obj.name.value.lower())", "simple", args, searchObj)
 }
