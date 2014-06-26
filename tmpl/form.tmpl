@@ -131,7 +131,7 @@ func (o *$obj.name.value) ${field.name.value}Widget() *Widget {
 			Value : strconv.FormatBool(o.$field.name.value),
 		#else if $field.type == "list<string>"
 			Value : strings.Join(o.$field.name.value, "\n"),
-			IsList : true
+			IsList : true,
 		#else
 		Change go.tmpl go support $field.type now!
 		#end if
