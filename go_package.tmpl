@@ -146,9 +146,6 @@ func getSearchObj(word string, fields []string, params map[string]string, termKe
 				fieldName := k[0:len(k) - 5]
 				if dateVal, ok := ranges[fieldName]; ok {
 					dateVal["gte"] = intVal.Unix()
-					if _, flag := dateVal["lt"]; !flag {
-						dateVal["lt"] = intVal.AddDate(0, 0, 1).Unix()
-					}
 					ranges[fieldName] = dateVal
 				} else {
 					ranges[fieldName] = map[string]int64{
@@ -159,15 +156,11 @@ func getSearchObj(word string, fields []string, params map[string]string, termKe
 			} else {
 				fieldName := k[0:len(k) - 3]
 				if dateVal, ok := ranges[fieldName]; ok {
-					dateVal["lt"] = intVal.Unix()
-					if _, flag := dateVal["gte"]; !flag {
-						dateVal["gte"] = intVal.AddDate(0, 0, -1).Unix()
-					}
-					ranges["Date"] = dateVal
+					dateVal["lt"] = intVal.AddDate(0, 0, 1).Unix()
 				} else {
 					ranges[fieldName] = map[string]int64{
-						"gte": intVal.AddDate(0, 0, -1).Unix(),
-						"lt":  intVal.Unix(),
+						"gte": intVal.AddDate(0, 0, -1).Unix() + 1,
+						"lt":  intVal.AddDate(0, 0, 1).Unix(),
 					}
 				}
 			}
