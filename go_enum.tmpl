@@ -21,6 +21,9 @@ var (
 		$key: $label,
 #end for
 	}
+	${obj.name.value}Key = []int32 {
+		${",".join([str(item.tag) for item in obj.values])},
+	}
 	${obj.name.value}JSON string
 	${obj.name.value}LabelJSON string
 )
