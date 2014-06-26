@@ -37,7 +37,8 @@ func (o *$obj.name.value) ReadForm(params map[string]string) (hasError bool) {
 		if val == "" {
 			o.$field.name.value = 0
 		} else {
-			intVal, _ := time.Parse(DateLayout, val)
+		        loc, _ := time.LoadLocation("Local")
+			intVal, _ := time.ParseInLocation(DateTimeLayout, val, loc)
 			o.$field.name.value = intVal.Unix()
 		}
 	#else if $field.type == "i64"
