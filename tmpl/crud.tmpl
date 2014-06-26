@@ -75,7 +75,7 @@ func $(className)Index(ctx *admin.AdminContext) (html string) {
 	for i, v := range objs {
 		stupidGoInterface[i] = models.IXuanWuObj(v)
 	}
-	return autoTpl.Index(ctx.GetFlash(), obj, stupidGoInterface, total, limit, offset)
+	return autoTpl.Index(ctx, ctx.GetFlash(), obj, stupidGoInterface, total, limit, offset)
 }
 
 func $(className)Create(ctx *admin.AdminContext) (html string) {
@@ -86,9 +86,9 @@ func $(className)Create(ctx *admin.AdminContext) (html string) {
 		obj = models.New$(className)FromBytes(data)
 		obj.ValidateData()
 		ctx.ClearSession("$(className)Create")
-		return autoTpl.Create(obj.Widgets(), "建立$(classLabel)")
+		return autoTpl.Create(ctx, obj.Widgets(), "建立$(classLabel)")
 	}
-	return autoTpl.Create(models.New$(className)().Widgets(), "建立$(classLabel)")
+	return autoTpl.Create(ctx, models.New$(className)().Widgets(), "建立$(classLabel)")
 }
 
 func $(className)CreatePost(ctx *admin.AdminContext) (html string) {
@@ -112,7 +112,7 @@ func $(className)CreatePost(ctx *admin.AdminContext) (html string) {
 
 func $(className)View(ctx *admin.AdminContext) (html string) {
 	obj, _ := models.$(className)FindByID(ctx.Params["id"])
-	return autoTpl.View(obj)
+	return autoTpl.View(ctx, obj)
 }
 
 func $(className)Edit(ctx *admin.AdminContext) (html string) {
@@ -125,11 +125,11 @@ func $(className)Edit(ctx *admin.AdminContext) (html string) {
 		ctx.ClearSession("$(className)Edit")
 
 		if o.ID == obj.ID {
-			return autoTpl.Edit(o)
+			return autoTpl.Edit(ctx, o)
 		}
 	}
 
-	return autoTpl.Edit(obj)
+	return autoTpl.Edit(ctx, obj)
 }
 
 func $(className)ViewPost(ctx *admin.AdminContext) (html string) {
