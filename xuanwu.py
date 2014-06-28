@@ -257,7 +257,7 @@ def transform_struct(obj):
 						obj.dateKeys.append(fieldname + "Start")
 						obj.dateKeys.append(fieldname + "End")
 					elif field.type == "string":
-						obj.termKeys.apend(fieldname)
+						obj.termKeys.append(fieldname)
 					else:
 						raise Exception(thrift_file + " " + obj.name.value + " invalid filterFields: " + str(missingFields))			
 
