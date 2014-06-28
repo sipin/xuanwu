@@ -27,8 +27,9 @@ func init() {
 	web.Post("$(urlBase)/delete", $(className)DeletePost)
 }
 
-func getSearch$(className)(q string, limit int, offset int) (objs []*models.$(className)) {
-	out, _ := models.$(className)Search(q, limit, offset)
+func getSearch$(className)(q string, params map[string]string, limit int, offset int) (objs []*models.$(className), total int) {
+	out, _ := models.$(className)SearchWithParams(q, params, limit, offset)
+	total = out.Hits.Total
 
 	for _, hit := range out.Hits.Hits {
 		obj, _ := models.$(className)FindByID(hit.Id)
@@ -39,7 +40,7 @@ func getSearch$(className)(q string, limit int, offset int) (objs []*models.$(cl
 }
 
 func $(className)Index(ctx *admin.AdminContext) (html string) {
-	total := models.$(className)Count(nil)
+	var total int
 	limit := 20
 	offset := 0
 	if val, ok := ctx.Params["offset"]; ok {
@@ -55,20 +56,10 @@ func $(className)Index(ctx *admin.AdminContext) (html string) {
 
 	q, is_search := ctx.Params["q"]
 	if is_search {
-		objs = getSearch$(className)(q, limit, offset)
-		total = len(objs)
+		objs, total = getSearch$(className)(q, ctx.Params, limit, offset)
 	} else {
-		#if len($obj.filterFields) == 0
+		total = models.$(className)Count(nil)
 		objs, _ = models.$(className)Find(nil, limit, offset)
-		#else
-		query := bson.M{}
-		#for field in $obj.filterFields
-		if val, ok := ctx.Params["$field.name.value"]; ok {
-			query["$field.name.value"] = val
-		}
-		#end for
-		objs, _ = models.$(className)Find(query, limit, offset)
-		#end if
 	}
 
 	stupidGoInterface := make([]models.IXuanWuObj, len(objs))

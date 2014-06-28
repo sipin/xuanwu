@@ -87,9 +87,6 @@ def main(thrift_idl):
             missingFields = [field for field in filterFields if field not in foundFields]
             raise Exception("missing filterFields: " + str(missingFields))
 
-        if len(obj.filterFields) > 0:
-            obj.imports.append("labix.org/v2/mgo/bson")
-
         outDir = urlBase.split(path.sep)[-2]
         t = Template(crud, searchList=[{"namespace": outDir,
                                         "className": obj.name.value,
