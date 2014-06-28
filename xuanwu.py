@@ -252,10 +252,7 @@ def transform_struct(obj):
 		for fieldname in filterFields:
 			for field in obj.fields:
 				if field.name.value == fieldname:
-					f = ListField()
-					f.label = field.label
-					f.key = fieldname
-					obj.filterFields.append(f)
+					obj.filterFields.append(field)
 					if field.widget_type in ["date", "time", "datetime"]:
 						obj.dateKeys.append(fieldname + "Start")
 						obj.dateKeys.append(fieldname + "End")

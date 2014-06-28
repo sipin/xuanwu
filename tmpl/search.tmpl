@@ -4,13 +4,13 @@ type $(obj.name.value)SearchIndexObj struct {
 	#for field in $obj.search
 	$field string `json:"$(field)"`
 	#end for
-	#for listField in $obj.filterFields
-	#if $obj.fieldMap[listField.key].type == "string"
-	$listField.key string `json:"$(listField.key)"`
-	#else if  $obj.fieldMap[listField.key].type == "i64"
-	$listField.key int64 `json:"$(listField.key)"`
+	#for field in $obj.filterFields
+	#if $field.type == "string"
+	$field.name.value string `json:"$(field.name.value)"`
+	#else if  $field.type == "i64"
+	$field.name.value int64 `json:"$(field.name.value)"`
 	#else
-	$listField.key has unsupported filter type 
+	$field.name.value has unsupported filter type 
 	#end if
 	#end for
 }
@@ -21,7 +21,7 @@ func (o *$obj.name.value) IndexSearch() () {
 		o.$(field),
 		#end for
 		#for field in $obj.filterFields
-		o.$(field.key),
+		o.$(field.name.value),
 		#end for
 	})
 }
