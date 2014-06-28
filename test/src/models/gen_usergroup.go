@@ -173,7 +173,6 @@ func (o *UserGroup) Save() (info *mgo.ChangeInfo, err error) {
 	if o.ID == "" {
 		o.ID = bson.NewObjectId()
 	}
-
 	return col.UpsertId(o.ID, o)
 }
 
@@ -408,11 +407,13 @@ func UserGroupRemoveByID(id string) (result *UserGroup, err error) {
 	return
 }
 
-// Search
+//Search
 
-func (o *UserGroup) HasSimpleSearch() bool {
+func (o *UserGroup) IsSearchEnabled() bool {
 	return false
 }
+
+//end search
 
 func (o *UserGroup) TypeName() string {
 	return UserGroupTableName

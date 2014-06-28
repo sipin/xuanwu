@@ -42,11 +42,14 @@ type Widget struct {
 	PlaceHolder string
 	Type        string
 	ErrorMsg    string
+	EnumKey     []int32
 	EnumData    map[int32]string
 	StringList  []string
 	Required    bool
 	Disabled    bool
 	Hidden      bool
+	Readonly    bool
+	IsList      bool
 	GetBindData func() (data []*IDLabelPair)
 }
 
@@ -83,7 +86,7 @@ func (w *Widget) String() string {
 
 type IXuanWuObj interface {
 	Id() string
-	HasSimpleSearch() bool
+	IsSearchEnabled() bool
 	GetLabel() string
 	GetListedLabels() []*IDLabelPair
 	GetFieldAsString(fieldKey string) (Value string)
@@ -109,4 +112,83 @@ func I64Date(c int64) string {
 
 func I32Time(c int32) string {
 	return I64Time(int64(c))
+}
+
+func getQueryString(word string, fields []string) map[string]interface{} {
+	queryString := make(map[string]interface{})
+	queryString["default_operator"] = "OR"
+	queryString["fields"] = fields
+	queryString["query"] = word
+
+	return queryString
+}
+
+func getQuery(key string, data map[string]interface{}) map[string]interface{} {
+	query := make(map[string]interface{})
+	query[key] = data
+	args := make(map[string]interface{})
+	args["query"] = query
+	return args
+}
+
+func getSearchObj(word string, fields []string, params map[string]string, termKeys map[string]bool, dateKeys map[string]bool) map[string]interface{} {
+	terms := make(map[string]string)
+	ranges := make(map[string]map[string]int64)
+
+	for k, v := range params {
+		if _, ok := termKeys[k]; ok {
+			terms[k] = v
+			continue
+		}
+
+		if isStart, ok := dateKeys[k]; ok {
+			intVal, _ := time.Parse(DateLayout, v)
+			if isStart {
+				fieldName := k[0 : len(k)-5]
+				if dateVal, ok := ranges[fieldName]; ok {
+					dateVal["gte"] = intVal.Unix()
+					ranges[fieldName] = dateVal
+				} else {
+					ranges[fieldName] = map[string]int64{
+						"gte": intVal.Unix(),
+						"lt":  intVal.AddDate(0, 0, 1).Unix(),
+					}
+				}
+			} else {
+				fieldName := k[0 : len(k)-3]
+				if dateVal, ok := ranges[fieldName]; ok {
+					dateVal["lt"] = intVal.AddDate(0, 0, 1).Unix()
+				} else {
+					ranges[fieldName] = map[string]int64{
+						"gte": intVal.AddDate(0, 0, -1).Unix() + 1,
+						"lt":  intVal.AddDate(0, 0, 1).Unix(),
+					}
+				}
+			}
+		}
+	}
+
+	if len(terms) == 0 && len(ranges) == 0 {
+		return getQuery("query_string", getQueryString(word, fields))
+	}
+
+	filtered := make(map[string]interface{})
+	if word != "" {
+		filtered["query"] = map[string]interface{}{
+			"query_string": getQueryString(word, fields),
+		}
+	}
+
+	filter := make(map[string]interface{})
+	if len(terms) > 0 {
+		filter["term"] = terms
+	}
+
+	if len(ranges) > 0 {
+		filter["range"] = ranges
+	}
+
+	filtered["filter"] = filter
+
+	return getQuery("filtered", filtered)
 }

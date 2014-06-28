@@ -20,6 +20,9 @@ var (
 		1: "离线",
 		2: "在线",
 	}
+	UserStatusKey = []int32{
+		0, 1, 2,
+	}
 	UserStatusJSON      string
 	UserStatusLabelJSON string
 )

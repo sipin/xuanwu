@@ -4,7 +4,6 @@ import (
 	//Official libs
 	"bytes"
 	"fmt"
-	"github.com/mattbaird/elastigo/core"
 	"models/test"
 	"regexp"
 	"strconv"
@@ -62,17 +61,6 @@ type User struct {
 	Gender         string        `bson:"Gender" thrift:"Gender,14"`
 	Index          int32         `bson:"Index" thrift:"Index,15"`
 	widgets        map[string]*Widget
-}
-
-type UserSearchSimpleObj struct {
-	UserName string `json:"UserName"`
-}
-type UserSearchNameObj struct {
-	Name string `json:"Name"`
-}
-type UserSearchUserObj struct {
-	Name  string `json:"Name"`
-	Intro string `json:"Intro"`
 }
 
 func NewUser() *User {
@@ -613,18 +601,6 @@ func (o *User) Save() (info *mgo.ChangeInfo, err error) {
 	if o.ID == "" {
 		o.ID = bson.NewObjectId()
 	}
-
-	core.Index("user", "simple", o.ID.Hex(), nil, UserSearchSimpleObj{
-		o.UserName,
-	})
-	core.Index("user", "name", o.ID.Hex(), nil, UserSearchNameObj{
-		o.Name,
-	})
-	core.Index("user", "user", o.ID.Hex(), nil, UserSearchUserObj{
-		o.Name,
-		o.Intro,
-	})
-
 	return col.UpsertId(o.ID, o)
 }
 
@@ -937,6 +913,7 @@ func (o *User) StatusWidget() *Widget {
 			Name:        "Status",
 			PlaceHolder: "",
 			Type:        "select",
+			EnumKey:     test.UserStatusKey,
 			EnumData:    test.UserStatusLabel,
 		}
 		if o.widgets == nil {
@@ -1349,56 +1326,16 @@ func UserRemoveByID(id string) (result *User, err error) {
 		return
 	}
 	err = col.RemoveId(bson.ObjectIdHex(id))
-	core.Delete("user", "simple", id, nil)
-	core.Delete("user", "name", id, nil)
-	core.Delete("user", "user", id, nil)
 	return
 }
 
-// Search
-func UserSearchSimple(word string, limit int, offset int) (core.SearchResult, error) {
-	searchJson := `{
-    "query" : {
-        "query_string" :  {
-	      "default_operator": "OR",
-	      "fields": ` + `["UserName"]` + `,
-	      "query": "` + word + `"
-	    }
-    }
-}`
-	args := map[string]interface{}{"from": offset, "size": limit}
-	return core.SearchRequest("user", "simple", args, searchJson)
-}
-func UserSearchName(word string, limit int, offset int) (core.SearchResult, error) {
-	searchJson := `{
-    "query" : {
-        "query_string" :  {
-	      "default_operator": "OR",
-	      "fields": ` + `["Name"]` + `,
-	      "query": "` + word + `"
-	    }
-    }
-}`
-	args := map[string]interface{}{"from": offset, "size": limit}
-	return core.SearchRequest("user", "name", args, searchJson)
-}
-func UserSearchUser(word string, limit int, offset int) (core.SearchResult, error) {
-	searchJson := `{
-    "query" : {
-        "query_string" :  {
-	      "default_operator": "OR",
-	      "fields": ` + `["Name", "Intro"]` + `,
-	      "query": "` + word + `"
-	    }
-    }
-}`
-	args := map[string]interface{}{"from": offset, "size": limit}
-	return core.SearchRequest("user", "user", args, searchJson)
+//Search
+
+func (o *User) IsSearchEnabled() bool {
+	return false
 }
 
-func (o *User) HasSimpleSearch() bool {
-	return true
-}
+//end search
 
 func (o *User) ViewUrl(id string) string {
 	return "/admin/user/" + id
