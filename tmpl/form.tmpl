@@ -260,6 +260,27 @@ func (o *$obj.name.value) WidgetStruct() *${obj.name.value}Widget {
 	}
 }
 
+func (o *$obj.name.value) GetFilters() []*Widget {
+	return []*Widget{
+#for field in $obj.filterFields
+		&Widget{
+			Label: "$field.label",
+			Name: "$field.name.value",
+			PlaceHolder: "$field.placeholder",
+			Type: "$field.widget_type",
+		#if hasattr($field, "enums")
+			EnumKey : $(filename).$(field.enums)Key,
+			EnumData : $(filename).$(field.enums)Label,
+		#else if hasattr($field, "stringList")
+			StringList : $(filename).$field.stringList,
+		#else if hasattr($field, "bindData")
+			GetBindData : $field.bindData,
+		#end if
+		},
+#end for
+	}
+}
+
 func (o *$obj.name.value) Widgets() []*Widget {
 	return []*Widget{
 #for field in $obj.fields

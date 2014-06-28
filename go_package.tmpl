@@ -89,6 +89,7 @@ type IXuanWuObj interface {
 	GetLabel() string
 	GetListedLabels() []*IDLabelPair
 	GetFieldAsString(fieldKey string) (Value string)
+	GetFilters() []*Widget
 	Widgets() []*Widget
 }
 
