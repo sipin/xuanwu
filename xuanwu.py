@@ -26,13 +26,36 @@ widget_types = set([
 	"datetime",
 	"photo",
 	"photos",
-    "file",
+	"file",
 	"files",
 	"droplist",
 	"combobox",
 	"hidden",
 	"time",
-    "userselect",
+	"userselect",
+])
+
+supported_annotations = set([
+	"label",
+	"baseURL",
+	"listedFields",
+	"search",
+	"dm",
+	"widget",
+	"bindData",
+	"requiredMsg",
+	"rule",
+	"ruleMsg",
+	"filterFields",
+	"placeholder",
+	"stringList",
+	"readonly",
+	"disabled",
+	"index",
+	"enums",
+	"toList",
+	"summary",
+	"viewUrl",
 ])
 
 typedef = dict()
@@ -75,12 +98,15 @@ def type_translate(obj):
 		return obj.value
 	return "unknown(%s)" % obj
 
-def add_properties(field):
+def add_properties(field, obj):
 	field.label = field.name.value
 
 	# todo: add field name checking
 	for att in field.annotations:
-		setattr(field, att.name.value.replace("-", "_"), att.value.value)
+		if att.name.value not in supported_annotations:
+			raise Exception(obj.name.value + " " + field.name.value +
+			 " has invalid field annotation: " + att.name.value)
+		setattr(field, att.name.value, att.value.value)
 
 	if hasattr(field, "bindData"):
 		col, label = field.bindData.split(".")
@@ -168,11 +194,10 @@ class ListField:
 
 def transform_struct(obj):
 	idField = obj.fields[0]
-	add_properties(idField)
 
 	obj.fieldMap = {}
 	for field in obj.fields:
-		add_properties(field)
+		add_properties(field, obj)
 		field.go_type = type_translate(field.type)
 		field.type = str(field.type)
 		field.widget_type = get_widget_type(field)
