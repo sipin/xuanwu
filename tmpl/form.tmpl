@@ -21,7 +21,7 @@ func (o *$obj.name.value) ReadForm(params map[string]string) (hasError bool) {
 	#else if $field.type == "i32"
 		intVal, _ := strconv.Atoi(val)
 		#if hasattr(field, "stringList")
-		if intVal <= 0 || intVal >= len(o.${field.name.value}Widget().StringList) {
+		if intVal <= 0 {
 			intVal = 0
 		}
 		#end if
@@ -101,6 +101,8 @@ func (o *$obj.name.value) IDWidget() *Widget {
 	ret, ok := o.widgets[name]
 	if !ok || ret==nil {
 		ret = &Widget{
+			Type: "hidden",
+			Name: "ID",
 			Value: o.Id(),
 		}
 		if o.widgets == nil {
@@ -208,7 +210,7 @@ func (o *$obj.name.value) GetFieldAsString(fieldKey string) (Value string) {
 	#else if $field.type == "string"
 	        widget := o.${field.name.value}Widget()
 		if widget.Type == "select" {
-		   Value = widget.String()
+		   Value = widget.Val()
 		} else {
 		   Value = o.$field.name.value
 		}
