@@ -60,7 +60,7 @@ func (w *Widget) Hide() {
 	w.Hidden = true
 }
 
-func (w *Widget) String() string {
+func (w *Widget) Val() string {
 
 	if idx, err := strconv.Atoi(w.Value); err == nil {
 		if w.StringList != nil {
