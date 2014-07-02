@@ -20,7 +20,28 @@ func init() {
 	#if len([i for i in $obj.fields if hasattr(i, "index")]) > 0
 	db.SetOnFinishInit(init${obj.name.value}Index)
 	#end if
+	#if len([f for f in $obj.filterFields if f.type == "string"]) > 0
+	db.SetOnFinishInit(init${obj.name.value}Mapping)
+	#end if
 }
+
+#if len([f for f in $obj.filterFields if f.type == "string"]) > 0
+func init${obj.name.value}Mapping() {
+	opt := indices.MappingOptions{
+		Properties: map[string]interface{}{
+			#for f in [f for f in $obj.filterFields if f.type == "string"]
+			"$f.name.value": map[string]string{"index": "not_analyzed", "type": "string"},
+			#end for
+		},
+	}
+
+	indices.CreateIndex("$(obj.name.value.lower())")
+	err := indices.PutMapping("$(obj.name.value.lower())", "simple", $(obj.name.value){}, opt)
+	if err != nil {
+		panic(err)
+	}
+}
+#end if
 
 #if len([i for i in $obj.fields if hasattr(i, "index")]) > 0
 func init${obj.name.value}Index() {

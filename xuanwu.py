@@ -269,6 +269,9 @@ def transform_struct(obj):
 	if hasattr(idField, "label"):
 		obj.label = idField.label
 
+	if len([f for f in obj.filterFields if f.type == "string"]) > 0:
+		obj.imports.append("github.com/mattbaird/elastigo/indices")
+
 	for field in obj.fields:
 		if hasattr(field, "rule"):
 			obj.imports.append("regexp")
