@@ -16,6 +16,7 @@ type_ref = dict(
 widget_types = set([
 	"text",
 	"textarea",
+	"opinion",
 	"richtext",
 	"password",
 	"radio",
