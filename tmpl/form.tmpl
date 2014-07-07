@@ -49,6 +49,9 @@ func (o *$obj.name.value) ReadForm(params map[string]string) (hasError bool) {
 		o.$field.name.value = (val != "")
 	#else if $field.type == "list<string>"
 		o.$field.name.value = strings.Split(val, "\n")
+		for i, k := range o.$field.name.value {
+			o.$(field.name.value)[i] = strings.Trim(k, "\r")
+		}
 	#else
 	Change go.tmpl go support $field.type now!
 	#end if
