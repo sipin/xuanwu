@@ -122,3 +122,19 @@ func $(obj.name.value)RemoveByID(id string) (result *$obj.name.value, err error)
 	#end if
 	return
 }
+
+func $(obj.name.value)FindByUsersIDs(ids []string) (result []*$obj.name.value, err error) {
+	session, col := db.GetCol("$obj.name.value")
+	defer session.Close()
+
+	err = col.Find(db.M{"UsersID": db.M{"\$in": ids}}).All(&result)
+	return
+}
+
+func $(obj.name.value)CountByUsersIDs(ids []string) (result int) {
+	session, col := db.GetCol("$obj.name.value")
+	defer session.Close()
+
+	result, _ = col.Find(db.M{"UsersID": db.M{"\$in": ids}}).Count()
+	return
+}

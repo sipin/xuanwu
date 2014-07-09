@@ -14,6 +14,15 @@ import (
 	autoTpl "tpl/auto"
 	"zfw/models"
 	"github.com/sipin/web"
+	mp "zfw/models/permission"
+	"admin/permission"
+	"labix.org/v2/mgo/bson"
+	"admin/system/relation"
+)
+
+var (
+	$(className)Perm_Department = permission.New("$(classLabel).部门管理员", mp.Type.User, mp.Type.Role)
+	$(className)Perm_Organization= permission.New("$(classLabel).单位管理员", mp.Type.User, mp.Type.Role)
 )
 
 func init() {
@@ -58,8 +67,30 @@ func $(className)Index(ctx *admin.AdminContext) (html string) {
 	if is_search {
 		objs, total = getSearch$(className)(q, ctx.Params, limit, offset)
 	} else {
-		total = models.$(className)Count(nil)
-		objs, _ = models.$(className)Find(nil, limit, offset)
+		if ctx.User.Account == "admin" {
+			cond := bson.M{"UsersID": ctx.User.Id()}
+			total = models.$(className)Count(cond)
+			objs, _ = models.$(className)Find(cond, limit, offset)
+		} else if $(className)Perm_Organization.Check(ctx.User) {
+			users, err := relation.GetOrgUsersByUser(ctx.User)
+			if err != nil {
+				panic(err)
+			}
+			total = models.$(className)CountByUsersIDs(users)
+			objs, _ = models.$(className)FindByUsersIDs(users)
+		} else if $(className)Perm_Department.Check(ctx.User) {
+			users, err := relation.GetDeptUsersByUser(ctx.User)
+			if err != nil {
+				panic(err)
+			}
+			total = models.$(className)CountByUsersIDs(users)
+			objs, _ = models.$(className)FindByUsersIDs(users)
+		} else {
+			cond := bson.M{"UsersID": ctx.User.Id()}
+			total = models.$(className)Count(cond)
+			objs, _ = models.$(className)Find(cond, limit, offset)
+		}
+
 	}
 
 	stupidGoInterface := make([]models.IXuanWuObj, len(objs))
@@ -85,6 +116,9 @@ func $(className)Create(ctx *admin.AdminContext) (html string) {
 func $(className)CreatePost(ctx *admin.AdminContext) (html string) {
 	obj := models.New$(className)()
 
+	if ctx.Params["UsersID"] == "" {
+		ctx.Params["UsersID"] = ctx.User.Id()
+	}
 	hasError := obj.ReadForm(ctx.Params)
 
 	if hasError {
