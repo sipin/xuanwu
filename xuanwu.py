@@ -57,6 +57,9 @@ supported_annotations = set([
 	"toList",
 	"summary",
 	"viewUrl",
+
+	#permission
+	"Create", "Read", "Update", "Delete",
 ])
 
 typedef = dict()
