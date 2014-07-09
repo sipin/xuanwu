@@ -6,7 +6,11 @@ import (
 
 	//3rd party libs
 	#for item in $obj.imports
+	#if isinstance(item, tuple):
+	$item[0] "$item[1]"
+	#else
 	"$item"
+	#end if
 	#end for
 
 	//Own libs
@@ -15,6 +19,14 @@ import (
 	"zfw/models"
 	"github.com/sipin/web"
 )
+
+#if len($obj.permission) > 0
+var (
+	#for i in $obj.permission
+	P$i["name"] = permission.New("$i["category"].${i['name']}", $i["type"])
+	#end for
+)
+#end if
 
 func init() {
 	web.Get("$(urlBase)/index", $(className)Index)
@@ -69,7 +81,45 @@ func $(className)Index(ctx *admin.AdminContext) (html string) {
 	return autoTpl.Index(ctx.Context, ctx.GetFlash(), obj, stupidGoInterface, total, limit, offset)
 }
 
+#for act in ["Create", "Read", "Update", "Delete"]
+func has$(className)${act}Permission(current, author *models.Users) bool {
+	#if len($obj.__getattribute__(act.lower())) == 0
+	return true
+	#end if
+	#for iii in $obj.__getattribute__(act.lower())
+	{
+		#if len(iii) == 0
+		#continue
+		#end if
+		ret := true
+		#if len([i["name"] for i in iii if i["name"] != "Owner"]) > 0
+		if ret && !permission.Check(current, P$(", P".join([i["name"] for i in iii if i["name"] != "Owner"]))) {
+			ret = false
+		}
+		#end if
+
+		#if len([i["name"] for i in iii if i["name"] == "Owner"]) > 0
+		if ret {
+			if !permission.IsSame$("(current, author) || !permission.IsSame".join([i["type"] for i in iii if i["name"] == "Owner"])) (current, author) {
+			ret = false
+			}
+		}
+		#end if
+		
+		if ret {
+			return true
+		}
+	}
+	#end for
+	return false
+}
+#end for
+
 func $(className)Create(ctx *admin.AdminContext) (html string) {
+	if !has$(className)CreatePermission(ctx.User, nil) {
+		ctx.SetFlashAlert("您没有创建的权限")
+		return ctx.Redirect("index")
+	}
 	var obj *models.$(className)
 	data := ctx.GetSession("$(className)Create")
 
@@ -83,6 +133,11 @@ func $(className)Create(ctx *admin.AdminContext) (html string) {
 }
 
 func $(className)CreatePost(ctx *admin.AdminContext) (html string) {
+	if !has$(className)CreatePermission(ctx.User, nil) {
+		ctx.SetFlashAlert("您没有创建的权限")
+		return ctx.Redirect("index")
+	}
+
 	obj := models.New$(className)()
 
 	hasError := obj.ReadForm(ctx.Params)
