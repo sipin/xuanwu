@@ -216,6 +216,8 @@ func (o *$obj.name.value) GetFieldAsString(fieldKey string) (Value string) {
 	        widget := o.${field.name.value}Widget()
 		if widget.Type == "select" {
 		   Value = widget.Val()
+		} else if widget.GetBindData != nil {
+			Value = widget.Val()
 		} else {
 		   Value = o.$field.name.value
 		}
