@@ -84,6 +84,10 @@ def dealPermission(obj, idField, thrift_idl, labelName):
     obj.update = permission(location, "Update", fieldElems(idField, "Update"))
     obj.delete = permission(location, "Delete", fieldElems(idField, "Delete"))
     obj.hasUser = len([i for i in obj.fields if str(i.name) == "UsersID"]) > 0
+    obj.hasDelete = len(obj.delete) > 0
+    obj.hasCreate = len(obj.create) > 0
+    obj.hasUpdate = len(obj.update) > 0
+    obj.hasRead = len(obj.read) > 0
     if len(obj.create) + len(obj.read) + len(obj.update) + len(obj.delete) > 0:
         if not obj.hasUser:
             raise Exception("%s use crud and miss UsersID" % (location))
@@ -102,7 +106,6 @@ def dealPermission(obj, idField, thrift_idl, labelName):
     if len(obj.permission) > 0:
         obj.imports.append("admin/permission")
         obj.imports.append(("mp", "zfw/models/permission"))
-
 
 def main(thrift_idl):
     source = open(thrift_idl, 'r').read()
