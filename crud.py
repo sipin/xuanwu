@@ -89,6 +89,12 @@ def dealPermission(obj, idField, thrift_idl, labelName):
     if len(obj.read) == 0 and obj.hasUser:
         obj.read = [[dict(name="Owner",type="Department")]]
 
+    if len(obj.delete) == 0 and obj.hasUser:
+        obj.delete = [[dict(name="Owner",type="User")]]
+
+    if len(obj.update) == 0 and obj.hasUser:
+        obj.update = [[dict(name="Owner",type="User")]]
+
     obj.hasDelete = len(obj.delete) > 0
     obj.hasCreate = len(obj.create) > 0
     obj.hasUpdate = len(obj.update) > 0
