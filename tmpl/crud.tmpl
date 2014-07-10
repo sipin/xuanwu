@@ -24,7 +24,7 @@ import (
 #if len($obj.permission) > 0
 var (
 	#for i in $obj.permission
-	Perm_$i["name"] = permission.New("$i["category"].${i['name']}", $i["type"])
+	Perm_$(className)_$i["name"] = permission.New("$i["category"].${i['name']}", $i["type"])
 	#end for
 )
 #end if
@@ -72,7 +72,7 @@ func make$(className)UserList(current *models.Users) ([]string) {
 
 	ignore = false
 	#if len([i["name"] for i in iii if i["name"] != "Owner"]) > 0
-	if !permission.Check(current, Perm_$(", Perm_".join([i["name"] for i in iii if i["name"] != "Owner"]))) {
+	if !permission.Check(current, Perm_$(className)_$(", Perm_$(className)_".join([i["name"] for i in iii if i["name"] != "Owner"]))) {
 		ignore = true
 	}
 	#end if
@@ -170,7 +170,7 @@ func has$(className)${act}Permission(current, author *models.Users) bool {
 		#end if
 		ret := true
 		#if len([i["name"] for i in iii if i["name"] != "Owner"]) > 0
-		if ret && !permission.Check(current, Perm_$(", Perm_".join([i["name"] for i in iii if i["name"] != "Owner"]))) {
+		if ret && !permission.Check(current, Perm_$(className)_$(", Perm_$(className)_".join([i["name"] for i in iii if i["name"] != "Owner"]))) {
 			ret = false
 		}
 		#end if
@@ -210,10 +210,12 @@ func $(className)Create(ctx *admin.AdminContext) (html string) {
 }
 
 func $(className)CreatePost(ctx *admin.AdminContext) (html string) {
+#if $obj.hasCreate
 	if !has$(className)CreatePermission(ctx.User, nil) {
 		ctx.SetFlashAlert("您没有创建的权限")
 		return ctx.Redirect("index")
 	}
+#end if
 
 	obj := models.New$(className)()
 	hasError := obj.ReadForm(ctx.Params)

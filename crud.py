@@ -79,16 +79,22 @@ def permission(name, action, obj):
 def dealPermission(obj, idField, thrift_idl, labelName):
     location = "%s.%s" % (os.path.basename(thrift_idl), str(obj.name))
     obj.crud = dict()
-    obj.create = permission(location, "Create", fieldElems(idField, "Create"))
+    create = fieldElems(idField, "Create")
+    obj.create = permission(location, "Create", create)
     obj.read = permission(location, "Read", fieldElems(idField, "Read"))
     obj.update = permission(location, "Update", fieldElems(idField, "Update"))
     obj.delete = permission(location, "Delete", fieldElems(idField, "Delete"))
+
     obj.hasUser = len([i for i in obj.fields if str(i.name) == "UsersID"]) > 0
+    if len(obj.read) == 0 and obj.hasUser:
+        obj.read = [[dict(name="Owner",type="Department")]]
+
     obj.hasDelete = len(obj.delete) > 0
     obj.hasCreate = len(obj.create) > 0
     obj.hasUpdate = len(obj.update) > 0
     obj.hasRead = len(obj.read) > 0
     if len(obj.create) + len(obj.read) + len(obj.update) + len(obj.delete) > 0:
+        obj.imports.append("admin/permission")
         if not obj.hasUser:
             raise Exception("%s use crud and miss UsersID" % (location))
     obj.permission = []
@@ -103,8 +109,9 @@ def dealPermission(obj, idField, thrift_idl, labelName):
                 p["type"] = [p["type"]]
             p["type"] = ", ".join(["mp.Type." + i for i in p["type"]])
             obj.permission.append(p)
+
     if len(obj.permission) > 0:
-        obj.imports.append("admin/permission")
+
         obj.imports.append(("mp", "zfw/models/permission"))
 
 def main(thrift_idl):
