@@ -129,6 +129,7 @@ func getQuery$(className)(current *models.Users, limit, offset int) (objs []*mod
 	if err != nil {
 		return
 	}
+	total = models.$(className)Count(query)
 	
 	return
 }
