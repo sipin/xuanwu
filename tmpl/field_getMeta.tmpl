@@ -1,0 +1,25 @@
+func () (data []IXuanWuObj, head IXuanWuObj) {
+	data = []IXuanWuObj{}
+	jsonData := o.$field.name.value
+	var tmp interface{}
+	json.Unmarshal([]byte(jsonData), &tmp)
+	if tmp != nil {
+		if datas, ok := tmp.([]interface{}); ok{
+			for _, raw := range datas {
+				tmpObj := raw.(map[string]interface{})
+				single := map[string]string{}
+				for k, v := range tmpObj {
+					value, _ := v.(string)
+					single[k] = value
+				}
+				meta := New$(field.meta)()
+				meta.ReadForm(single)
+				data = append(data, IXuanWuObj(meta))
+			}
+		}
+	}
+
+	head = IXuanWuObj(New$(table)())
+
+	return
+}

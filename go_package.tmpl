@@ -51,6 +51,7 @@ type Widget struct {
 	Readonly    bool
 	IsList      bool
 	GetBindData	func() (data []*IDLabelPair)
+	GetMetaData func() (data []IXuanWuObj, head IXuanWuObj)
 }
 func (w *Widget) Disable() {
 	w.Disabled = true
@@ -78,6 +79,11 @@ func (w *Widget) Val() string {
 				return data.Label
 			}
 		}
+	}
+
+	if w.GetMetaData != nil {
+		// should show not thing
+		return ""
 	}
 
 	return w.Value
