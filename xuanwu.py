@@ -42,6 +42,7 @@ supported_annotations = set([
 	"listedFields",
 	"search",
 	"dm",
+	"meta",
 	"widget",
 	"bindData",
 	"requiredMsg",
@@ -119,6 +120,17 @@ def add_properties(field, obj):
 		t = Template(tpl, searchList=[{"field": field, "col": col, "label": label}])
 		field.bindData = str(t).strip()
 
+	if hasattr(field, "meta"):
+		if str(field.type) != "string":
+			print (repr(field.type))
+			print field.type
+			raise Exception("meta data must should store in string type")
+
+		tpl = open('tmpl/field_getMeta.tmpl', 'r').read()
+
+		t = Template(tpl, searchList=[{"field": field, "table": field.meta}])
+		field.metaFunc = str(t).strip()
+
 	if not hasattr(field, "placeholder"):
 		field.placeholder = ""
 
@@ -154,6 +166,8 @@ def get_widget_type(field):
 		if att.name.value.lower() == "dm":
 			field.placeholder = att.value.value
 			return "dm"
+		if att.name.value.lower() == "meta":
+			return "meta"
 	return "text"
 
 def transform_type(field_type):
@@ -298,6 +312,9 @@ def transform_struct(obj):
 		field.foreign = ""
 		if field.name.value.endswith("ID"):
 			field.foreign = field.name.value[:-2]
+
+		if hasattr(field, "meta"):
+			obj.imports.append("encoding/json")
 
 	obj.toList = [i.name.value for i in obj.fields if hasattr(i, "toList")]
 	if "ID" not in obj.toList:

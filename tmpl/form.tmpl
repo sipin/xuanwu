@@ -8,7 +8,9 @@ func (o *$obj.name.value) ReadForm(params map[string]string) (hasError bool) {
 #for field in $obj.fields
 #if $field.name.value != "ID"
 	if val, ok := params["$field.name.value"]; ok {
-	#if $field.type == "string"
+	#if hasattr($field, "meta")
+		o.$field.name.value = val
+	#else if $field.type == "string"
 		o.$field.name.value = val
 	#else if $field.type == "i32" and $field.widget_type in ["datetime"]
 		if val == "" {
@@ -155,6 +157,8 @@ func (o *$obj.name.value) ${field.name.value}Widget() *Widget {
 			StringList : $(filename).$field.stringList,
 		#else if hasattr($field, "bindData")
 			GetBindData : $field.bindData,
+		#else if hasattr($field, "meta")
+			GetMetaData : $field.metaFunc,
 		#else if $field.required
 			Required: true,
 		#end if
