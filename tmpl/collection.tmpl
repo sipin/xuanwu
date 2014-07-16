@@ -75,7 +75,11 @@ func $(obj.name.value)FindByIDs(id []string) (result []*$obj.name.value, err err
 func ${obj.name.value}To${i}List(ms []*$obj.name.value) ([]string) {
 	ret := make([]string, len(ms))
 	for idx, m := range ms {
-		ret[idx] = m.GetFieldAsString("$i")
+	#if $i == "ID"
+		ret[idx] = m.Id()
+	#else
+		ret[idx] = m.$i
+	#end if
 	}
 	return ret
 }
