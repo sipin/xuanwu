@@ -144,6 +144,9 @@ func (o *$obj.name.value) ${field.name.value}Widget() *Widget {
 		#else if $field.type == "list<string>"
 			Value : strings.Join(o.$field.name.value, "\n"),
 			IsList : true,
+			#if not hasattr($field, "stringList")
+			StringList : o.$field.name.value,
+			#end if
 		#else
 		Change go.tmpl go support $field.type now!
 		#end if
