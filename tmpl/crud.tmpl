@@ -145,9 +145,9 @@ func $(className)Index(ctx *admin.AdminContext) (html string) {
 	var obj *models.$(className)
 	var objs []*models.$(className)
 
-	q := ctx.Params["q"]
-	if q != "" {
-		objs, total = getSearch$(className)(ctx.User, q, ctx.Params, limit, offset)
+	action := ctx.Params["_action"]
+	if action == "search" {
+		objs, total = getSearch$(className)(ctx.User, ctx.Params["q"], ctx.Params, limit, offset)
 	} else {
 		objs, total = getQuery$(className)(ctx.User, limit, offset)
 	}
