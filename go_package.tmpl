@@ -153,7 +153,7 @@ func getSearchObj(word string, fields []string, params map[string]string, termKe
 		if isStart, ok := dateKeys[k]; ok {
 			intVal, _ := time.Parse(DateLayout, v)
 			if isStart {
-				fieldName := k[0:len(k) - 5]
+				fieldName := k[0 : len(k)-5]
 				if dateVal, ok := ranges[fieldName]; ok {
 					dateVal["gte"] = intVal.Unix()
 					ranges[fieldName] = dateVal
@@ -164,7 +164,7 @@ func getSearchObj(word string, fields []string, params map[string]string, termKe
 					}
 				}
 			} else {
-				fieldName := k[0:len(k) - 3]
+				fieldName := k[0 : len(k)-3]
 				if dateVal, ok := ranges[fieldName]; ok {
 					dateVal["lt"] = intVal.AddDate(0, 0, 1).Unix()
 				} else {
@@ -189,14 +189,26 @@ func getSearchObj(word string, fields []string, params map[string]string, termKe
 	}
 
 	filter := make(map[string]interface{})
-	if len(terms) > 0 {
-		filter["term"] = terms
+	var must []interface{}
+
+	for k, v := range terms {
+		must = append(must, map[string]interface{}{
+			"term": map[string]string{
+				k: v,
+			},
+		})
 	}
 
-	if len(ranges) > 0 {
-		filter["range"] = ranges
+	for k, v := range ranges {
+		must = append(must, map[string]interface{}{
+			"range": map[string]interface{}{
+				k: v,
+			},
+		})
 	}
-
+	filter["bool"] = map[string]interface{}{
+		"must": must,
+	}
 	filtered["filter"] = filter
 
 	return getQuery("filtered", filtered)
