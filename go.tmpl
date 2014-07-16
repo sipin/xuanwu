@@ -36,10 +36,7 @@ func init${obj.name.value}Mapping() {
 	}
 
 	indices.CreateIndex("$(obj.name.value.lower())")
-	err := indices.PutMapping("$(obj.name.value.lower())", "simple", $(obj.name.value){}, opt)
-	if err != nil {
-		panic(err)
-	}
+	indices.PutMapping("$(obj.name.value.lower())", "simple", $(obj.name.value){}, opt)
 }
 #end if
 
