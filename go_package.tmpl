@@ -51,7 +51,6 @@ type Widget struct {
 	Readonly    bool
 	IsList      bool
 	GetBindData	func() (data []*IDLabelPair)
-	GetMetaData func() (data []IXuanWuObj, head IXuanWuObj)
 }
 func (w *Widget) Disable() {
 	w.Disabled = true
@@ -59,6 +58,29 @@ func (w *Widget) Disable() {
 
 func (w *Widget) Hide() {
 	w.Hidden = true
+}
+
+func (w *Widget) String() string {
+
+	if idx, err := strconv.Atoi(w.Value); err == nil {
+		if w.StringList != nil {
+			return w.StringList[idx]
+		}
+		if w.EnumData != nil {
+			return w.EnumData[int32(idx)]
+		}
+	}
+
+	if w.GetBindData != nil {
+		datas := w.GetBindData()
+		for _, data := range datas {
+			if w.Value == data.ID {
+				return data.Label
+			}
+		}
+	}
+
+	return w.Value
 }
 
 func (w *Widget) Val() string {
@@ -79,11 +101,6 @@ func (w *Widget) Val() string {
 				return data.Label
 			}
 		}
-	}
-
-	if w.GetMetaData != nil {
-		// should show not thing
-		return ""
 	}
 
 	return w.Value
@@ -153,7 +170,7 @@ func getSearchObj(word string, fields []string, params map[string]string, termKe
 		if isStart, ok := dateKeys[k]; ok {
 			intVal, _ := time.Parse(DateLayout, v)
 			if isStart {
-				fieldName := k[0 : len(k)-5]
+				fieldName := k[0:len(k) - 5]
 				if dateVal, ok := ranges[fieldName]; ok {
 					dateVal["gte"] = intVal.Unix()
 					ranges[fieldName] = dateVal
@@ -164,7 +181,7 @@ func getSearchObj(word string, fields []string, params map[string]string, termKe
 					}
 				}
 			} else {
-				fieldName := k[0 : len(k)-3]
+				fieldName := k[0:len(k) - 3]
 				if dateVal, ok := ranges[fieldName]; ok {
 					dateVal["lt"] = intVal.AddDate(0, 0, 1).Unix()
 				} else {
@@ -189,26 +206,14 @@ func getSearchObj(word string, fields []string, params map[string]string, termKe
 	}
 
 	filter := make(map[string]interface{})
-	var must []interface{}
-
-	for k, v := range terms {
-		must = append(must, map[string]interface{}{
-			"term": map[string]string{
-				k: v,
-			},
-		})
+	if len(terms) > 0 {
+		filter["term"] = terms
 	}
 
-	for k, v := range ranges {
-		must = append(must, map[string]interface{}{
-			"range": map[string]interface{}{
-				k: v,
-			},
-		})
+	if len(ranges) > 0 {
+		filter["range"] = ranges
 	}
-	filter["bool"] = map[string]interface{}{
-		"must": must,
-	}
+
 	filtered["filter"] = filter
 
 	return getQuery("filtered", filtered)

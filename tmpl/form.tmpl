@@ -8,9 +8,7 @@ func (o *$obj.name.value) ReadForm(params map[string]string) (hasError bool) {
 #for field in $obj.fields
 #if $field.name.value != "ID"
 	if val, ok := params["$field.name.value"]; ok {
-	#if hasattr($field, "meta")
-		o.$field.name.value = val
-	#else if $field.type == "string"
+	#if $field.type == "string"
 		o.$field.name.value = val
 	#else if $field.type == "i32" and $field.widget_type in ["datetime"]
 		if val == "" {
@@ -51,9 +49,6 @@ func (o *$obj.name.value) ReadForm(params map[string]string) (hasError bool) {
 		o.$field.name.value = (val != "")
 	#else if $field.type == "list<string>"
 		o.$field.name.value = strings.Split(val, "\n")
-		for i, k := range o.$field.name.value {
-			o.$(field.name.value)[i] = strings.Trim(k, "\r")
-		}
 	#else
 	Change go.tmpl go support $field.type now!
 	#end if
@@ -84,8 +79,6 @@ func (o *$obj.name.value) ValidateData() (hasError bool) {
 	if o.$field.name.value == "" {
 		#elif $field.type in ["i32", "i64"]
 	if o.$field.name.value == 0 {
-		#elif $field.type == "list<string>"
-	if len(o.$field.name.value) == 0 {
 		#end if
 		o.${field.name.value}Widget().ErrorMsg = "$field.requiredMsg"
 		hasError = true
@@ -144,9 +137,6 @@ func (o *$obj.name.value) ${field.name.value}Widget() *Widget {
 		#else if $field.type == "list<string>"
 			Value : strings.Join(o.$field.name.value, "\n"),
 			IsList : true,
-			#if not hasattr($field, "stringList")
-			StringList : o.$field.name.value,
-			#end if
 		#else
 		Change go.tmpl go support $field.type now!
 		#end if
@@ -160,8 +150,6 @@ func (o *$obj.name.value) ${field.name.value}Widget() *Widget {
 			StringList : $(filename).$field.stringList,
 		#else if hasattr($field, "bindData")
 			GetBindData : $field.bindData,
-		#else if hasattr($field, "meta")
-			GetMetaData : $field.metaFunc,
 		#else if $field.required
 			Required: true,
 		#end if
@@ -223,8 +211,6 @@ func (o *$obj.name.value) GetFieldAsString(fieldKey string) (Value string) {
 	        widget := o.${field.name.value}Widget()
 		if widget.Type == "select" {
 		   Value = widget.Val()
-		} else if widget.GetBindData != nil {
-			Value = widget.Val()
 		} else {
 		   Value = o.$field.name.value
 		}

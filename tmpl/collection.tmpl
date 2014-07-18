@@ -57,25 +57,25 @@ func $(obj.name.value)Count(query interface{}) (result int) {
 	return
 }
 
-func $(obj.name.value)FindByIDs(id []string, sortFields ...string) (result []*$obj.name.value, err error) {
+func $(obj.name.value)FindByIDs(id []string) (result []*$obj.name.value, err error) {
+	session, col := db.GetCol("$obj.name.value")
+	defer session.Close()
+
 	ids := make([]bson.ObjectId, 0, len(id))
 	for _, i := range id {
 		if bson.IsObjectIdHex(i) {
 			ids = append(ids, bson.ObjectIdHex(i))
 		}
 	}
-	return $(obj.name.value)FindAll(db.M{"_id": db.M{"\$in": ids}}, sortFields...)
+	err = col.Find(db.M{"_id": db.M{"\$in": ids}}).All(&result)
+	return
 }
 
 #for i in $obj.toList
 func ${obj.name.value}To${i}List(ms []*$obj.name.value) ([]string) {
 	ret := make([]string, len(ms))
 	for idx, m := range ms {
-	#if $i == "ID"
-		ret[idx] = m.Id()
-	#else
-		ret[idx] = m.$i
-	#end if
+		ret[idx] = m.GetFieldAsString("$i")
 	}
 	return ret
 }
@@ -122,4 +122,3 @@ func $(obj.name.value)RemoveByID(id string) (result *$obj.name.value, err error)
 	#end if
 	return
 }
-

@@ -11,12 +11,12 @@ type_ref = dict(
 	i32 = "int32",
 	i64 = "int64",
 	bool = "bool",
+    senum = "senum",
 )
 
 widget_types = set([
 	"text",
 	"textarea",
-	"opinion",
 	"richtext",
 	"password",
 	"radio",
@@ -42,7 +42,6 @@ supported_annotations = set([
 	"listedFields",
 	"search",
 	"dm",
-	"meta",
 	"widget",
 	"bindData",
 	"requiredMsg",
@@ -58,9 +57,6 @@ supported_annotations = set([
 	"toList",
 	"summary",
 	"viewUrl",
-
-	#permission
-	"Create", "Read", "Update", "Delete",
 ])
 
 typedef = dict()
@@ -92,6 +88,11 @@ except ValueError:
 if not out_path.endswith(path.sep):
 		out_path = out_path + path.sep
 
+def capitalize(str):
+        if len(str) < 1:
+                return str
+        return str[0].upper() + str[1:]
+
 def type_translate(obj):
 	if str(obj) in type_ref:
 		return type_ref[str(obj)]
@@ -120,17 +121,6 @@ def add_properties(field, obj):
 		t = Template(tpl, searchList=[{"field": field, "col": col, "label": label}])
 		field.bindData = str(t).strip()
 
-	if hasattr(field, "meta"):
-		if str(field.type) != "string":
-			print (repr(field.type))
-			print field.type
-			raise Exception("meta data must should store in string type")
-
-		tpl = open('tmpl/field_getMeta.tmpl', 'r').read()
-
-		t = Template(tpl, searchList=[{"field": field, "table": field.meta}])
-		field.metaFunc = str(t).strip()
-
 	if not hasattr(field, "placeholder"):
 		field.placeholder = ""
 
@@ -142,7 +132,7 @@ def get_search(obj):
 
 	for field in obj.fields:
 		if field.name.value == "ID" and hasattr(field, "search"):
-			search = [f.strip() for f in field.search.split(",")]
+			search = [capitalize(f.strip()) for f in field.search.split(",")]
 
 	if search == None:
 		return search
@@ -153,8 +143,7 @@ def get_search(obj):
 			if str(field.type) != "string":
 				raise Exception(obj.name.value + " has non-string searchField: " + searchField)
 		except KeyError:
-			raise Exception(obj.name.value + " has invalid searchField: " + searchField)
-
+			raise Exception(obj.name.value + " has invalid searchField: " + searchField)        
 	return search
 
 def get_widget_type(field):
@@ -166,8 +155,6 @@ def get_widget_type(field):
 		if att.name.value.lower() == "dm":
 			field.placeholder = att.value.value
 			return "dm"
-		if att.name.value.lower() == "meta":
-			return "meta"
 	return "text"
 
 def transform_type(field_type):
@@ -219,7 +206,7 @@ def transform_struct(obj):
 		field.go_type = type_translate(field.type)
 		field.type = str(field.type)
 		field.widget_type = get_widget_type(field)
-		obj.fieldMap[field.name.value] = field
+		obj.fieldMap[capitalize(field.name.value)] = field
 
 	obj.imports = ["bytes", "fmt"]
 	obj.listedFieldStrings = []
@@ -287,9 +274,6 @@ def transform_struct(obj):
 	if hasattr(idField, "label"):
 		obj.label = idField.label
 
-	if len([f for f in obj.filterFields if f.type == "string"]) > 0:
-		obj.imports.append("github.com/mattbaird/elastigo/indices")
-
 	for field in obj.fields:
 		if hasattr(field, "rule"):
 			obj.imports.append("regexp")
@@ -311,10 +295,8 @@ def transform_struct(obj):
 
 		field.foreign = ""
 		if field.name.value.endswith("ID"):
-			field.foreign = field.name.value[:-2]
-
-		if hasattr(field, "meta"):
-			obj.imports.append("encoding/json")
+			field.foreign = capitalize(field.name.value[:-2])
+		field.name.value = capitalize(field.name.value)
 
 	obj.toList = [i.name.value for i in obj.fields if hasattr(i, "toList")]
 	if "ID" not in obj.toList:
@@ -405,7 +387,7 @@ def main(thrift_idl):
 		print 'namespace go not found, please add `namespace go XXXX` to ' + thrift_file + " and retry"
 		sys.exit(1)
 
-	namespace = str(loader.namespace)
+	namespace = str(loader.namespace)    
 
 	tpl = open('go_package.tmpl', 'r').read()
 	t = Template(tpl, searchList=[{"namespace": namespace}])
@@ -416,5 +398,6 @@ def main(thrift_idl):
 
 	for module in loader.modules.values():
 		transform(module)
+
 
 main(thrift_file)
