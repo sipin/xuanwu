@@ -106,6 +106,7 @@ def type_translate(obj):
 
 def add_properties(field, obj):
 	field.label = field.name.value
+	field.name.value = capitalize(field.name.value)
 
 	# todo: add field name checking
 	for att in field.annotations:
@@ -219,7 +220,7 @@ def transform_struct(obj):
 	
 	obj.listedFields = []
 	if hasattr(idField, "listedFields"):
-		listedFields = [f.strip() for f in idField.listedFields.split(",")]
+		listedFields = [capitalize(f.strip()) for f in idField.listedFields.split(",")]
 		for fieldname in listedFields:
 			if "." in fieldname:
 				objName, objField = fieldname.split(".")
@@ -245,7 +246,7 @@ def transform_struct(obj):
 
 
 		if len(listedFields) > len(obj.listedFields):
-			foundFields = [field.name.value for field in obj.listedFields if field.name.value in listedFields]
+			foundFields = [field.name.value for field in obj.listedFields if field.name.value in listedFields]            
 			missingFields = [field for field in listedFields if field not in foundFields]
 			raise Exception(thrift_file + " " + obj.name.value + " missing listedFields: " + str(missingFields))
 
