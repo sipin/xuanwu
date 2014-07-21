@@ -58,6 +58,7 @@ supported_annotations = set([
 	"toList",
 	"summary",
 	"viewUrl",
+        "tplPackage",
 
 	#permission
 	"Create", "Read", "Update", "Delete",

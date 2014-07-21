@@ -142,6 +142,9 @@ def main(thrift_idl):
         idField = obj.fields[0]
         labelName = fieldElem(idField, "label")
         urlBase = fieldElem(idField, "baseurl")
+        tplPackage = fieldElem(idField, "tplpackage")
+        if tplPackage == "":
+            tplPackage = "tpl/auto"
 
         if labelName == "" or urlBase == "":
             continue
@@ -167,6 +170,7 @@ def main(thrift_idl):
                                         "className": obj.name.value,
                                         "classLabel": labelName,
                                         "urlBase": urlBase,
+                                        "tplPackage": tplPackage,
                                         "obj": obj,
                                         }])
         res = str(t)
