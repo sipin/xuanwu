@@ -56,8 +56,8 @@ var ${obj.name.value}TableName = "${obj.name.value}"
 type $obj.name.value struct {
 	#for field in $obj.fields
 		#if $field.name.value == "ID"
-	ID         bson.ObjectId `bson:"_id,omitempty" thrift:"$field.name.value,$field.tag"`
-		#else
+	ID         bson.ObjectId `bson:"_id, omitempty" thrift:"$field.name.value,$field.tag"`
+	#else
 	$field.name.value  $field.go_type `bson:"$field.name.value" thrift:"$field.name.value,$field.tag"`
 		#end if
 	#end for
@@ -67,6 +67,7 @@ type $obj.name.value struct {
 func New$(obj.name.value)() *$obj.name.value {
 	rval := new($obj.name.value)
 	rval.ID = bson.NewObjectId()
+	rval.IdStr = rval.ID.Hex()
 	return rval
 }
 
