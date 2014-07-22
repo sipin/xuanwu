@@ -40,6 +40,7 @@ supported_annotations = set([
 	"label",
 	"baseURL",
 	"listedFields",
+	"orderFields",
 	"search",
 	"dm",
 	"meta",
@@ -262,6 +263,25 @@ def transform_struct(obj):
 			foundFields = [field.name.value for field in obj.listedFields if field.name.value in listedFields]
 			missingFields = [field for field in listedFields if field not in foundFields]
 			raise Exception(thrift_file + " " + obj.name.value + " missing listedFields: " + str(missingFields))
+
+	if hasattr(idField, "orderFields"):
+		orderFields = {}
+		for field in map(lambda s:s.strip(), idField.orderFields.split(",")):
+			if field.find(":") >= 0:
+				field, order = field.split(":")[:2]
+			else:
+				order = ""
+			orderFields[field] = order if order in ("asc", "desc") else "none"
+		for field in obj.listedFields:
+			if field.key in orderFields:
+				field.order = orderFields[field.key]
+				del orderFields[field.key]
+
+		if len(filter(lambda s: hasattr(s, "order") and s.order!="none", obj.listedFields)) > 1:
+			raise Exception(thrift_file + " " + obj.name.value + " too many default order index")
+		if len(orderFields) > 0:
+			raise Exception(thrift_file + " " + obj.name.value + " missing orderFields: " + ",".join(orderFields))
+
 
 	obj.filterFields = []
 	obj.termKeys = []
