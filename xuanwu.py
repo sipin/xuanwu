@@ -151,9 +151,9 @@ def get_search(obj):
 		try:
 			field = obj.fieldMap[fieldName]
 			if str(field.type) != "string":
-				raise Exception(obj.name.value + " has non-string searchField: " + searchField)
+				raise Exception(obj.name.value + " has non-string searchField: " + fieldName)
 		except KeyError:
-			raise Exception(obj.name.value + " has invalid searchField: " + searchField)
+			raise Exception(obj.name.value + " has invalid searchField: " + fieldName)
 
 	return search
 
