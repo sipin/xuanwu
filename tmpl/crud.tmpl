@@ -40,7 +40,7 @@ func init() {
 	web.Post("$(urlBase)/delete", $(className)DeletePost)
 }
 
-func getSearch$(className)(current *models.Users, q string, params map[string]string, limit int, offset int) (objs []*models.$(className), total int) {
+func getSearch$(className)(current *models.Users, q string, params map[string]string, limit int, offset int, sortField string) (objs []*models.$(className), total int) {
 	out, _ := models.$(className)SearchWithParams(q, params, limit, offset)
 	total = out.Hits.Total
 
@@ -57,7 +57,7 @@ func getSearch$(className)(current *models.Users, q string, params map[string]st
 	query["UsersID"] = bson.M{"\$in": make$(className)UserList(current)}
 	#end if
 
-	objs, _ = models.$(className)FindAll(query)
+	objs, _ = models.$(className)FindAll(query, sortField)
 	return
 }
 
@@ -118,19 +118,38 @@ func make$(className)UserList(current *models.Users) ([]string) {
 	#end if
 }
 
-func getQuery$(className)(current *models.Users, limit, offset int) (objs []*models.$(className), total int) {
+func getQuery$(className)(current *models.Users, limit, offset int, sortField string) (objs []*models.$(className), total int) {
 	userId := make$(className)UserList(current)
 	query := bson.M{}
 
 	if userId != nil {
 		query["UsersID"] = bson.M{"\$in": userId}
 	}
-	objs, err := models.$(className)Find(query, limit, offset)
+	objs, err := models.$(className)Find(query, limit, offset, sortField)
 	if err != nil {
 		return
 	}
 	total = models.$(className)Count(query)
 	
+	return
+}
+
+func get$(className)OrderSort(ctx *admin.AdminContext) (order string, sort string) {
+	order, _ = ctx.Params["order"]
+	sort, _ = ctx.Params["sort"]
+	if order != "" && sort != "" {
+		return
+	}
+	labels := models.New$(className)().GetListedLabels()
+	for _, label := range labels {
+		if order == "" && label.Order != "none" {
+			order = label.ID
+		}
+		if label.ID == order {
+			sort = label.Order
+			break
+		}
+	}
 	return
 }
 
@@ -146,17 +165,25 @@ func $(className)Index(ctx *admin.AdminContext) (html string) {
 	var objs []*models.$(className)
 
 	action := ctx.Params["_action"]
-	if action == "search" {
-		objs, total = getSearch$(className)(ctx.User, ctx.Params["q"], ctx.Params, limit, offset)
+	order, sort := get$(className)OrderSort(ctx)
+	var sortField string
+	if sort == "desc" {
+		sortField = "-" + order
+	} else if sort == "asc" {
+		sortField = order
+	}
+	q, _ := ctx.Params["q"]
+	if action == "search" && q != ""{
+		objs, total = getSearch$(className)(ctx.User, q, ctx.Params, limit, offset, sortField)
 	} else {
-		objs, total = getQuery$(className)(ctx.User, limit, offset)
+		objs, total = getQuery$(className)(ctx.User, limit, offset, sortField)
 	}
 
 	stupidGoInterface := make([]models.IXuanWuObj, len(objs))
 	for i, v := range objs {
 		stupidGoInterface[i] = models.IXuanWuObj(v)
 	}
-	return autoTpl.Index(ctx.Context, ctx.GetFlash(), obj, stupidGoInterface, total, limit, offset)
+	return autoTpl.Index(ctx.Context, ctx.GetFlash(), obj, stupidGoInterface, total, limit, offset, order, sort)
 }
 
 #for act in ["Create", "Read", "Update", "Delete"]

@@ -6,7 +6,7 @@ func () (data []*IDLabelPair) {
 	#end if
 	data = make([]*IDLabelPair, 0, length)
 	#if hasattr($field.const_value, 'value')
-	data = append(data, &IDLabelPair {"", ""})
+	data = append(data, &IDLabelPair {"", "", ""})
 	#end if
 	for _, obj := range(objs) {
 		data = append(data, &IDLabelPair {

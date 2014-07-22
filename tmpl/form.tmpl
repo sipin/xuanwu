@@ -192,6 +192,9 @@ func (o *$obj.name.value) GetListedLabels() []*IDLabelPair {
 		&IDLabelPair {
 			ID : "$field.key",
 			Label : "$field.label",
+			#if hasattr(field, "order")
+			Order : "$field.order",
+			#end if
 		},
 		#end for
 	}
