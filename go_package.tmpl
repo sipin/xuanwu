@@ -123,7 +123,7 @@ func I32Time(c int32) string {
 
 func getQueryString(word string, fields []string) map[string]interface{} {
 	queryString := make(map[string]interface{})
-	queryString["default_operator"] = "OR"
+	queryString["default_operator"] = "AND"
 	queryString["fields"] = fields
 	queryString["query"] = word
 
