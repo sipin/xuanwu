@@ -268,6 +268,16 @@ type ${obj.name.value}Widget struct {
 #end for
 }
 
+var ${obj.name.value}Fields = struct {
+#for field in $obj.fields
+	${field.name.value} string
+#end for
+} {
+#for field in $obj.fields
+	"${field.name.value}",
+#end for
+}
+
 func (o *$obj.name.value) WidgetStruct() *${obj.name.value}Widget {
 	return &${obj.name.value}Widget{
 #for field in $obj.fields
