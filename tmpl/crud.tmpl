@@ -142,7 +142,7 @@ func get$(className)OrderSort(ctx *admin.AdminContext) (order string, sort strin
 	}
 	labels := models.New$(className)().GetListedLabels()
 	for _, label := range labels {
-		if order == "" && label.Order != "none" {
+		if order == "" && (label.Order == "asc" || label.Order == "desc"){
 			order = label.ID
 		}
 		if label.ID == order {
