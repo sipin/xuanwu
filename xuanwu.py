@@ -34,6 +34,7 @@ widget_types = set([
 	"hidden",
 	"time",
 	"userselect",
+	"relateSelect"
 ])
 
 supported_annotations = set([
@@ -46,6 +47,7 @@ supported_annotations = set([
 	"meta",
 	"widget",
 	"bindData",
+	"relateData",
 	"requiredMsg",
 	"rule",
 	"ruleMsg",
@@ -59,7 +61,7 @@ supported_annotations = set([
 	"toList",
 	"summary",
 	"viewUrl",
-        "tplPackage",
+	"tplPackage",
 
 	#permission
 	"Create", "Read", "Update", "Delete",
@@ -124,8 +126,6 @@ def add_properties(field, obj):
 
 	if hasattr(field, "meta"):
 		if str(field.type) != "string":
-			print (repr(field.type))
-			print field.type
 			raise Exception("meta data must should store in string type")
 
 		tpl = open('tmpl/field_getMeta.tmpl', 'r').read()
@@ -215,13 +215,29 @@ class ListField:
 def transform_struct(obj):
 	idField = obj.fields[0]
 
+	obj.relateObj = {}
 	obj.fieldMap = {}
 	for field in obj.fields:
-		add_properties(field, obj)
 		field.go_type = type_translate(field.type)
 		field.type = str(field.type)
 		field.widget_type = get_widget_type(field)
 		obj.fieldMap[field.name.value] = field
+
+		if field.widget_type == "relateSelect":
+			obj.relateObj[field.name.value] = field
+			field.relateFields = []
+
+	for field in obj.fields:
+		add_properties(field, obj)
+
+	for field in obj.fields:
+		if hasattr(field, "relateData"):
+			col, label = field.relateData.split(".")
+			if col not in obj.relateObj:
+				raise Exception(thrift_file + " missing realte field " + col)
+			obj.relateObj[col].relateFields.append((field.name.value, label))
+			field.disabled = "True"
+			delattr(field, "relateData")
 
 	obj.imports = ["bytes", "fmt"]
 	obj.listedFieldStrings = []

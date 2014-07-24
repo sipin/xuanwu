@@ -140,6 +140,7 @@ def main(thrift_idl):
         if not hasattr(obj, "fields"):
             continue
 
+
         idField = obj.fields[0]
         labelName = fieldElem(idField, "label")
         obj.label = labelName
@@ -170,6 +171,29 @@ def main(thrift_idl):
             foundFields = [field.name.value for field in obj.filterFields if field.name.value in filterFields]
             missingFields = [field for field in filterFields if field not in foundFields]
             raise Exception("missing filterFields: " + str(missingFields))
+
+        # relateSelect JsonData
+        relateObj = {}
+        for field in obj.fields:
+            for att in field.annotations:
+                if att.name.value == "widget":
+                    if att.value.value == "relateSelect":
+                        relateObj[field.name.value] = field
+                        field.relateFields = []
+                if att.name.value == "bindData":
+                    col, label = att.value.value.split(".")
+                    field.bindTable = col
+
+        for field in obj.fields:
+            for att in field.annotations:
+                if att.name.value == "relateData":
+                    col, label = att.value.value.split(".")
+                    if col not in relateObj:
+                        raise Exception(thrift_file + " missing realte field " + col)
+                    relateObj[col].relateFields.append((label, field.name.value))
+        
+        if len(relateObj) > 0:
+            obj.imports.append("encoding/json")
 
         outDir = urlBase.split(path.sep)[-2]
         t = Template(crud, searchList=[{"namespace": outDir,
