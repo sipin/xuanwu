@@ -53,6 +53,7 @@ type Widget struct {
 	IsList      bool
 	GetBindData	func() (data []*IDLabelPair)
 	GetMetaData func() (data []IXuanWuObj, head IXuanWuObj)
+	GetRelateFields func() (pairs [][2]string)
 }
 func (w *Widget) Disable() {
 	w.Disabled = true

@@ -1,0 +1,9 @@
+func () (pairs [][2]string) {
+	pairs = [][2]string{
+		#for field in $relateFields
+		{"$field[0]", "$field[1]"},
+		#end for
+	}
+
+	return
+}
