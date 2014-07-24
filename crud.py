@@ -135,12 +135,14 @@ def main(thrift_idl):
         urlBase = ""
         obj.filterFields = []
         obj.imports = []
+        obj.listedFields = []
 
         if not hasattr(obj, "fields"):
             continue
 
         idField = obj.fields[0]
         labelName = fieldElem(idField, "label")
+        obj.label = labelName
         urlBase = fieldElem(idField, "baseurl")
         tplPackage = fieldElem(idField, "tplpackage")
         if tplPackage == "":
@@ -148,6 +150,10 @@ def main(thrift_idl):
 
         if labelName == "" or urlBase == "":
             continue
+
+        listedFields = fieldElem(idField, "listedfields")
+        if listedFields != "":
+            obj.listedFields = [f.strip() for f in listedFields.split(",")]
 
         filterFields = fieldElem(idField, "filterfields")
         if filterFields != "":

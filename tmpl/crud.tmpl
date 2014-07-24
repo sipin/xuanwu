@@ -2,8 +2,10 @@ package $namespace
 
 import (
 	//Official libs
+	"fmt"
 	"strings"
 	"strconv"
+	"time"
 
 	//3rd party libs
 	#for item in $obj.imports
@@ -16,6 +18,7 @@ import (
 
 	//Own libs
 	"admin"
+	"xls"
 	autoTpl "$tplPackage"
 	"zfw/models"
 	"github.com/sipin/web"
@@ -32,6 +35,7 @@ var (
 
 func init() {
 	web.Get("$(urlBase)/index", $(className)Index)
+	web.Get("$(urlBase)/export", $(className)Export)
 	web.Get("$(urlBase)/view", $(className)View)
 	web.Get("$(urlBase)/create", $(className)Create)
 	web.Post("$(urlBase)/create", $(className)CreatePost)
@@ -185,6 +189,71 @@ func $(className)Index(ctx *admin.AdminContext) (html string) {
 		stupidGoInterface[i] = models.IXuanWuObj(v)
 	}
 	return autoTpl.Index(ctx.Context, ctx.GetFlash(), obj, stupidGoInterface, total, limit, offset, order, sort)
+}
+
+func $(className)Export(ctx *admin.AdminContext) (html string) {
+	limit := 20
+	if val, ok := ctx.Params["limit"]; ok {
+		limit, _ = strconv.Atoi(val)
+	}
+	offset, _ := strconv.Atoi(ctx.Params["offset"])
+
+	var obj *models.$(className)
+	var objs []*models.$(className)
+
+	action := ctx.Params["_action"]
+	order, sort := get$(className)OrderSort(ctx)
+	var sortField string
+	if sort == "desc" {
+		sortField = "-" + order
+	} else if sort == "asc" {
+		sortField = order
+	}
+	q, _ := ctx.Params["q"]
+	if action == "search" && q != ""{
+		objs, _ = getSearch$(className)(ctx.User, q, ctx.Params, limit, offset, sortField)
+	} else {
+		objs, _ = getQuery$(className)(ctx.User, limit, offset, sortField)
+	}
+
+	sheet := xls.NewSheet("Sheet1")
+	rows := make([]*xls.Row, len(objs) + 1)
+
+	labelObjs := obj.GetListedLabels()
+	var labels []interface{}
+	for _, o := range labelObjs {
+		labels = append(labels, o.Label)
+	}
+	rows[0] = xls.NewRow(labels...)
+
+	for i, o := range objs {
+		#for f in $obj.listedFields
+		#if "." in f
+		$(f.replace(".", "")), _ := o.Get$(f[:f.index(".")])()
+		#end if
+		#end for
+		rows[i + 1] = xls.NewRow(
+			#for f in $obj.listedFields
+			#if "." in f
+			$(f.replace(".", "")).GetFieldAsString("$(f[f.index(".")+1:])"),
+			#else
+			o.GetFieldAsString("$(f)"),
+			#end if
+			#end for
+		)
+	}
+
+	tbl := xls.NewTable(rows...)
+	sheet.SetTable(tbl)
+
+	ret, err := xls.Marshal(sheet)
+	if err != nil {
+		ctx.Logger.Error(err)
+	}
+
+	fname := fmt.Sprintf("attachment;filename=\"%s_%s.xls\"", "$(obj.label)", time.Now().Format("2006-01-02_1504"))
+	ctx.SetHeader("Content-Disposition", fname, true)
+	return string(ret)
 }
 
 #for act in ["Create", "Read", "Update", "Delete"]
