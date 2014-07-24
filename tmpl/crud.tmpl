@@ -2,6 +2,7 @@ package $namespace
 
 import (
 	//Official libs
+	"strings"
 	"strconv"
 
 	//3rd party libs
@@ -51,7 +52,7 @@ func getSearch$(className)(current *models.Users, q string, params map[string]st
 		}
 		ids = append(ids, bson.ObjectIdHex(hit.Id))
 	}
-	
+
 	query := bson.M{"_id": bson.M{"\$in": ids}}
 	#if $obj.hasRead
 	query["UsersID"] = bson.M{"\$in": make$(className)UserList(current)}
@@ -130,7 +131,7 @@ func getQuery$(className)(current *models.Users, limit, offset int, sortField st
 		return
 	}
 	total = models.$(className)Count(query)
-	
+
 	return
 }
 
@@ -210,7 +211,7 @@ func has$(className)${act}Permission(current, author *models.Users) bool {
 			}
 		}
 		#end if
-		
+
 		if ret {
 			return true
 		}
@@ -320,7 +321,7 @@ func $(className)ViewPost(ctx *admin.AdminContext) (html string) {
 		ctx.SetFlashAlert(err.Error())
 		return ctx.Redirect("index")
 	}
-	
+
 #if $obj.hasRead
 	author, _ := obj.GetUsers()
 	if !has$(className)ReadPermission(ctx.User, author) {
@@ -375,25 +376,59 @@ func $(className)EditPost(ctx *admin.AdminContext) (html string) {
 	return
 }
 
-func $(className)DeletePost(ctx *admin.AdminContext) (html string) {
 #if $obj.hasDelete
-	obj, err := models.$(className)FindByID(ctx.Params["id"])
+func $(className)DeleteOne(ctx *admin.AdminContext, id string) (ok bool) {
+	obj, err := models.$(className)FindByID(id)
 	if err != nil {
-		ctx.SetFlashAlert(err.Error())
-		return ctx.Redirect("index")
+		return false
 	}
 
 	author, _ := obj.GetUsers()
 	if !has$(className)DeletePermission(ctx.User, author) {
-		ctx.SetFlashAlert("您没有删除的权限")
-		return ctx.Redirect("index")
+		return false
 	}
-	id := obj.Id()
-#else
-	id := ctx.Params["id"]
-#end if
 
 	models.$(className)RemoveByID(id)
+	return true
+}
+#end if
+
+func $(className)DeletePost(ctx *admin.AdminContext) (html string) {
+	ids := ctx.Params["ids"]
+
+#if $obj.hasDelete
+	var ok bool
+	if ids != "" {
+		for _, id := range strings.Split(ids, "\n") {
+			id = strings.Trim(id, "\r")
+			ok = $(className)DeleteOne(ctx, id)
+			if !ok {
+				ctx.SetFlashNotice("删除失败")
+				ctx.Redirect("index")
+				return
+			}
+		}
+	} else {
+		ok = $(className)DeleteOne(ctx, ctx.Params["id"])
+	}
+
+	if ok {
+		ctx.SetFlashNotice("删除失败")
+		ctx.Redirect("index")
+		return
+	}
+#else
+	if ids == "" {
+		id := ctx.Params["id"]
+		models.$(className)RemoveByID(id)
+	} else {
+		for _, id := range strings.Split(ids, "\n") {
+			id = strings.Trim(id, "\r")
+			models.$(className)RemoveByID(id)
+		}
+	}
+#end if
+
 	ctx.SetFlashNotice("删除成功")
 	ctx.Redirect("index")
 	return
