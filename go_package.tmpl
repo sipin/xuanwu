@@ -214,3 +214,13 @@ func getSearchObj(word string, fields []string, params map[string]string, termKe
 
 	return getQuery("filtered", filtered)
 }
+
+func sortFieldsFilter(sortFields []string) (rtn []string) {
+	rtn = make([]string, 0, len(sortFields))
+	for _, s := range sortFields {
+		if s != ""{
+			rtn = append(rtn, s)
+		}
+	}
+	return
+}
