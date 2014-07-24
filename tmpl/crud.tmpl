@@ -39,6 +39,11 @@ func init() {
 	web.Post("$(urlBase)/edit", $(className)EditPost)
 	web.Post("$(urlBase)/view", $(className)ViewPost)
 	web.Post("$(urlBase)/delete", $(className)DeletePost)
+	#for field in $obj.fields
+	#if hasattr(field, "relateFields")
+	web.Get("$(urlBase)/relate/$field.name", $(className)$(field.name)Relate)
+	#end if
+	#end for
 }
 
 func getSearch$(className)(current *models.Users, q string, params map[string]string, limit int, offset int, sortField string) (objs []*models.$(className), total int) {
@@ -433,3 +438,24 @@ func $(className)DeletePost(ctx *admin.AdminContext) (html string) {
 	ctx.Redirect("index")
 	return
 }
+
+#for field in $obj.fields
+#if hasattr(field, "relateFields")
+func $(className)$(field.name)Relate(ctx *admin.AdminContext) (jsonData string) {
+	ID, _ := ctx.Params["ID"]
+	if ID != ""{
+		data, _ := models.$(field.bindTable)FindByID(ID)
+		if data == nil {
+			return
+		}
+		rtn := map[string]string{}
+		#for k, v in $field.relateFields
+		rtn["$v"] = data.$(k)Widget().Value
+		#end for
+		jsonByte, _ := json.Marshal(rtn)
+		jsonData = string(jsonByte)
+	}
+	return
+}
+#end if
+#end for

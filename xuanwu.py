@@ -117,11 +117,6 @@ def add_properties(field, obj):
 			 " has invalid field annotation: " + att.name.value)
 		setattr(field, att.name.value, att.value.value)
 
-	if hasattr(field, "widget") and field.widget == "relateSelect":
-		tpl = open('tmpl/field_getRelateFields.tmpl', 'r').read()
-		t = Template(tpl, searchList=[{"relateFields": field.relateFields}])
-		field.relateData = str(t).strip()
-
 	if hasattr(field, "bindData"):
 		col, label = field.bindData.split(".")
 		tpl = open('tmpl/field_getBindData.tmpl', 'r').read()
@@ -231,8 +226,9 @@ def transform_struct(obj):
 		if field.widget_type == "relateSelect":
 			obj.relateObj[field.name.value] = field
 			field.relateFields = []
-		else:
-			add_properties(field, obj)
+
+	for field in obj.fields:
+		add_properties(field, obj)
 
 	for field in obj.fields:
 		if hasattr(field, "relateData"):
@@ -240,10 +236,8 @@ def transform_struct(obj):
 			if col not in obj.relateObj:
 				raise Exception(thrift_file + " missing realte field " + col)
 			obj.relateObj[col].relateFields.append((field.name.value, label))
+			field.disabled = "True"
 			delattr(field, "relateData")
-
-	for field in obj.relateObj.values():
-		add_properties(field, obj)
 
 	obj.imports = ["bytes", "fmt"]
 	obj.listedFieldStrings = []

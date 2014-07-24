@@ -165,9 +165,6 @@ func (o *$obj.name.value) ${field.name.value}Widget() *Widget {
 		#else if $field.required
 			Required: true,
 		#end if
-		#if hasattr($field, "relateData")
-			GetRelateFields : $field.relateData,
-		#end if
 		#if hasattr($field, "disable")
 		        Disabled: $field.disable,
 		#end if
