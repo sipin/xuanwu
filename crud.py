@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 import sys
 import os
+import base
 
 from ptsd import ast
 from ptsd.loader import Loader, Parser
@@ -18,6 +19,8 @@ filename = ".".join(path.basename(thrift_file).split(".")[:-1])
 if not out_path.endswith(path.sep):
     out_path = out_path + path.sep
 
+outDir = out_path.split(path.sep)[-2]
+
 def updateController(out_path):
     subdirs = [o for o in os.listdir(out_path) if os.path.isdir(os.path.join(out_path, o))]
     content = "package controller\n\nimport (\n"
@@ -29,16 +32,12 @@ def updateController(out_path):
     f = open(out_path + "gen_init.go", "w")
     f.write(content)
     f.close()
-
-outDir = out_path.split(path.sep)[-2]
-
+    
 def getControlDir(urlBase):
-    outdir = out_path + \
-      urlBase.split(path.sep)[-2] + path.sep
+    outdir = out_path + urlBase.split(path.sep)[-2] + path.sep
     if not os.path.exists(outdir):
         os.makedirs(outdir)
     return outdir
-
 
 def fieldElem(field, key):
     for att in field.annotations:
@@ -76,8 +75,8 @@ def permission(name, action, obj):
         ret.append(item)
     return ret
 
-def dealPermission(obj, idField, thrift_idl, labelName):
-    location = "%s.%s" % (os.path.basename(thrift_idl), str(obj.name))
+def dealPermission(obj, idField, labelName):
+    location = "%s.%s" % (os.path.basename(thrift_file), str(obj.name))
     obj.crud = dict()
     create = fieldElems(idField, "Create")
     obj.create = permission(location, "Create", create)
@@ -117,101 +116,46 @@ def dealPermission(obj, idField, thrift_idl, labelName):
             obj.permission.append(p)
 
     if len(obj.permission) > 0:
-
         obj.imports.append(("mp", "zfw/models/permission"))
 
-def main(thrift_idl):
-    source = open(thrift_idl, 'r').read()
-    loader = Loader(thrift_idl, lambda x: x)
-    namespace = str(loader.namespace)
-
-    tpl = open('tpl/create.tmpl', 'r').read().decode("utf8")
-    crud = open('tmpl/crud.tmpl', 'r').read().decode("utf8")
-    thrift = Parser().parse(source)
-
-    ## generate controller files
-    for obj in thrift.body:
-        labelName = ""
+def transform_module(module):
+    for obj in module.structs:
         urlBase = ""
-        obj.filterFields = []
         obj.imports = []
-        obj.listedFields = []
-
-        if not hasattr(obj, "fields"):
-            continue
-
-
         idField = obj.fields[0]
-        labelName = fieldElem(idField, "label")
-        obj.label = labelName
         urlBase = fieldElem(idField, "baseurl")
         tplPackage = fieldElem(idField, "tplpackage")
+        obj.classLabel = fieldElem(idField, "label")
         if tplPackage == "":
             tplPackage = "tpl/auto"
 
-        if labelName == "" or urlBase == "":
+        if obj.label  == "" or urlBase == "":
             continue
 
-        listedFields = fieldElem(idField, "listedfields")
-        if listedFields != "":
-            obj.listedFields = [f.strip() for f in listedFields.split(",")]
-
-        filterFields = fieldElem(idField, "filterfields")
-        if filterFields != "":
-            filterFields = [f.strip() for f in filterFields.split(",")]
-        for fieldname in filterFields:
-            for field in obj.fields:
-                if field.name.value == fieldname:
-                    obj.filterFields.append(field)
-
-        dealPermission(obj, idField, thrift_idl, labelName)
-
-        # make sure all field in filter fields exists
-        if len(filterFields) > len(obj.filterFields):
-            foundFields = [field.name.value for field in obj.filterFields if field.name.value in filterFields]
-            missingFields = [field for field in filterFields if field not in foundFields]
-            raise Exception("missing filterFields: " + str(missingFields))
-
-        # relateSelect JsonData
-        relateObj = {}
-        for field in obj.fields:
-            for att in field.annotations:
-                if att.name.value == "widget":
-                    if att.value.value == "relateSelect":
-                        relateObj[field.name.value] = field
-                        field.relateFields = []
-                if att.name.value == "bindData":
-                    col, label = att.value.value.split(".")
-                    field.bindTable = col
-
-        for field in obj.fields:
-            for att in field.annotations:
-                if att.name.value == "relateData":
-                    col, label = att.value.value.split(".")
-                    if col not in relateObj:
-                        raise Exception(thrift_file + " missing realte field " + col)
-                    relateObj[col].relateFields.append((label, field.name.value))
-        
-        if len(relateObj) > 0:
+        dealPermission(obj, idField, obj.classLabel)
+        if len(obj.relateObj) > 0:
             obj.imports.append("encoding/json")
 
         outDir = urlBase.split(path.sep)[-2]
-        t = Template(crud, searchList=[{"namespace": outDir,
-                                        "className": obj.name.value,
-                                        "classLabel": labelName,
+        crud = open('tmpl/crud.tmpl', 'r').read().decode("utf8")
+        res = Template(crud, searchList=[{"namespace": outDir,
+                                        "className": obj.label,
                                         "urlBase": urlBase,
                                         "tplPackage": tplPackage,
                                         "obj": obj,
-                                        }])
-        res = str(t)
+                                        }])        
         writeDir = getControlDir(urlBase)
         outfile = writeDir + "gen_" + obj.name.value.lower() + ".go"
-        f = open(outfile, "w")
-        f.write(res)
-        f.close()
-
-        ## print "generate: {}".format(outfile)
-        ## update init.go in controller
-        updateController(out_path)
+        with open(outfile, "w") as fp:
+            fp.write(str(res))
+            
+    
+def main(thrift_idl):
+    loader = base.load_thrift(thrift_idl)
+    global namespace
+    namespace = loader.namespace
+    for obj in loader.modules.values():
+        transform_module(obj)
+    updateController(out_path)
 
 main(thrift_file)

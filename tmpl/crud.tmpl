@@ -232,13 +232,13 @@ func $(className)Export(ctx *admin.AdminContext) (html string) {
 	rows[0] = xls.NewRow(labels...)
 
 	for i, o := range objs {
-		#for f in $obj.listedFields
+		#for f in $obj.listedFieldNames
 		#if "." in f
 		$(f.replace(".", "")), _ := o.Get$(f[:f.index(".")])()
 		#end if
 		#end for
 		rows[i + 1] = xls.NewRow(
-			#for f in $obj.listedFields
+			#for f in $obj.listedFieldNames
 			#if "." in f
 			$(f.replace(".", "")).GetFieldAsString("$(f[f.index(".")+1:])"),
 			#else
@@ -256,7 +256,7 @@ func $(className)Export(ctx *admin.AdminContext) (html string) {
 		ctx.Logger.Error(err)
 	}
 
-	fname := fmt.Sprintf("attachment;filename=\"%s_%s.xls\"", "$(obj.label)", time.Now().Format("2006-01-02_1504"))
+	fname := fmt.Sprintf("attachment;filename=\"%s_%s.xls\"", "$(obj.classLabel)", time.Now().Format("2006-01-02_1504"))
 	ctx.SetHeader("Content-Disposition", fname, true)
 	return string(ret)
 }
@@ -307,9 +307,9 @@ func $(className)Create(ctx *admin.AdminContext) (html string) {
 		obj = models.New$(className)FromBytes(data)
 		obj.ValidateData()
 		ctx.ClearSession("$(className)Create")
-		return autoTpl.Create(ctx.Context, obj.Widgets(), "建立$(classLabel)")
+		return autoTpl.Create(ctx.Context, obj.Widgets(), "建立$(obj.classLabel)")
 	}
-	return autoTpl.Create(ctx.Context, models.New$(className)().Widgets(), "建立$(classLabel)")
+	return autoTpl.Create(ctx.Context, models.New$(className)().Widgets(), "建立$(obj.classLabel)")
 }
 
 func $(className)CreatePost(ctx *admin.AdminContext) (html string) {
@@ -519,7 +519,7 @@ func $(className)$(field.name)Relate(ctx *admin.AdminContext) (jsonData string) 
 		}
 		rtn := map[string]string{}
 		#for k, v in $field.relateFields
-		rtn["$v"] = data.$(k)Widget().Value
+		rtn["$k"] = data.$(v)Widget().Value
 		#end for
 		jsonByte, _ := json.Marshal(rtn)
 		jsonData = string(jsonByte)
