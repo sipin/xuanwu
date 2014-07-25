@@ -152,7 +152,7 @@ def transform_module(module):
             
     
 def main(thrift_idl):
-    loader = base.loader_thrift(thrift_idl)
+    loader = base.load_thrift(thrift_idl)
     global namespace
     namespace = loader.namespace
     for obj in loader.modules.values():

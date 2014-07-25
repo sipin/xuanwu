@@ -322,7 +322,7 @@ def init_module(module):
 		init_OrderFields(obj)
 		init_FilterFields(obj)
 
-def loader_thrift(thrift_idl):    
+def load_thrift(thrift_idl):    
 	loader = Loader(thrift_idl, lambda x: x)
 	if loader.namespace == "":
 		print 'namespace go not found, please add `namespace go XXXX` to ' + thrift_file + " and retry"

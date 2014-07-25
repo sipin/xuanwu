@@ -87,11 +87,9 @@ def transform_struct(obj):
 	tpl = open('tmpl/go.tmpl', 'r').read()
 	t = Template(tpl, searchList=[{"namespace": namespace, "filename": filename, "obj": obj}])
 	code = str(t)
-	f = open(out_path + 'gen_' + obj.name.value.lower() + ".go", "w")
-	f.write(code)
-	f.close()
-
-	
+	with open(out_path + 'gen_' + obj.name.value.lower() + ".go", "w") as f:
+		f.write(code)
+		
 def transform(module):	
 	for struct in module.structs:
 		transform_struct(struct)
