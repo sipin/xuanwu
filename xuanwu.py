@@ -99,10 +99,9 @@ def transform(module):
 		t = Template(tpl, searchList=[{"namespace": filename, "objs": module.consts}])
 		if not path.exists(out_path + filename):
 			mkdir(out_path + filename)
-		f = open(out_path + "%s/gen_%s_const.go" % (filename, filename), "w")
-		f.write(str(t))
-		f.close()
-
+		with open(out_path + "%s/gen_%s_const.go" % (filename, filename), "w") as fp:
+			fp.write(str(t))
+			
 	if len(module.enums) > 0:
 		tpl = open('tmpl/go_enum.tmpl', 'r').read()
 		t = Template(tpl, searchList=[{
@@ -112,10 +111,9 @@ def transform(module):
 		}])
 		if not path.exists(out_path + filename):
 			mkdir(out_path + filename)
-		f = open(out_path + "%s/gen_%s_enum.go" % (filename, filename), "w")
-		f.write(str(t))
-		f.close()
-
+		with open(out_path + "%s/gen_%s_enum.go" % (filename, filename), "w") as fp:
+			fp.write(str(t))
+	
 	
 def main(thrift_idl):
 	loader = base.load_thrift(thrift_idl)
@@ -124,9 +122,9 @@ def main(thrift_idl):
 	tpl = open('tmpl/go_package.tmpl', 'r').read()
 	t = Template(tpl, searchList=[{"namespace": namespace}])
 	code = unicode(t)
-	f = open(out_path + 'gen_init.go', "w")
-	f.write(code)
-	f.close()
+	with open(out_path + 'gen_init.go', "w") as fp:
+		fp.write(code)
+		
 	for module in loader.modules.values():
 		transform(module)
 	

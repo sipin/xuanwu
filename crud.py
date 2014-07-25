@@ -137,18 +137,17 @@ def transform_module(module):
 
         outDir = urlBase.split(path.sep)[-2]
         crud = open('tmpl/crud.tmpl', 'r').read().decode("utf8")
-        t = Template(crud, searchList=[{"namespace": outDir,
+        res = Template(crud, searchList=[{"namespace": outDir,
                                         "className": obj.name.value,
                                         "classLabel": obj.label,
                                         "urlBase": urlBase,
                                         "tplPackage": tplPackage,
                                         "obj": obj,
-                                        }])
-        res = str(t)
+                                        }])        
         writeDir = getControlDir(urlBase)
         outfile = writeDir + "gen_" + obj.name.value.lower() + ".go"
         with open(outfile, "w") as fp:
-            fp.write(res)         
+            fp.write(str(res))
             
     
 def main(thrift_idl):
