@@ -125,21 +125,21 @@ def transform_module(module):
         idField = obj.fields[0]        
         urlBase = fieldElem(idField, "baseurl")
         tplPackage = fieldElem(idField, "tplpackage")
+        obj.classLabel = fieldElem(idField, "label")
         if tplPackage == "":
             tplPackage = "tpl/auto"
 
         if obj.label  == "" or urlBase == "":
             continue
     
-        dealPermission(obj, idField, obj.label)
+        dealPermission(obj, idField, obj.classLabel)
         if len(obj.relateObj) > 0:
             obj.imports.append("encoding/json")
 
         outDir = urlBase.split(path.sep)[-2]
         crud = open('tmpl/crud.tmpl', 'r').read().decode("utf8")
         res = Template(crud, searchList=[{"namespace": outDir,
-                                        "className": obj.name.value,
-                                        "classLabel": obj.label,
+                                        "className": obj.label,
                                         "urlBase": urlBase,
                                         "tplPackage": tplPackage,
                                         "obj": obj,

@@ -80,10 +80,10 @@ def type_translate(obj):
 		return obj.value
 	return "unknown(%s)" % obj
 
-def add_properties(field, obj):
+def add_properties(field, obj):	
 	field.label = field.name.value
 	# todo: add field name checking
-	for att in field.annotations:
+	for att in field.annotations:		
 		if att.name.value not in supported_annotations:
 			raise Exception(obj.name.value + " " + field.name.value +
 			 " has invalid field annotation: " + att.name.value)
@@ -172,10 +172,11 @@ def transform_const(obj):
 
 def init_Fields(obj):
 	idField = obj.fields[0]
+	obj.label = obj.name.value
 	obj.relateObj = {}
 	obj.fieldMap = {}
 	for field in obj.fields:
-		field.foreign = ""
+		field.foreign = ""		
 		if field.name.value.endswith("ID"):
 				field.foreign = field.name.value[:-2] 
 		field.go_type = type_translate(field.type)
@@ -315,8 +316,7 @@ def init_module(module):
 				obj.labels[i.tag] = label_anno[0]
 				
 	## init struct related
-	for obj in module.structs:
-		obj.label = obj.name.value
+	for obj in module.structs:		
 		init_Fields(obj)
 		init_ListedField(obj)
 		init_OrderFields(obj)
