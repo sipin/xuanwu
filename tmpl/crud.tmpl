@@ -232,13 +232,13 @@ func $(className)Export(ctx *admin.AdminContext) (html string) {
 	rows[0] = xls.NewRow(labels...)
 
 	for i, o := range objs {
-		#for f in $obj.listedFields
+		#for f in $obj.listedFieldNames
 		#if "." in f
 		$(f.replace(".", "")), _ := o.Get$(f[:f.index(".")])()
 		#end if
 		#end for
 		rows[i + 1] = xls.NewRow(
-			#for f in $obj.listedFields
+			#for f in $obj.listedFieldNames
 			#if "." in f
 			$(f.replace(".", "")).GetFieldAsString("$(f[f.index(".")+1:])"),
 			#else
@@ -519,7 +519,7 @@ func $(className)$(field.name)Relate(ctx *admin.AdminContext) (jsonData string) 
 		}
 		rtn := map[string]string{}
 		#for k, v in $field.relateFields
-		rtn["$v"] = data.$(k)Widget().Value
+		rtn["$k"] = data.$(v)Widget().Value
 		#end for
 		jsonByte, _ := json.Marshal(rtn)
 		jsonData = string(jsonByte)
