@@ -80,10 +80,10 @@ def type_translate(obj):
 		return obj.value
 	return "unknown(%s)" % obj
 
-def add_properties(field, obj):	
+def add_properties(field, obj):
 	field.label = field.name.value
 	# todo: add field name checking
-	for att in field.annotations:		
+	for att in field.annotations:
 		if att.name.value not in supported_annotations:
 			raise Exception(obj.name.value + " " + field.name.value +
 			 " has invalid field annotation: " + att.name.value)
@@ -96,7 +96,7 @@ def add_properties(field, obj):
 		t = Template(tpl, searchList=[{"field": field, "col": col, "label": label}])
 		field.bindData = str(t).strip()
 		field.bindTable = col
-		
+
 	if hasattr(field, "meta"):
 		if str(field.type) != "string":
 			raise Exception("meta data must should store in string type")
@@ -132,7 +132,7 @@ def transform_type(field_type):
 	elif isinstance(field_type, ast.Double):
 		return 'Float'
 	elif isinstance(field_type, ast.Bool):
-		return 'Boolean'	
+		return 'Boolean'
 	elif isinstance(field_type, (ast.Binary, ast.String)):
 		return 'String'
 	elif isinstance(field_type, ast.Identifier):
@@ -162,8 +162,8 @@ def transform_field(field, indent=0):
 	return line
 
 class ListField:
-	pass	
-    
+	pass
+
 def transform_const(obj):
 	obj.go_type = type_translate(obj.type)
 	obj.is_map = isinstance(obj.type, ast.Map)
@@ -176,9 +176,9 @@ def init_Fields(obj):
 	obj.relateObj = {}
 	obj.fieldMap = {}
 	for field in obj.fields:
-		field.foreign = ""		
+		field.foreign = ""
 		if field.name.value.endswith("ID"):
-				field.foreign = field.name.value[:-2] 
+				field.foreign = field.name.value[:-2]
 		field.go_type = type_translate(field.type)
 		field.type = str(field.type)
 		field.widget_type = get_widget_type(field)
@@ -199,12 +199,12 @@ def init_Fields(obj):
 			obj.relateObj[col].relateFields.append((field.name.value, label))
 			field.disabled = "True"
 			delattr(field, "relateData")
-			
+
 	obj.toList = [i.name.value for i in obj.fields if hasattr(i, "toList")]
 	if "ID" not in obj.toList:
 		obj.toList.append("ID")
 
-			
+
 def init_ListedField(obj):
 	idField = obj.fields[0]
 	obj.listedFields = []
@@ -259,7 +259,7 @@ def init_OrderFields(obj):
 			raise Exception(thrift_file + " " + obj.name.value + " too many default order index")
 		if len(orderFields) > 0:
 			raise Exception(thrift_file + " " + obj.name.value + " missing orderFields: " + ",".join(orderFields))
-		
+
 def init_FilterFields(obj):
 	idField = obj.fields[0]
 	obj.filterFields = []
@@ -277,7 +277,7 @@ def init_FilterFields(obj):
 					elif field.type == "string":
 						obj.termKeys.append(fieldname)
 					else:
-						raise Exception(thrift_file + " " + obj.name.value + " invalid filterFields: " + str(missingFields))			
+						raise Exception(thrift_file + " " + obj.name.value + " invalid filterFields: " + str(missingFields))
 
 		if len(filterFields) > len(obj.filterFields):
 			foundFields = [field.name.value for field in obj.filterFields if field.name.value in filterFields]
@@ -289,7 +289,7 @@ def init_module(module):
 	module.typedef = []
 	module.enums = []
 	module.structs = []
-	
+
 	for node in [i for i in module.values() if isinstance(i, ast.Typedef)]:
 		node.go_type = type_translate(node.type)
 		module.typedefs.append(node)
@@ -314,23 +314,21 @@ def init_module(module):
 				obj.labels[i.tag] = '"%s"' % i.name
 			else:
 				obj.labels[i.tag] = label_anno[0]
-				
+
 	## init struct related
-	for obj in module.structs:		
+	for obj in module.structs:
 		init_Fields(obj)
 		init_ListedField(obj)
 		init_OrderFields(obj)
 		init_FilterFields(obj)
 
-def load_thrift(thrift_idl):    
+def load_thrift(thrift_idl):
 	loader = Loader(thrift_idl, lambda x: x)
 	if loader.namespace == "":
 		print 'namespace go not found, please add `namespace go XXXX` to ' + thrift_file + " and retry"
 		sys.exit(1)
-    
+
 	loader.namespace = str(loader.namespace)
 	for module in loader.modules.values():
-		init_module(module)		
+		init_module(module)
 	return loader
-	
-

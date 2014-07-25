@@ -18,14 +18,14 @@ filename = ".".join(path.basename(thrift_file).split(".")[:-1])
 
 if not out_path.endswith(path.sep):
 	out_path = out_path + path.sep
-	
+
 try:
 	src_path = out_path.replace("\\", "/")
 	src_path = src_path[src_path.index("/src/")+5:].strip("/")
 except ValueError:
 	print "output_folder_path should contains '/src/', for xuanwu to use absolute go path import"
 	sys.exit()
-	
+
 def get_search(obj):
 	search = None
 	for field in obj.fields:
@@ -46,7 +46,7 @@ def get_search(obj):
 
 def struct_import(obj):
 	idField = obj.fields[0]
-	obj.imports = ["bytes", "fmt"]	
+	obj.imports = ["bytes", "fmt"]
 	obj.search = get_search(obj)
 	if obj.search != None:
 		obj.imports.append("github.com/mattbaird/elastigo/core")
@@ -57,11 +57,11 @@ def struct_import(obj):
 
 	if len([f for f in obj.filterFields if f.type == "string"]) > 0:
 		obj.imports.append("github.com/mattbaird/elastigo/indices")
-		
+
 	for field in obj.fields:
 		if hasattr(field, "rule"):
 			obj.imports.append("regexp")
-			
+
 		if hasattr(field, "stringList") or hasattr(field, "enums"):
 			import_module = filename
 			if src_path:
@@ -76,11 +76,11 @@ def struct_import(obj):
 
 		if field.widget_type in ["date", "time", "datetime"]:
 			obj.imports.append("time")
-			
+
 		if hasattr(field, "meta"):
 			obj.imports.append("encoding/json")
 	obj.imports = sorted(set(obj.imports))
-	
+
 
 def transform_struct(obj):
 	struct_import(obj)
@@ -89,11 +89,11 @@ def transform_struct(obj):
 	code = str(t)
 	with open(out_path + 'gen_' + obj.name.value.lower() + ".go", "w") as f:
 		f.write(code)
-		
-def transform(module):	
+
+def transform(module):
 	for struct in module.structs:
 		transform_struct(struct)
-		
+
 	if len(module.consts) > 0:
 		tpl = open('tmpl/go_const.tmpl', 'r').read()
 		t = Template(tpl, searchList=[{"namespace": filename, "objs": module.consts}])
@@ -101,7 +101,7 @@ def transform(module):
 			mkdir(out_path + filename)
 		with open(out_path + "%s/gen_%s_const.go" % (filename, filename), "w") as fp:
 			fp.write(str(t))
-			
+
 	if len(module.enums) > 0:
 		tpl = open('tmpl/go_enum.tmpl', 'r').read()
 		t = Template(tpl, searchList=[{
@@ -113,8 +113,8 @@ def transform(module):
 			mkdir(out_path + filename)
 		with open(out_path + "%s/gen_%s_enum.go" % (filename, filename), "w") as fp:
 			fp.write(str(t))
-	
-	
+
+
 def main(thrift_idl):
 	loader = base.load_thrift(thrift_idl)
 	global namespace
@@ -124,8 +124,8 @@ def main(thrift_idl):
 	code = unicode(t)
 	with open(out_path + 'gen_init.go', "w") as fp:
 		fp.write(code)
-		
+
 	for module in loader.modules.values():
 		transform(module)
-	
+
 main(thrift_file)

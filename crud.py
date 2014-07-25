@@ -119,10 +119,10 @@ def dealPermission(obj, idField, labelName):
         obj.imports.append(("mp", "zfw/models/permission"))
 
 def transform_module(module):
-    for obj in module.structs:        
+    for obj in module.structs:
         urlBase = ""
         obj.imports = []
-        idField = obj.fields[0]        
+        idField = obj.fields[0]
         urlBase = fieldElem(idField, "baseurl")
         tplPackage = fieldElem(idField, "tplpackage")
         obj.classLabel = fieldElem(idField, "label")
@@ -131,7 +131,7 @@ def transform_module(module):
 
         if obj.label  == "" or urlBase == "":
             continue
-    
+
         dealPermission(obj, idField, obj.classLabel)
         if len(obj.relateObj) > 0:
             obj.imports.append("encoding/json")
