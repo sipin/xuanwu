@@ -2,17 +2,18 @@
 
 #for field in $obj.fields
 	#if $field.foreign != ""
-func (p *$obj.name.value) Get$(field.foreign)() (result *$field.foreign, err error) {
-	return $(field.foreign)FindByID(p.$field.name.value)
+func (p *$obj.name.value) Get$(field.foreign)() (result *$field.foreign_type, err error) {
+	return $(field.foreign_type)FindByID(p.$field.name.value)
 }
 
-func (p *$obj.name.value) Set$(field.foreign)(obj *$field.foreign) {
+func (p *$obj.name.value) Set$(field.foreign)(obj *$field.foreign_type) {
 	p.$field.name.value = obj.ID.Hex()
 }
-
+#if $field.foreign == $field.foreign_type
 func (o *$field.foreign) GetAll$(obj.name.value)() (result []*$obj.name.value, err error) {
 	query := bson.M{"$(field.foreign)ID": o.ID.Hex()}
 	return $(obj.name.value)FindAll(query)
 }
+#end if
 	#end if
 #end for

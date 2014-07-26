@@ -51,6 +51,11 @@ def struct_import(obj):
 	if obj.search != None:
 		obj.imports.add("github.com/mattbaird/elastigo/core")
 
+
+	for f in obj.fields:
+		if f.foreign_package != "":
+			obj.imports.add(f.foreign_package)
+
 	obj.label = obj.name.value
 	if hasattr(idField, "label"):
 		obj.label = idField.label
