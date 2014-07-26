@@ -118,7 +118,6 @@ def get_widget_type(obj, field):
 	for att in field.annotations:
 		if att.name.value.lower() == "widget":
 			if not att.value.value in widget_types:
-				print widget_types
 				raise Exception(thrift_file + " " + obj.name.value + ":" + field.name.value + " has invalid widget type: " + att.value.value)
 			return att.value.value
 		if att.name.value.lower() == "dm":
