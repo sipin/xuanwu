@@ -32,7 +32,7 @@ def updateController(out_path):
     f = open(out_path + "gen_init.go", "w")
     f.write(content)
     f.close()
-    
+
 def getControlDir(urlBase):
     outdir = out_path + urlBase.split(path.sep)[-2] + path.sep
     if not os.path.exists(outdir):
@@ -99,7 +99,7 @@ def dealPermission(obj, idField, labelName):
     obj.hasUpdate = len(obj.update) > 0
     obj.hasRead = len(obj.read) > 0
     if len(obj.create) + len(obj.read) + len(obj.update) + len(obj.delete) > 0:
-        obj.imports.append("admin/permission")
+        obj.imports.add("admin/permission")
         if not obj.hasUser:
             raise Exception("%s use crud and miss UsersID" % (location))
     obj.permission = []
@@ -116,12 +116,12 @@ def dealPermission(obj, idField, labelName):
             obj.permission.append(p)
 
     if len(obj.permission) > 0:
-        obj.imports.append(("mp", "zfw/models/permission"))
+        obj.imports.add(("mp", "zfw/models/permission"))
 
 def transform_module(module):
     for obj in module.structs:
         urlBase = ""
-        obj.imports = []
+        obj.imports = set()
         idField = obj.fields[0]
         urlBase = fieldElem(idField, "baseurl")
         tplPackage = fieldElem(idField, "tplpackage")
@@ -134,7 +134,7 @@ def transform_module(module):
 
         dealPermission(obj, idField, obj.classLabel)
         if len(obj.relateObj) > 0:
-            obj.imports.append("encoding/json")
+            obj.imports.add("encoding/json")
 
         outDir = urlBase.split(path.sep)[-2]
         crud = open('tmpl/crud.tmpl', 'r').read().decode("utf8")
@@ -143,13 +143,13 @@ def transform_module(module):
                                         "urlBase": urlBase,
                                         "tplPackage": tplPackage,
                                         "obj": obj,
-                                        }])        
+                                        }])
         writeDir = getControlDir(urlBase)
         outfile = writeDir + "gen_" + obj.name.value.lower() + ".go"
         with open(outfile, "w") as fp:
             fp.write(str(res))
-            
-    
+
+
 def main(thrift_idl):
     loader = base.load_thrift(thrift_idl)
     global namespace
