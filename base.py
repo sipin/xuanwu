@@ -44,6 +44,7 @@ supported_annotations = set([
 	"dm",
 	"enums",
 	"filterFields",
+	"fk",
 	"index",
 	"label",
 	"listedFields",
