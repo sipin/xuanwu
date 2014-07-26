@@ -46,39 +46,44 @@ def get_search(obj):
 
 def struct_import(obj):
 	idField = obj.fields[0]
-	obj.imports = ["bytes", "fmt"]
+	obj.imports = set(["bytes", "fmt"])
 	obj.search = get_search(obj)
 	if obj.search != None:
-		obj.imports.append("github.com/mattbaird/elastigo/core")
+		obj.imports.add("github.com/mattbaird/elastigo/core")
+
+
+	for f in obj.fields:
+		if f.foreign_package != "":
+			obj.imports.add(f.foreign_package)
 
 	obj.label = obj.name.value
 	if hasattr(idField, "label"):
 		obj.label = idField.label
 
 	if len([f for f in obj.filterFields if f.type == "string"]) > 0:
-		obj.imports.append("github.com/mattbaird/elastigo/indices")
+		obj.imports.add("github.com/mattbaird/elastigo/indices")
 
 	for field in obj.fields:
 		if hasattr(field, "rule"):
-			obj.imports.append("regexp")
+			obj.imports.add("regexp")
 
 		if hasattr(field, "stringList") or hasattr(field, "enums"):
 			import_module = filename
 			if src_path:
 				import_module = src_path + "/" + import_module
-			obj.imports.append(import_module)
+			obj.imports.add(import_module)
 
 		if field.type in ["i32", "i64", "bool"] and field.widget_type not in ["date", "time", "datetime"]:
-			obj.imports.append("strconv")
+			obj.imports.add("strconv")
 
 		if field.type == "list<string>":
-			obj.imports.append("strings")
+			obj.imports.add("strings")
 
 		if field.widget_type in ["date", "time", "datetime"]:
-			obj.imports.append("time")
+			obj.imports.add("time")
 
 		if hasattr(field, "meta"):
-			obj.imports.append("encoding/json")
+			obj.imports.add("encoding/json")
 	obj.imports = sorted(set(obj.imports))
 
 

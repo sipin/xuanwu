@@ -5,7 +5,7 @@ from ptsd import ast
 from ptsd.loader import Loader, Parser
 from Cheetah.Template import Template
 from os import path, mkdir
-
+thrift_file = ""
 type_ref = dict(
 	string = "string",
 	i32 = "int32",
@@ -14,54 +14,55 @@ type_ref = dict(
 )
 
 widget_types = set([
-	"text",
-	"textarea",
-	"opinion",
-	"richtext",
-	"password",
-	"radio",
 	"checkbox",
-	"select",
-	"selectPk",
+	"combobox",
 	"date",
 	"datetime",
-	"photo",
-	"photos",
+	"droplist",
 	"file",
 	"files",
-	"droplist",
-	"combobox",
 	"hidden",
+	"opinion",
+	"password",
+	"photo",
+	"photos",
+	"radio",
+	"relateSelect",
+	"richtext",
+	"select",
+	"selectPk",
+	"text",
+	"textarea",
 	"time",
 	"userselect",
-	"relateSelect"
 ])
 
 supported_annotations = set([
-	"label",
 	"baseURL",
-	"listedFields",
-	"orderFields",
-	"search",
-	"dm",
-	"meta",
-	"widget",
 	"bindData",
+	"disabled",
+	"dm",
+	"enums",
+	"filterFields",
+	"fk",
+	"index",
+	"label",
+	"listedFields",
+	"meta",
+	"orderFields",
+	"placeholder",
+	"readonly",
 	"relateData",
 	"requiredMsg",
 	"rule",
 	"ruleMsg",
-	"filterFields",
-	"placeholder",
+	"search",
 	"stringList",
-	"readonly",
-	"disabled",
-	"index",
-	"enums",
-	"toList",
 	"summary",
-	"viewUrl",
+	"toList",
 	"tplPackage",
+	"viewUrl",
+	"widget",
 
 	#permission
 	"Create", "Read", "Update", "Delete",
@@ -113,11 +114,11 @@ def add_properties(field, obj):
 		field.requiredMsg = "请输入" + field.label
 
 
-def get_widget_type(field):
+def get_widget_type(obj, field):
 	for att in field.annotations:
 		if att.name.value.lower() == "widget":
 			if not att.value.value in widget_types:
-				raise Exception(field.name.value + " has invalid widget type: " + att.value.value)
+				raise Exception(thrift_file + " " + obj.name.value + ":" + field.name.value + " has invalid widget type: " + att.value.value)
 			return att.value.value
 		if att.name.value.lower() == "dm":
 			field.placeholder = att.value.value
@@ -176,20 +177,35 @@ def init_Fields(obj):
 	obj.relateObj = {}
 	obj.fieldMap = {}
 	for field in obj.fields:
+		add_properties(field, obj)
 		field.foreign = ""
+		field.foreign_package = ""
 		if field.name.value.endswith("ID"):
-				field.foreign = field.name.value[:-2]
+			field.foreign = field.name.value[:-2]
+			field.foreign_type = field.foreign
+
+		if hasattr(field, "fk"):
+			if "." in field.fk:
+				pos = field.fk.rindex(".")
+				field.foreign = field.fk[pos+1:]
+				field.foreign_package = field.fk[0:pos]
+
+				if "/" in field.foreign_package:
+					pos = field.foreign_package.rindex("/")
+					field.foreign_type = field.foreign_package[pos+1:] + "." + field.foreign
+				else:
+					field.foreign_type = field.foreign_package + "." + field.foreign
+			else:
+				field.foreign_type = field.fk
+
 		field.go_type = type_translate(field.type)
 		field.type = str(field.type)
-		field.widget_type = get_widget_type(field)
+		field.widget_type = get_widget_type(obj, field)
 		obj.fieldMap[field.name.value] = field
 
 		if field.widget_type == "relateSelect":
 			obj.relateObj[field.name.value] = field
 			field.relateFields = []
-
-	for field in obj.fields:
-		add_properties(field, obj)
 
 	for field in obj.fields:
 		if hasattr(field, "relateData"):
@@ -323,6 +339,8 @@ def init_module(module):
 		init_FilterFields(obj)
 
 def load_thrift(thrift_idl):
+	global thrift_file
+	thrift_file = thrift_idl
 	loader = Loader(thrift_idl, lambda x: x)
 	if loader.namespace == "":
 		print 'namespace go not found, please add `namespace go XXXX` to ' + thrift_file + " and retry"
