@@ -295,6 +295,8 @@ def init_FilterFields(obj):
 						obj.dateKeys.append(fieldName + "End")
 					elif field.type == "string":
 						obj.termKeys.append(fieldName)
+					elif field.type == "list<string>":
+						obj.termKeys.append(fieldName)
 					else:
 						raise Exception("%s %s has invalid filterField: %s:%s" %
 					(thrift_file, obj.name.value, fieldName, field.type))
