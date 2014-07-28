@@ -211,7 +211,7 @@ def init_Fields(obj):
 		if hasattr(field, "relateData"):
 			col, label = field.relateData.split(".")
 			if col not in obj.relateObj:
-				raise Exception(thrift_file + " missing realte field " + col)
+				raise Exception(thrift_file + " missing relate field " + col)
 			obj.relateObj[col].relateFields.append((field.name.value, label))
 			field.disabled = "True"
 			delattr(field, "relateData")
