@@ -38,9 +38,11 @@ def get_search(obj):
 		try:
 			field = obj.fieldMap[fieldName]
 			if str(field.type) != "string":
-				raise Exception(thrift_file + " " + obj.name.value + " has non-string searchField: " + fieldName)
+				raise Exception("%s %s has non-string searchField: %s:%s" %
+					(thrift_file, obj.name.value, fieldName, field.type))
 		except KeyError:
-			raise Exception(thrift_file + " " + obj.name.value + " has invalid searchField: " + fieldName)
+			raise Exception("%s %s has invalid searchField: %s(%s)" %
+					(thrift_file, obj.name.value, fieldName, field.type))
 
 	return search
 
