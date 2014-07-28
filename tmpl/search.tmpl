@@ -42,7 +42,7 @@ var $(obj.name.value)SearchDateKeys = map[string]bool{
 	#end for
 }
 
-func $(obj.name.value)SearchWithParams(word string, params map[string]string, limit int, offset int) (core.SearchResult, error) {
+func $(obj.name.value)SearchWithParams(word string, params map[string]interface{}, limit int, offset int) (core.SearchResult, error) {
 	searchObj := getSearchObj(word, $(obj.name.value)SearchFileds, params, $(obj.name.value)SearchTermKeys, $(obj.name.value)SearchDateKeys)
 	args := map[string]interface{} {"from" : offset, "size": limit}
 	return core.SearchRequest("$(obj.name.value.lower())", "simple", args, searchObj)
