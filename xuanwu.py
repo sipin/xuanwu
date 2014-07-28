@@ -65,9 +65,6 @@ def struct_import(obj):
 	if hasattr(idField, "label"):
 		obj.label = idField.label
 
-	if len([f for f in obj.filterFields if f.type == "string"]) > 0:
-		obj.imports.add("github.com/mattbaird/elastigo/indices")
-
 	for field in obj.fields:
 		if hasattr(field, "rule"):
 			obj.imports.add("regexp")
@@ -89,10 +86,13 @@ def struct_import(obj):
 
 		if hasattr(field, "meta"):
 			obj.imports.add("encoding/json")
-	obj.imports = sorted(set(obj.imports))
+
 	obj.stringFilterFields = [f for f in obj.filterFields if f.type in ["string", "list<string>"]]
 	obj.need_mapping = len(obj.stringFilterFields) > 0
 	obj.need_index = len([i for i in obj.fields if hasattr(i, "index")]) > 0
+
+	if obj.need_mapping:
+		obj.imports.add("github.com/mattbaird/elastigo/indices")
 
 
 

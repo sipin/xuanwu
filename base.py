@@ -188,12 +188,12 @@ def init_Fields(obj):
 		if hasattr(field, "fk"):
 			if "." in field.fk:
 				pos = field.fk.rindex(".")
-				field.foreign = field.fk[pos+1:]
+				foreign_type = field.fk[pos+1:]
 				field.foreign_package = field.fk[0:pos]
 
 				if "/" in field.foreign_package:
 					pos = field.foreign_package.rindex("/")
-					field.foreign_type = field.foreign_package[pos+1:] + "." + field.foreign
+					field.foreign_type = field.foreign_package[pos+1:] + "." + foreign_type
 				else:
 					field.foreign_type = field.foreign_package + "." + field.foreign
 			else:
