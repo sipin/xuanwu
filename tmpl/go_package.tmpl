@@ -138,7 +138,84 @@ func getQuery(key string, data map[string]interface{}) map[string]interface{} {
 	return args
 }
 
-func getSearchObj(word string, fields []string, params map[string]interface{}, termKeys map[string]bool, dateKeys map[string]bool) map[string]interface{} {
+func getSearchObj(word string, fields []string, params map[string]string, termKeys map[string]bool, dateKeys map[string]bool) map[string]interface{} {
+	terms := make(map[string]string)
+	ranges := make(map[string]map[string]int64)
+
+	for k, v := range params {
+		if v == "" {
+			continue
+		}
+		if _, ok := termKeys[k]; ok {
+			terms[k] = v
+			continue
+		}
+
+		if isStart, ok := dateKeys[k]; ok {
+			intVal, _ := time.Parse(DateLayout, v)
+			if isStart {
+				fieldName := k[0 : len(k)-5]
+				if dateVal, ok := ranges[fieldName]; ok {
+					dateVal["gte"] = intVal.Unix()
+					ranges[fieldName] = dateVal
+				} else {
+					ranges[fieldName] = map[string]int64{
+						"gte": intVal.Unix(),
+						"lt":  intVal.AddDate(0, 0, 1).Unix(),
+					}
+				}
+			} else {
+				fieldName := k[0 : len(k)-3]
+				if dateVal, ok := ranges[fieldName]; ok {
+					dateVal["lt"] = intVal.AddDate(0, 0, 1).Unix()
+				} else {
+					ranges[fieldName] = map[string]int64{
+						"gte": intVal.AddDate(0, 0, -1).Unix() + 1,
+						"lt":  intVal.AddDate(0, 0, 1).Unix(),
+					}
+				}
+			}
+		}
+	}
+
+	if len(terms) == 0 && len(ranges) == 0 {
+		return getQuery("query_string", getQueryString(word, fields))
+	}
+
+	filtered := make(map[string]interface{})
+	if word != "" {
+		filtered["query"] = map[string]interface{}{
+			"query_string": getQueryString(word, fields),
+		}
+	}
+
+	filter := make(map[string]interface{})
+	var must []interface{}
+
+	for k, v := range terms {
+		must = append(must, map[string]interface{}{
+			"term": map[string]string{
+				k: v,
+			},
+		})
+	}
+
+	for k, v := range ranges {
+		must = append(must, map[string]interface{}{
+			"range": map[string]interface{}{
+				k: v,
+			},
+		})
+	}
+	filter["bool"] = map[string]interface{}{
+		"must": must,
+	}
+	filtered["filter"] = filter
+
+	return getQuery("filtered", filtered)
+}
+
+func getMoreSearchObj(word string, fields []string, params map[string]interface{}, termKeys map[string]bool, dateKeys map[string]bool) map[string]interface{} {
 	terms := make(map[string]interface{})
 	ranges := make(map[string]map[string]int64)
 

@@ -90,6 +90,7 @@ def struct_import(obj):
 	obj.stringFilterFields = [f for f in obj.filterFields if f.type in ["string", "list<string>"]]
 	obj.need_mapping = len(obj.stringFilterFields) > 0
 	obj.need_index = len([i for i in obj.fields if hasattr(i, "index")]) > 0
+	obj.need_searchmore = len([f for f in obj.filterFields if f.type in ["list<string>"]]) > 0
 
 	if obj.need_mapping:
 		obj.imports.add("github.com/mattbaird/elastigo/indices")
