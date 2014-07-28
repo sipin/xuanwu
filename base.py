@@ -86,7 +86,7 @@ def add_properties(field, obj):
 	# todo: add field name checking
 	for att in field.annotations:
 		if att.name.value not in supported_annotations:
-			raise Exception(obj.name.value + " " + field.name.value +
+			raise Exception(thrift_file + " " + obj.name.value + " " + field.name.value +
 			 " has invalid field annotation: " + att.name.value)
 		setattr(field, att.name.value, att.value.value)
 
@@ -100,7 +100,8 @@ def add_properties(field, obj):
 
 	if hasattr(field, "meta"):
 		if str(field.type) != "string":
-			raise Exception("meta data must should store in string type")
+			raise Exception(thrift_file + " " + obj.name.value +
+				"meta data must should store in string type")
 
 		tpl = open('tmpl/field_getMeta.tmpl', 'r').read()
 
@@ -113,12 +114,12 @@ def add_properties(field, obj):
 	if field.required and not hasattr(field, "requiredMsg"):
 		field.requiredMsg = "请输入" + field.label
 
-
 def get_widget_type(obj, field):
 	for att in field.annotations:
 		if att.name.value.lower() == "widget":
 			if not att.value.value in widget_types:
-				raise Exception(thrift_file + " " + obj.name.value + ":" + field.name.value + " has invalid widget type: " + att.value.value)
+				raise Exception(thrift_file + " " + obj.name.value + ":" +
+					field.name.value + " has invalid widget type: " + att.value.value)
 			return att.value.value
 		if att.name.value.lower() == "dm":
 			field.placeholder = att.value.value
@@ -127,7 +128,7 @@ def get_widget_type(obj, field):
 			return "meta"
 	return "text"
 
-def transform_type(field_type):
+def transform_type(field_type, obj):
 	if isinstance(field_type, (ast.Byte, ast.I16, ast.I32, ast.I64)):
 		return 'Integer'
 	elif isinstance(field_type, ast.Double):
@@ -146,7 +147,7 @@ def transform_type(field_type):
 	elif isinstance(field_type, ast.Set):
 		# TODO(wickman) Support pystachio set?
 		return 'List(%s)' % transform_type(field_type.value_type)
-	raise ValueError('Unsupported conversion type: %s (base:%s)' % (field_type, type(field_type)))
+	raise ValueError(thrift_file + 'Unsupported conversion type: %s (base:%s)' % (field_type, type(field_type)))
 
 def transform_field(field, indent=0):
 	line = ' ' * indent
@@ -187,12 +188,12 @@ def init_Fields(obj):
 		if hasattr(field, "fk"):
 			if "." in field.fk:
 				pos = field.fk.rindex(".")
-				field.foreign = field.fk[pos+1:]
+				foreign_type = field.fk[pos+1:]
 				field.foreign_package = field.fk[0:pos]
 
 				if "/" in field.foreign_package:
 					pos = field.foreign_package.rindex("/")
-					field.foreign_type = field.foreign_package[pos+1:] + "." + field.foreign
+					field.foreign_type = field.foreign_package[pos+1:] + "." + foreign_type
 				else:
 					field.foreign_type = field.foreign_package + "." + field.foreign
 			else:
@@ -219,7 +220,6 @@ def init_Fields(obj):
 	obj.toList = [i.name.value for i in obj.fields if hasattr(i, "toList")]
 	if "ID" not in obj.toList:
 		obj.toList.append("ID")
-
 
 def init_ListedField(obj):
 	idField = obj.fields[0]
@@ -254,7 +254,8 @@ def init_ListedField(obj):
 		if len(listedFields) > len(obj.listedFields):
 			foundFields = [field.name.value for field in obj.listedFields if field.name.value in listedFields]
 			missingFields = [field for field in listedFields if field not in foundFields]
-			raise Exception(thrift_file + " " + obj.name.value + " missing listedFields: " + str(missingFields))
+			raise Exception(thrift_file + " " + obj.name.value +
+				" missing listedFields: " + str(missingFields))
 
 def init_OrderFields(obj):
 	idField = obj.fields[0]
@@ -272,9 +273,11 @@ def init_OrderFields(obj):
 				del orderFields[field.key]
 
 		if len(filter(lambda s: hasattr(s, "order") and s.order!="none", obj.listedFields)) > 1:
-			raise Exception(thrift_file + " " + obj.name.value + " too many default order index")
+			raise Exception(thrift_file + " " + obj.name.value +
+				" too many default order index")
 		if len(orderFields) > 0:
-			raise Exception(thrift_file + " " + obj.name.value + " missing orderFields: " + ",".join(orderFields))
+			raise Exception(thrift_file + " " + obj.name.value +
+				" missing orderFields: " + ",".join(orderFields))
 
 def init_FilterFields(obj):
 	idField = obj.fields[0]
@@ -283,22 +286,26 @@ def init_FilterFields(obj):
 	obj.dateKeys = []
 	if hasattr(idField, "filterFields"):
 		filterFields = [f.strip() for f in idField.filterFields.split(",")]
-		for fieldname in filterFields:
+		for fieldName in filterFields:
 			for field in obj.fields:
-				if field.name.value == fieldname:
+				if field.name.value == fieldName:
 					obj.filterFields.append(field)
 					if field.widget_type in ["date", "time", "datetime"]:
-						obj.dateKeys.append(fieldname + "Start")
-						obj.dateKeys.append(fieldname + "End")
+						obj.dateKeys.append(fieldName + "Start")
+						obj.dateKeys.append(fieldName + "End")
 					elif field.type == "string":
-						obj.termKeys.append(fieldname)
+						obj.termKeys.append(fieldName)
+					elif field.type == "list<string>":
+						obj.termKeys.append(fieldName)
 					else:
-						raise Exception(thrift_file + " " + obj.name.value + " invalid filterFields: " + str(missingFields))
+						raise Exception("%s %s has invalid filterField: %s:%s" %
+					(thrift_file, obj.name.value, fieldName, field.type))
 
 		if len(filterFields) > len(obj.filterFields):
 			foundFields = [field.name.value for field in obj.filterFields if field.name.value in filterFields]
 			missingFields = [field for field in filterFields if field not in foundFields]
-			raise Exception(thrift_file + " " + obj.name.value + " missing filterFields: " + str(missingFields))
+			raise Exception(thrift_file + " " + obj.name.value +
+				" missing filterFields: " + str(missingFields))
 
 def init_module(module):
 	module.consts = []

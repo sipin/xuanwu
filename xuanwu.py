@@ -34,15 +34,20 @@ def get_search(obj):
 
 	if search == None:
 		return search
+
+	searchFields = []
 	for fieldName in search:
 		try:
 			field = obj.fieldMap[fieldName]
-			if str(field.type) != "string":
-				raise Exception(obj.name.value + " has non-string searchField: " + fieldName)
+			if str(field.type) not in ["string"]:
+				raise Exception("%s %s has non-string searchField: %s:%s" %
+					(thrift_file, obj.name.value, fieldName, field.type))
+			searchFields.append(field)
 		except KeyError:
-			raise Exception(obj.name.value + " has invalid searchField: " + fieldName)
+			raise Exception("%s %s has invalid searchField: %s(%s)" %
+					(thrift_file, obj.name.value, fieldName, field.type))
 
-	return search
+	return searchFields
 
 def struct_import(obj):
 	idField = obj.fields[0]
@@ -59,9 +64,6 @@ def struct_import(obj):
 	obj.label = obj.name.value
 	if hasattr(idField, "label"):
 		obj.label = idField.label
-
-	if len([f for f in obj.filterFields if f.type == "string"]) > 0:
-		obj.imports.add("github.com/mattbaird/elastigo/indices")
 
 	for field in obj.fields:
 		if hasattr(field, "rule"):
@@ -84,7 +86,15 @@ def struct_import(obj):
 
 		if hasattr(field, "meta"):
 			obj.imports.add("encoding/json")
-	obj.imports = sorted(set(obj.imports))
+
+	obj.stringFilterFields = [f for f in obj.filterFields if f.type in ["string", "list<string>"]]
+	obj.need_mapping = len(obj.stringFilterFields) > 0
+	obj.need_index = len([i for i in obj.fields if hasattr(i, "index")]) > 0
+	obj.need_searchmore = len([f for f in obj.filterFields if f.type in ["list<string>"]]) > 0
+
+	if obj.need_mapping:
+		obj.imports.add("github.com/mattbaird/elastigo/indices")
+
 
 
 def transform_struct(obj):

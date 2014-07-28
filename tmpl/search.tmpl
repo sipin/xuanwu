@@ -2,23 +2,17 @@
 #if $obj.search != None
 type $(obj.name.value)SearchIndexObj struct {
 	#for field in $obj.search
-	$field string `json:"$(field)"`
+	$field.name.value $field.go_type `json:"$(field.name.value)"`
 	#end for
 	#for field in $obj.filterFields
-	#if $field.type == "string"
-	$field.name.value string `json:"$(field.name.value)"`
-	#else if  $field.type == "i64"
-	$field.name.value int64 `json:"$(field.name.value)"`
-	#else
-	$field.name.value has unsupported filter type 
-	#end if
+	$field.name.value $field.go_type `json:"$(field.name.value)"`
 	#end for
 }
 
 func (o *$obj.name.value) IndexSearch() () {
 	core.Index("$(obj.name.value.lower())", "simple", o.ID.Hex(), nil, $(obj.name.value)SearchIndexObj{
 		#for field in $obj.search
-		o.$(field),
+		o.$(field.name.value),
 		#end for
 		#for field in $obj.filterFields
 		o.$(field.name.value),
@@ -28,7 +22,7 @@ func (o *$obj.name.value) IndexSearch() () {
 
 var $(obj.name.value)SearchFileds = []string{
 	#for field in $obj.search
-	"$(field)",
+	"$(field.name.value)",
 	#end for
 }
 
@@ -54,6 +48,13 @@ func $(obj.name.value)SearchWithParams(word string, params map[string]string, li
 	return core.SearchRequest("$(obj.name.value.lower())", "simple", args, searchObj)
 }
 
+#if $obj.need_searchmore
+func $(obj.name.value)SearchWithMoreParams(word string, params map[string]interface{}, limit int, offset int) (core.SearchResult, error) {
+	searchObj := getMoreSearchObj(word, $(obj.name.value)SearchFileds, params, $(obj.name.value)SearchTermKeys, $(obj.name.value)SearchDateKeys)
+	args := map[string]interface{} {"from" : offset, "size": limit}
+	return core.SearchRequest("$(obj.name.value.lower())", "simple", args, searchObj)
+}
+#end if
 
 func $(obj.name.value)Search(word string, limit int, offset int) (core.SearchResult, error) {
 	searchObj := getQuery("query_string", getQueryString(word, $(obj.name.value)SearchFileds))

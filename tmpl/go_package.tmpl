@@ -215,6 +215,107 @@ func getSearchObj(word string, fields []string, params map[string]string, termKe
 	return getQuery("filtered", filtered)
 }
 
+func getMoreSearchObj(word string, fields []string, params map[string]interface{}, termKeys map[string]bool, dateKeys map[string]bool) map[string]interface{} {
+	terms := make(map[string]interface{})
+	ranges := make(map[string]map[string]int64)
+
+	for k, v := range params {
+		switch v := v.(type) {
+		case string:
+			if v == "" {
+				continue
+			}
+			if _, ok := termKeys[k]; ok {
+				terms[k] = v
+				continue
+			}
+
+			if isStart, ok := dateKeys[k]; ok {
+				intVal, _ := time.Parse(DateLayout, v)
+				if isStart {
+					fieldName := k[0 : len(k)-5]
+					if dateVal, ok := ranges[fieldName]; ok {
+						dateVal["gte"] = intVal.Unix()
+						ranges[fieldName] = dateVal
+					} else {
+						ranges[fieldName] = map[string]int64{
+							"gte": intVal.Unix(),
+							"lt":  intVal.AddDate(0, 0, 1).Unix(),
+						}
+					}
+				} else {
+					fieldName := k[0 : len(k)-3]
+					if dateVal, ok := ranges[fieldName]; ok {
+						dateVal["lt"] = intVal.AddDate(0, 0, 1).Unix()
+					} else {
+						ranges[fieldName] = map[string]int64{
+							"gte": intVal.AddDate(0, 0, -1).Unix() + 1,
+							"lt":  intVal.AddDate(0, 0, 1).Unix(),
+						}
+					}
+				}
+			}
+		case []string:
+			if len(v) == 0 {
+				continue
+			}
+			if _, ok := termKeys[k]; ok {
+				terms[k] = v
+				continue
+			}
+		}
+	}
+
+	if len(terms) == 0 && len(ranges) == 0 {
+		return getQuery("query_string", getQueryString(word, fields))
+	}
+
+	filtered := make(map[string]interface{})
+	if word != "" {
+		filtered["query"] = map[string]interface{}{
+			"query_string": getQueryString(word, fields),
+		}
+	}
+
+	filter := make(map[string]interface{})
+	var must []interface{}
+	var should []interface{}
+
+	for k, v := range terms {
+		switch v := v.(type) {
+		case string:
+			must = append(must, map[string]interface{}{
+				"term": map[string]string{
+					k: v,
+				},
+			})
+		case []string:
+			for _, val := range v {
+				should = append(should, map[string]interface{}{
+					"term": map[string]string{
+						k: val,
+					},
+				})
+			}
+		}
+	}
+
+	for k, v := range ranges {
+		must = append(must, map[string]interface{}{
+			"range": map[string]interface{}{
+				k: v,
+			},
+		})
+	}
+	filter["bool"] = map[string]interface{}{
+		"must":   must,
+		"should": should,
+	}
+	filtered["filter"] = filter
+
+	return getQuery("filtered", filtered)
+}
+
 func sortFieldsFilter(sortFields []string) (rtn []string) {
 	rtn = make([]string, 0, len(sortFields))
 	for _, s := range sortFields {
