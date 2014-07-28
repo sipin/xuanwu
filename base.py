@@ -70,6 +70,11 @@ supported_annotations = set([
 
 typedef = dict()
 
+def capitalize(str):
+	if len(str) < 1:
+		return str
+	return str[0].upper() + str[1:]
+
 def type_translate(obj):
 	if str(obj) in type_ref:
 		return type_ref[str(obj)]
@@ -82,6 +87,7 @@ def type_translate(obj):
 	return "unknown(%s)" % obj
 
 def add_properties(field, obj):
+	field.name.value = capitalize(field.name.value)
 	field.label = field.name.value
 	# todo: add field name checking
 	for att in field.annotations:
@@ -181,7 +187,7 @@ def init_Fields(obj):
 		field.foreign = ""
 		field.foreign_package = ""
 		if field.name.value.endswith("ID"):
-			field.foreign = field.name.value[:-2]
+			field.foreign = capitalize(field.name.value[:-2])
 			field.foreign_type = field.foreign
 
 		if hasattr(field, "fk"):
@@ -201,7 +207,7 @@ def init_Fields(obj):
 		field.go_type = type_translate(field.type)
 		field.type = str(field.type)
 		field.widget_type = get_widget_type(obj, field)
-		obj.fieldMap[field.name.value] = field
+		obj.fieldMap[capitalize(field.name.value)] = field
 
 		if field.widget_type == "relateSelect":
 			obj.relateObj[field.name.value] = field
@@ -227,7 +233,7 @@ def init_ListedField(obj):
 	obj.listedFieldStrings = []
 	obj.listedFieldNames = []
 	if hasattr(idField, "listedFields"):
-		listedFields = [f.strip() for f in idField.listedFields.split(",")]
+		listedFields = [capitalize(f.strip()) for f in idField.listedFields.split(",")]
 		obj.listedFieldNames = listedFields
 		for fieldname in listedFields:
 			if "." in fieldname:

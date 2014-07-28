@@ -24,7 +24,7 @@ func $(obj.name.value.lower())Sort(q *mgo.Query, sortFields []string) {
 	#else
 	q.Sort("-_id")
 	#end if
-} 
+}
 
 func $(obj.name.value)Find(query interface{}, limit int, offset int, sortFields ...string) (result []*$obj.name.value, err error) {
 	session, col := db.GetCol("$obj.name.value")
@@ -123,4 +123,3 @@ func $(obj.name.value)RemoveByID(id string) (result *$obj.name.value, err error)
 	#end if
 	return
 }
-

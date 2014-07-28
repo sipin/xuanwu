@@ -2,40 +2,22 @@ package $namespace
 
 import (
 	//Official libs
-	"fmt"
-	"strings"
 	"strconv"
-	"time"
 
 	//3rd party libs
 	#for item in $obj.imports
-	#if isinstance(item, tuple):
-	$item[0] "$item[1]"
-	#else
 	"$item"
-	#end if
 	#end for
 
 	//Own libs
 	"admin"
-	"xls"
-	autoTpl "$tplPackage"
-	"zfw/models"
+	autoTpl "tpl/auto"
+	"kp/models"
 	"github.com/sipin/web"
-	"labix.org/v2/mgo/bson"
 )
-
-#if len($obj.permission) > 0
-var (
-	#for i in $obj.permission
-	Perm_$(className)_$i["name"] = permission.New("$i["category"].${i['name']}", $i["type"])
-	#end for
-)
-#end if
 
 func init() {
 	web.Get("$(urlBase)/index", $(className)Index)
-	web.Get("$(urlBase)/export", $(className)Export)
 	web.Get("$(urlBase)/view", $(className)View)
 	web.Get("$(urlBase)/create", $(className)Create)
 	web.Post("$(urlBase)/create", $(className)CreatePost)
@@ -43,263 +25,51 @@ func init() {
 	web.Post("$(urlBase)/edit", $(className)EditPost)
 	web.Post("$(urlBase)/view", $(className)ViewPost)
 	web.Post("$(urlBase)/delete", $(className)DeletePost)
-	#for field in $obj.fields
-	#if hasattr(field, "relateFields")
-	web.Get("$(urlBase)/relate/$field.name", $(className)$(field.name)Relate)
-	#end if
-	#end for
 }
 
-func getSearch$(className)(current *models.Users, q string, params map[string]string, limit int, offset int, sortField string) (objs []*models.$(className), total int) {
+func getSearch$(className)(q string, params map[string]string, limit int, offset int) (objs []*models.$(className), total int) {
 	out, _ := models.$(className)SearchWithParams(q, params, limit, offset)
 	total = out.Hits.Total
 
-	ids := make([]bson.ObjectId, 0, len(out.Hits.Hits))
 	for _, hit := range out.Hits.Hits {
-		if !bson.IsObjectIdHex(hit.Id) {
-			continue
-		}
-		ids = append(ids, bson.ObjectIdHex(hit.Id))
+		obj, _ := models.$(className)FindByID(hit.Id)
+		objs = append(objs, obj)
 	}
 
-	query := bson.M{"_id": bson.M{"\$in": ids}}
-	#if $obj.hasRead
-	query["UsersID"] = bson.M{"\$in": make$(className)UserList(current)}
-	#end if
-
-	objs, _ = models.$(className)FindAll(query, sortField)
-	return
-}
-
-func make$(className)UserList(current *models.Users) ([]string) {
-	#if not $obj.hasRead
-	return nil
-	#else
-	item := make(map[string]int, 1024)
-	var ignore bool
-	#for iii in $obj.read
-
-
-	ignore = false
-	#if len([i["name"] for i in iii if i["name"] != "Owner"]) > 0
-	if !permission.Check(current, Perm_$(className)_$(", Perm_$(className)_".join([i["name"] for i in iii if i["name"] != "Owner"]))) {
-		ignore = true
-	}
-	#end if
-	if !ignore {
-	count := 0
-	#for i in iii
-
-	#if i["name"] != "Owner"
-	#continue
-	#end if
-	// $i
-	if users, err := permission.GetUserListSame${i["type"]}(current); err == nil {
-		count ++
-		for _, u := range users {
-			if item[u] == -1 { // added!
-				continue
-			}
-			item[u] += 1
-		}
-	}
-		#end for
-	for k, v := range item {
-		if v == -1 {
-			continue
-		}
-		if v == count {
-			item[k] = -1
-		} else {
-			item[k] = 0
-		}
-	}
-	}
-	#end for
-
-
-	ret := make([]string, 0, len(item))
-	for k, v := range item {
-		if v == -1 {
-			ret = append(ret, k)
-		}
-	}
-	return ret
-	#end if
-}
-
-func getQuery$(className)(current *models.Users, limit, offset int, sortField string) (objs []*models.$(className), total int) {
-	userId := make$(className)UserList(current)
-	query := bson.M{}
-
-	if userId != nil {
-		query["UsersID"] = bson.M{"\$in": userId}
-	}
-	objs, err := models.$(className)Find(query, limit, offset, sortField)
-	if err != nil {
-		return
-	}
-	total = models.$(className)Count(query)
-
-	return
-}
-
-func get$(className)OrderSort(ctx *admin.AdminContext) (order string, sort string) {
-	order, _ = ctx.Params["order"]
-	sort, _ = ctx.Params["sort"]
-	if order != "" && sort != "" {
-		return
-	}
-	labels := models.New$(className)().GetListedLabels()
-	for _, label := range labels {
-		if order == "" && (label.Order == "asc" || label.Order == "desc"){
-			order = label.ID
-		}
-		if label.ID == order {
-			sort = label.Order
-			break
-		}
-	}
 	return
 }
 
 func $(className)Index(ctx *admin.AdminContext) (html string) {
 	var total int
 	limit := 20
+	offset := 0
+	if val, ok := ctx.Params["offset"]; ok {
+		offset, _ = strconv.Atoi(val)
+	}
+
 	if val, ok := ctx.Params["limit"]; ok {
 		limit, _ = strconv.Atoi(val)
 	}
-	offset, _ := strconv.Atoi(ctx.Params["offset"])
 
 	var obj *models.$(className)
 	var objs []*models.$(className)
 
-	action := ctx.Params["_action"]
-	order, sort := get$(className)OrderSort(ctx)
-	var sortField string
-	if sort == "desc" {
-		sortField = "-" + order
-	} else if sort == "asc" {
-		sortField = order
-	}
-	q, _ := ctx.Params["q"]
-	if action == "search" && q != ""{
-		objs, total = getSearch$(className)(ctx.User, q, ctx.Params, limit, offset, sortField)
+	q, is_search := ctx.Params["q"]
+	if is_search {
+		objs, total = getSearch$(className)(q, ctx.Params, limit, offset)
 	} else {
-		objs, total = getQuery$(className)(ctx.User, limit, offset, sortField)
+		total = models.$(className)Count(nil)
+		objs, _ = models.$(className)Find(nil, limit, offset)
 	}
 
 	stupidGoInterface := make([]models.IXuanWuObj, len(objs))
 	for i, v := range objs {
 		stupidGoInterface[i] = models.IXuanWuObj(v)
 	}
-	return autoTpl.Index(ctx.Context, ctx.GetFlash(), obj, stupidGoInterface, total, limit, offset, order, sort)
+	return autoTpl.Index(ctx.Context, ctx.GetFlash(), obj, stupidGoInterface, total, limit, offset)
 }
-
-func $(className)Export(ctx *admin.AdminContext) (html string) {
-	limit := 20
-	if val, ok := ctx.Params["limit"]; ok {
-		limit, _ = strconv.Atoi(val)
-	}
-	offset, _ := strconv.Atoi(ctx.Params["offset"])
-
-	var obj *models.$(className)
-	var objs []*models.$(className)
-
-	action := ctx.Params["_action"]
-	order, sort := get$(className)OrderSort(ctx)
-	var sortField string
-	if sort == "desc" {
-		sortField = "-" + order
-	} else if sort == "asc" {
-		sortField = order
-	}
-	q, _ := ctx.Params["q"]
-	if action == "search" && q != ""{
-		objs, _ = getSearch$(className)(ctx.User, q, ctx.Params, limit, offset, sortField)
-	} else {
-		objs, _ = getQuery$(className)(ctx.User, limit, offset, sortField)
-	}
-
-	sheet := xls.NewSheet("Sheet1")
-	rows := make([]*xls.Row, len(objs) + 1)
-
-	labelObjs := obj.GetListedLabels()
-	var labels []interface{}
-	for _, o := range labelObjs {
-		labels = append(labels, o.Label)
-	}
-	rows[0] = xls.NewRow(labels...)
-
-	for i, o := range objs {
-		#for f in $obj.listedFieldNames
-		#if "." in f
-		$(f.replace(".", "")), _ := o.Get$(f[:f.index(".")])()
-		#end if
-		#end for
-		rows[i + 1] = xls.NewRow(
-			#for f in $obj.listedFieldNames
-			#if "." in f
-			$(f.replace(".", "")).GetFieldAsString("$(f[f.index(".")+1:])"),
-			#else
-			o.GetFieldAsString("$(f)"),
-			#end if
-			#end for
-		)
-	}
-
-	tbl := xls.NewTable(rows...)
-	sheet.SetTable(tbl)
-
-	ret, err := xls.Marshal(sheet)
-	if err != nil {
-		ctx.Logger.Error(err)
-	}
-
-	fname := fmt.Sprintf("attachment;filename=\"%s_%s.xls\"", "$(obj.classLabel)", time.Now().Format("2006-01-02_1504"))
-	ctx.SetHeader("Content-Disposition", fname, true)
-	return string(ret)
-}
-
-#for act in ["Create", "Read", "Update", "Delete"]
-func has$(className)${act}Permission(current, author *models.Users) bool {
-	#if len($obj.__getattribute__(act.lower())) == 0
-	return true
-	#end if
-	#for iii in $obj.__getattribute__(act.lower())
-	{
-		#if len(iii) == 0
-		#continue
-		#end if
-		ret := true
-		#if len([i["name"] for i in iii if i["name"] != "Owner"]) > 0
-		if ret && !permission.Check(current, Perm_$(className)_$(", Perm_$(className)_".join([i["name"] for i in iii if i["name"] != "Owner"]))) {
-			ret = false
-		}
-		#end if
-
-		#if len([i["name"] for i in iii if i["name"] == "Owner"]) > 0
-		if ret {
-			if !permission.IsSame$("(current, author) || !permission.IsSame".join([i["type"] for i in iii if i["name"] == "Owner"])) (current, author) {
-			ret = false
-			}
-		}
-		#end if
-
-		if ret {
-			return true
-		}
-	}
-	#end for
-	return false
-}
-#end for
 
 func $(className)Create(ctx *admin.AdminContext) (html string) {
-	if !has$(className)CreatePermission(ctx.User, nil) {
-		ctx.SetFlashAlert("您没有创建的权限")
-		return ctx.Redirect("index")
-	}
 	var obj *models.$(className)
 	data := ctx.GetSession("$(className)Create")
 
@@ -313,14 +83,8 @@ func $(className)Create(ctx *admin.AdminContext) (html string) {
 }
 
 func $(className)CreatePost(ctx *admin.AdminContext) (html string) {
-#if $obj.hasCreate
-	if !has$(className)CreatePermission(ctx.User, nil) {
-		ctx.SetFlashAlert("您没有创建的权限")
-		return ctx.Redirect("index")
-	}
-#end if
-
 	obj := models.New$(className)()
+
 	hasError := obj.ReadForm(ctx.Params)
 
 	if hasError {
@@ -329,51 +93,21 @@ func $(className)CreatePost(ctx *admin.AdminContext) (html string) {
 		return
 	}
 
-#if $obj.hasUser
-	if obj.UsersID == "" {
-		obj.UsersID = ctx.User.Id()
-	}
-#end if
-
 	obj.Save()
 	ctx.ClearSession("$(className)Create")
 	ctx.SetFlashNotice("保存成功")
 	ctx.Redirect("index")
+
 	return
 }
 
 func $(className)View(ctx *admin.AdminContext) (html string) {
-	obj, err := models.$(className)FindByID(ctx.Params["id"])
-	if err != nil {
-		ctx.SetFlashAlert(err.Error())
-		return ctx.Redirect("index")
-	}
-
-#if $obj.hasRead
-	author, _ := obj.GetUsers()
-	if !has$(className)ReadPermission(ctx.User, author) {
-		ctx.SetFlashAlert("您没有查看的权限")
-		return ctx.Redirect("index")
-	}
-#end if
+	obj, _ := models.$(className)FindByID(ctx.Params["id"])
 	return autoTpl.View(ctx.Context, obj)
 }
 
 func $(className)Edit(ctx *admin.AdminContext) (html string) {
-	obj, err := models.$(className)FindByID(ctx.Params["id"])
-	if err != nil {
-		ctx.SetFlashAlert(err.Error())
-		return ctx.Redirect("index")
-	}
-
-#if $obj.hasUpdate
-	author, _ := obj.GetUsers()
-	if !has$(className)UpdatePermission(ctx.User, author) {
-		ctx.SetFlashAlert("您没有修改的权限")
-		return ctx.Redirect("index")
-	}
-#end if
-
+	obj, _ := models.$(className)FindByID(ctx.Params["id"])
 	data := ctx.GetSession("$(className)Edit")
 
 	if data != nil {
@@ -390,19 +124,7 @@ func $(className)Edit(ctx *admin.AdminContext) (html string) {
 }
 
 func $(className)ViewPost(ctx *admin.AdminContext) (html string) {
-	obj, err := models.$(className)FindByID(ctx.Params["id"])
-	if err != nil {
-		ctx.SetFlashAlert(err.Error())
-		return ctx.Redirect("index")
-	}
-
-#if $obj.hasRead
-	author, _ := obj.GetUsers()
-	if !has$(className)ReadPermission(ctx.User, author) {
-		ctx.SetFlashAlert("您没有查看的权限")
-		return ctx.Redirect("index")
-	}
-#end if
+	obj, _ := models.$(className)FindByID(ctx.Params["id"])
 
 	hasError := obj.ReadForm(ctx.Params)
 
@@ -420,19 +142,7 @@ func $(className)ViewPost(ctx *admin.AdminContext) (html string) {
 }
 
 func $(className)EditPost(ctx *admin.AdminContext) (html string) {
-	obj, err := models.$(className)FindByID(ctx.Params["id"])
-	if err != nil {
-		ctx.SetFlashAlert(err.Error())
-		return ctx.Redirect("index")
-	}
-
-#if $obj.hasUpdate
-	author, _ := obj.GetUsers()
-	if !has$(className)UpdatePermission(ctx.User, author) {
-		ctx.SetFlashAlert("您没有修改的权限")
-		return ctx.Redirect("index")
-	}
-#end if
+	obj, _ := models.$(className)FindByID(ctx.Params["id"])
 
 	hasError := obj.ReadForm(ctx.Params)
 
@@ -450,81 +160,10 @@ func $(className)EditPost(ctx *admin.AdminContext) (html string) {
 	return
 }
 
-#if $obj.hasDelete
-func $(className)DeleteOne(ctx *admin.AdminContext, id string) (ok bool) {
-	obj, err := models.$(className)FindByID(id)
-	if err != nil {
-		return false
-	}
-
-	author, _ := obj.GetUsers()
-	if !has$(className)DeletePermission(ctx.User, author) {
-		return false
-	}
-
-	models.$(className)RemoveByID(id)
-	return true
-}
-#end if
-
 func $(className)DeletePost(ctx *admin.AdminContext) (html string) {
-	ids := ctx.Params["ids"]
-
-#if $obj.hasDelete
-	var ok bool
-	if ids != "" {
-		for _, id := range strings.Split(ids, "\n") {
-			id = strings.Trim(id, "\r")
-			ok = $(className)DeleteOne(ctx, id)
-			if !ok {
-				ctx.SetFlashNotice("删除失败")
-				ctx.Redirect("index")
-				return
-			}
-		}
-	} else {
-		ok = $(className)DeleteOne(ctx, ctx.Params["id"])
-	}
-
-	if ok {
-		ctx.SetFlashNotice("删除失败")
-		ctx.Redirect("index")
-		return
-	}
-#else
-	if ids == "" {
-		id := ctx.Params["id"]
-		models.$(className)RemoveByID(id)
-	} else {
-		for _, id := range strings.Split(ids, "\n") {
-			id = strings.Trim(id, "\r")
-			models.$(className)RemoveByID(id)
-		}
-	}
-#end if
-
+	id, _ := ctx.Params["id"]
+	models.$(className)RemoveByID(id)
 	ctx.SetFlashNotice("删除成功")
 	ctx.Redirect("index")
 	return
 }
-
-#for field in $obj.fields
-#if hasattr(field, "relateFields")
-func $(className)$(field.name)Relate(ctx *admin.AdminContext) (jsonData string) {
-	ID, _ := ctx.Params["ID"]
-	if ID != ""{
-		data, _ := models.$(field.bindTable)FindByID(ID)
-		if data == nil {
-			return
-		}
-		rtn := map[string]string{}
-		#for k, v in $field.relateFields
-		rtn["$k"] = data.$(v)Widget().Value
-		#end for
-		jsonByte, _ := json.Marshal(rtn)
-		jsonData = string(jsonByte)
-	}
-	return
-}
-#end if
-#end for

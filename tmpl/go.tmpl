@@ -61,7 +61,7 @@ reEnsure${field.name}:
 			panic(err)
 		}
 		goto reEnsure${field.name}
-		
+
 	}
 
 	#end if
@@ -85,6 +85,7 @@ type $obj.name.value struct {
 func New$(obj.name.value)() *$obj.name.value {
 	rval := new($obj.name.value)
 	rval.ID = bson.NewObjectId()
+	rval.IdStr = rval.ID.Hex()
 	return rval
 }
 

@@ -26,11 +26,12 @@ except ValueError:
 	print "output_folder_path should contains '/src/', for xuanwu to use absolute go path import"
 	sys.exit()
 
+
 def get_search(obj):
 	search = None
 	for field in obj.fields:
 		if field.name.value == "ID" and hasattr(field, "search"):
-			search = [f.strip() for f in field.search.split(",")]
+			search = [base.capitalize(f.strip()) for f in field.search.split(",")]
 
 	if search == None:
 		return search
