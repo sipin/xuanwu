@@ -34,17 +34,20 @@ def get_search(obj):
 
 	if search == None:
 		return search
+
+	searchFields = []
 	for fieldName in search:
 		try:
 			field = obj.fieldMap[fieldName]
-			if str(field.type) != "string":
+			if str(field.type) not in ["string"]:
 				raise Exception("%s %s has non-string searchField: %s:%s" %
 					(thrift_file, obj.name.value, fieldName, field.type))
+			searchFields.append(field)
 		except KeyError:
 			raise Exception("%s %s has invalid searchField: %s(%s)" %
 					(thrift_file, obj.name.value, fieldName, field.type))
 
-	return search
+	return searchFields
 
 def struct_import(obj):
 	idField = obj.fields[0]
