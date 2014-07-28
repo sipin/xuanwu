@@ -7,7 +7,7 @@ type $(obj.name.value)SearchIndexObj struct {
 	#for field in $obj.filterFields
 	#if $field.type == "string"
 	$field.name.value string `json:"$(field.name.value)"`
-	#else if  $field.type == "i64"
+	#else if $field.type == "i64"
 	$field.name.value int64 `json:"$(field.name.value)"`
 	#else
 	$field.name.value has unsupported filter type

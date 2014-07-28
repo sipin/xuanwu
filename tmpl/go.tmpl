@@ -17,19 +17,19 @@ import (
 )
 
 func init() {
-	#if len([i for i in $obj.fields if hasattr(i, "index")]) > 0
+	#if $obj.need_index
 	db.SetOnFinishInit(init${obj.name.value}Index)
 	#end if
-	#if len([f for f in $obj.filterFields if f.type == "string"]) > 0
+	#if $obj.need_mapping
 	db.SetOnFinishInit(init${obj.name.value}Mapping)
 	#end if
 }
 
-#if len([f for f in $obj.filterFields if f.type == "string"]) > 0
+#if $obj.need_mapping
 func init${obj.name.value}Mapping() {
 	opt := indices.MappingOptions{
 		Properties: map[string]interface{}{
-			#for f in [f for f in $obj.filterFields if f.type == "string"]
+			#for f in $obj.stringFilterFields
 			"$f.name.value": map[string]string{"index": "not_analyzed", "type": "string"},
 			#end for
 		},
@@ -40,7 +40,7 @@ func init${obj.name.value}Mapping() {
 }
 #end if
 
-#if len([i for i in $obj.fields if hasattr(i, "index")]) > 0
+#if $obj.need_index
 func init${obj.name.value}Index() {
 	session, collection := db.GetCol(${obj.name.value}TableName)
 	defer session.Close()
@@ -61,7 +61,7 @@ reEnsure${field.name}:
 			panic(err)
 		}
 		goto reEnsure${field.name}
-		
+
 	}
 
 	#end if

@@ -286,18 +286,18 @@ def init_FilterFields(obj):
 	obj.dateKeys = []
 	if hasattr(idField, "filterFields"):
 		filterFields = [f.strip() for f in idField.filterFields.split(",")]
-		for fieldname in filterFields:
+		for fieldName in filterFields:
 			for field in obj.fields:
-				if field.name.value == fieldname:
+				if field.name.value == fieldName:
 					obj.filterFields.append(field)
 					if field.widget_type in ["date", "time", "datetime"]:
-						obj.dateKeys.append(fieldname + "Start")
-						obj.dateKeys.append(fieldname + "End")
+						obj.dateKeys.append(fieldName + "Start")
+						obj.dateKeys.append(fieldName + "End")
 					elif field.type == "string":
-						obj.termKeys.append(fieldname)
+						obj.termKeys.append(fieldName)
 					else:
-						raise Exception(thrift_file + " " + obj.name.value +
-							" invalid filterFields: " + str(missingFields))
+						raise Exception("%s %s has invalid filterField: %s:%s" %
+					(thrift_file, obj.name.value, fieldName, field.type))
 
 		if len(filterFields) > len(obj.filterFields):
 			foundFields = [field.name.value for field in obj.filterFields if field.name.value in filterFields]

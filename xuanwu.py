@@ -90,6 +90,10 @@ def struct_import(obj):
 		if hasattr(field, "meta"):
 			obj.imports.add("encoding/json")
 	obj.imports = sorted(set(obj.imports))
+	obj.stringFilterFields = [f for f in obj.filterFields if f.type == "string"]
+	obj.need_mapping = len(obj.stringFilterFields) > 0
+	obj.need_index = len([i for i in obj.fields if hasattr(i, "index")]) > 0
+
 
 
 def transform_struct(obj):
