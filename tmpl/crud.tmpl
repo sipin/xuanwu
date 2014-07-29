@@ -189,9 +189,9 @@ func $(className)Index(ctx *admin.AdminContext) (html string) {
 		objs, total = getQuery$(className)(ctx.User, limit, offset, sortField)
 	}
 
-	stupidGoInterface := make([]models.IXuanWuObj, len(objs))
+	stupidGoInterface := make([]xuanwu.IXuanWuObj, len(objs))
 	for i, v := range objs {
-		stupidGoInterface[i] = models.IXuanWuObj(v)
+		stupidGoInterface[i] = xuanwu.IXuanWuObj(v)
 	}
 	return autoTpl.Index(ctx.Context, ctx.GetFlash(), obj, stupidGoInterface, total, limit, offset, order, sort)
 }
