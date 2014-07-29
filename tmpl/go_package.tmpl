@@ -94,6 +94,7 @@ type IXuanWuObj interface {
 	Id() string
 	IsSearchEnabled() bool
 	GetLabel() string
+	GetName() string
 	GetListedLabels() []*IDLabelPair
 	GetFieldAsString(fieldKey string) (Value string)
 	GetFilters() []*Widget

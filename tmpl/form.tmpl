@@ -208,6 +208,10 @@ func (o *$obj.name.value) GetLabel() string {
 	return "$obj.label"
 }
 
+func (o *$obj.name.value) GetName() string {
+	return "$obj.name.value"
+}
+
 func (o *$obj.name.value) GetFieldAsString(fieldKey string) (Value string) {
 	switch fieldKey {
 #for field in $obj.listedFieldStrings
