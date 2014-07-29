@@ -13,7 +13,7 @@ func $(obj.name.value)FindOne(query interface{}, sortFields ...string) (result *
 }
 
 func $(obj.name.value.lower())Sort(q *mgo.Query, sortFields []string) {
-	sortFields = sortFieldsFilter(sortFields)
+	sortFields = XSortFieldsFilter(sortFields)
 	if len(sortFields) > 0 {
 		q.Sort(sortFields...)
 		return
@@ -24,7 +24,7 @@ func $(obj.name.value.lower())Sort(q *mgo.Query, sortFields []string) {
 	#else
 	q.Sort("-_id")
 	#end if
-} 
+}
 
 func $(obj.name.value)Find(query interface{}, limit int, offset int, sortFields ...string) (result []*$obj.name.value, err error) {
 	session, col := db.GetCol("$obj.name.value")
