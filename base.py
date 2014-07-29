@@ -348,12 +348,17 @@ def init_module(module):
 def load_thrift(thrift_idl):
 	global thrift_file
 	thrift_file = thrift_idl
-	loader = Loader(thrift_idl, lambda x: x)
-	if loader.namespace == "":
-		print 'namespace go not found, please add `namespace go XXXX` to ' + thrift_file + " and retry"
-		sys.exit(1)
+	try:
+		loader = Loader(thrift_idl, lambda x: x)
+		if loader.namespace == "":
+			print 'namespace go not found, please add `namespace go XXXX` to ' + thrift_file + " and retry"
+			sys.exit(1)
 
-	loader.namespace = str(loader.namespace)
-	for module in loader.modules.values():
-		init_module(module)
+		loader.namespace = str(loader.namespace)
+
+		for module in loader.modules.values():
+			init_module(module)
+	except Exception, e:
+		print "error", thrift_file
+		raise e
 	return loader
