@@ -35,6 +35,7 @@ widget_types = set([
 	"textarea",
 	"time",
 	"userselect",
+	"permissionSelect",
 ])
 
 supported_annotations = set([
