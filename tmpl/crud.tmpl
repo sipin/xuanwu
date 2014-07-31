@@ -183,8 +183,8 @@ func $(className)Index(ctx *admin.AdminContext) (html string) {
 	} else if sort == "asc" {
 		sortField = order
 	}
-	q, _ := ctx.Params["q"]
-	if action == "search" && q != ""{
+	q, ok := ctx.Params["q"]
+	if action == "search" && ok {
 		objs, total = getSearch$(className)(ctx.User, q, ctx.Params, limit, offset, sortField)
 	} else {
 		objs, total = getQuery$(className)(ctx.User, limit, offset, sortField)
