@@ -1,5 +1,9 @@
 func () (data []*IDLabelPair) {
-	objs, _ := $(col)FindAll(nil)
+	#if len($pkg) == 0
+		objs, _ := $(col)FindAll(nil)
+	#else
+		objs, _ := $(pkg).$(col)FindAll(nil)
+	#end if
 	length := len(objs)
 	#if hasattr($field.const_value, 'value')
 	length += 1

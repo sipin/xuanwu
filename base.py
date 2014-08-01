@@ -92,12 +92,27 @@ def add_properties(field, obj):
 		setattr(field, att.name.value, att.value.value)
 
 	if hasattr(field, "bindData"):
-		col, label = field.bindData.split(".")
+		ss = field.bindData.split(".")
+		if len(ss) == 2:
+		    pkg = None
+		    col, label = ss
+		elif len(ss) == 3:
+		    pkg = ss[0]
+		    col = ss[1]
+		    label = ss[2]
+		else:
+		    raise Exception(thrift_file + " " + obj.name.value + " " + field.name.value +
+		    " has invalid field annotation: bindData")
 		tpl = open('tmpl/field_getBindData.tmpl', 'r').read()
 
-		t = Template(tpl, searchList=[{"field": field, "col": col, "label": label}])
+		short = ""
+		if pkg != None:
+		    short = pkg.split("/")[-1]
+
+		t = Template(tpl, searchList=[{"field": field, "col": col, "label": label, "pkg": short}])
 		field.bindData = str(t).strip()
 		field.bindTable = col
+		field.bindPackage = pkg
 
 	if hasattr(field, "meta"):
 		if str(field.type) != "string":
