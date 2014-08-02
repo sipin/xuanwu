@@ -194,7 +194,7 @@ func $(className)Index(ctx *admin.AdminContext) (html string) {
 	for i, v := range objs {
 		stupidGoInterface[i] = xuanwu.IXuanWuObj(v)
 	}
-	return autoTpl.Index(ctx.Context, ctx.GetFlash(), obj, stupidGoInterface, total, limit, offset, order, sort)
+	return autoTpl.Index(ctx.Context, obj, stupidGoInterface, total, limit, offset, order, sort)
 }
 
 func $(className)Export(ctx *admin.AdminContext) (html string) {
