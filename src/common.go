@@ -91,8 +91,9 @@ type IXuanWuObj interface {
 
 var DateTimeLayout = "2006-01-02 15:04"
 var DateLayout = "2006-01-02"
+var TimeLayout = "15:04"
 
-func I64Time(c int64) string {
+func I64DateTime(c int64) string {
 	if c == 0 {
 		return ""
 	}
@@ -104,6 +105,13 @@ func I64Date(c int64) string {
 		return ""
 	}
 	return time.Unix(c, 0).Format(DateLayout)
+}
+
+func I64Time(c int64) string {
+	if c == 0 {
+		return ""
+	}
+	return time.Unix(c, 0).Format(TimeLayout)
 }
 
 func I32Time(c int32) string {
