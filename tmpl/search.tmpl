@@ -68,6 +68,9 @@ func $(obj.name.value)SearchPurge() {
 
 func $(obj.name.value)SearchRebuild() {
 	$(obj.name.value)SearchPurge()
+#if $obj.need_mapping
+	init${obj.name.value}Mapping()
+#end if
 	total := $(obj.name.value)Count(nil)
 	step := 100
 	start := 0
