@@ -24,22 +24,23 @@ func WidgetHidden(ws ...*Widget) {
 }
 
 type Widget struct {
-	Label       string
-	Value       string
-	Name        string
-	PlaceHolder string
-	Type        string
-	ErrorMsg    string
-	EnumKey     []int32
-	EnumData    map[int32]string
-	StringList  []string
-	Required    bool
-	Disabled    bool
-	Hidden      bool
-	Readonly    bool
-	IsList      bool
-	GetBindData func() (data []*IDLabelPair)
-	GetMetaData func() (data []IXuanWuObj, head IXuanWuObj)
+	Label          string
+	Value          string
+	Name           string
+	PlaceHolder    string
+	Type           string
+	ErrorMsg       string
+	EnumKey        []int32
+	EnumData       map[int32]string
+	StringList     []string
+	Required       bool
+	Disabled       bool
+	Hidden         bool
+	Readonly       bool
+	IsList         bool
+	GetBindData    func() (data []*IDLabelPair)
+	GetMetaData    func() (data []IXuanWuObj, head IXuanWuObj)
+	GetGroupedData func() (subInput string, data map[string][]*IDLabelPair)
 }
 
 func (w *Widget) Disable() {
