@@ -5,6 +5,9 @@ from ptsd import ast
 from ptsd.loader import Loader, Parser
 from Cheetah.Template import Template
 from os import path, mkdir
+import traceback
+
+
 thrift_file = ""
 type_ref = dict(
 	string = "string",
@@ -64,6 +67,7 @@ supported_annotations = set([
 	"tplPackage",
 	"viewUrl",
 	"widget",
+	"subselect",
 
 	#permission
 	"Create", "Read", "Update", "Delete",
@@ -233,6 +237,23 @@ def init_Fields(obj):
 			field.disabled = "True"
 			delattr(field, "relateData")
 
+	for field in obj.fields:
+		if hasattr(field, "subselect"):
+			field.widget_type = "subselect"
+			subInput, subStruct, subStructView, subStructIndex = field.subselect.split(".")
+			if not hasattr(field, "bindTable"):
+				raise Exception(thrift_file + " subselect should have bindData to group selections")
+			tpl = open('tmpl/field_getSubSelect.tmpl', 'r').read()
+
+			t = Template(tpl, searchList=[{
+				"field": field,
+				"subInput": subInput,
+				"subStruct": subStruct,
+				"subStructView": subStructView,
+				"subStructIndex": subStructIndex
+			}])
+			field.GroupedDataFunc = str(t).strip()
+
 	obj.toList = [i.name.value for i in obj.fields if hasattr(i, "toList")]
 	if "ID" not in obj.toList:
 		obj.toList.append("ID")
@@ -376,5 +397,6 @@ def load_thrift(thrift_idl):
 			init_module(module)
 	except Exception, e:
 		print "error", thrift_file
+		traceback.print_exc()
 		raise e
 	return loader

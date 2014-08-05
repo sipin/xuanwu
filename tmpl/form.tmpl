@@ -170,6 +170,9 @@ func (o *$obj.name.value) ${field.name.value}Widget() *Widget {
 			StringList : $(filename).$field.stringList,
 		#else if hasattr($field, "bindData")
 			GetBindData : $field.bindData,
+			#if hasattr($field, "GroupedDataFunc")
+			GetGroupedData : $field.GroupedDataFunc,
+			#end if
 		#else if hasattr($field, "meta")
 			GetMetaData : $field.metaFunc,
 		#else if $field.required
