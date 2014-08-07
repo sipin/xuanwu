@@ -82,7 +82,7 @@ def type_translate(obj):
 		return "[]%s" % type_translate(obj.value_type)
 	if isinstance(obj, ast.Map):
 		return "map[%s]%s" % (type_translate(obj.key_type), type_translate(obj.value_type))
-	if str(obj.value) in typedef:
+	if hasattr(obj, "value") and str(obj.value) in typedef:
 		return obj.value
 	return "unknown(%s)" % obj
 
