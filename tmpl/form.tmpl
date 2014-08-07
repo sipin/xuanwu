@@ -9,7 +9,27 @@ func (o *$obj.name.value) ReadForm(params map[string]string) (hasError bool) {
 #if $field.name.value != "ID"
 	if val, ok := params["$field.name.value"]; ok {
 	#if hasattr($field, "meta")
-		o.$field.name.value = val
+		o.$field.name.value = []string{}
+		var tmp interface{}
+		json.Unmarshal([]byte(val), &tmp)
+		if tmp != nil {
+			if datas, ok := tmp.([]interface{}); ok{
+				for _, raw := range datas {
+					tmpObj := raw.(map[string]interface{})
+					single := map[string]string{}
+					for k, v := range tmpObj {
+						if value, ok := v.(string); ok {
+							single[k] = value
+						}
+					}
+					record := New$(field.meta)()
+					record.ReadForm(single)
+					record.$(obj.name.value)ID = o.ID.Hex()
+					record.Save()
+					o.$field.name.value = append(o.$field.name.value, record.ID.Hex())
+				}
+			}
+		}
 	#else if $field.type == "string"
 		o.$field.name.value = val
 	#else if $field.type == "i32" and $field.widget_type in ["datetime"]

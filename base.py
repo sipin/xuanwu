@@ -43,6 +43,7 @@ widget_types = set([
 
 supported_annotations = set([
 	"baseURL",
+	"apiURL",
 	"bindData",
 	"disabled",
 	"dm",
@@ -119,9 +120,9 @@ def add_properties(field, obj):
 		field.bindPackage = pkg
 
 	if hasattr(field, "meta"):
-		if str(field.type) != "string":
+		if str(field.type) != "list<string>":
 			raise Exception(thrift_file + " " + obj.name.value +
-				"meta data must should store in string type")
+				" meta data must store in type list<string>")
 
 		tpl = open('tmpl/field_getMeta.tmpl', 'r').read()
 

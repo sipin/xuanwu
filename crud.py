@@ -129,25 +129,41 @@ def transform_module(module):
         if tplPackage == "":
             tplPackage = "tpl/auto"
 
-        if obj.label  == "" or urlBase == "":
+        if obj.label == "" or urlBase == "":
             continue
+        if obj.classLabel:
+            dealPermission(obj, idField, obj.classLabel)
+            if len(obj.relateObj) > 0:
+                obj.imports.add("encoding/json")
 
-        dealPermission(obj, idField, obj.classLabel)
-        if len(obj.relateObj) > 0:
-            obj.imports.add("encoding/json")
-
-        outDir = urlBase.split(path.sep)[-2]
-        crud = open('tmpl/crud.tmpl', 'r').read().decode("utf8")
-        res = Template(crud, searchList=[{"namespace": outDir,
-                                        "className": obj.label,
-                                        "urlBase": urlBase,
-                                        "tplPackage": tplPackage,
-                                        "obj": obj,
-                                        }])
-        writeDir = getControlDir(urlBase)
-        outfile = writeDir + "gen_" + obj.name.value.lower() + ".go"
-        with open(outfile, "w") as fp:
-            fp.write(str(res))
+            outDir = urlBase.split(path.sep)[-2]
+            crud = open('tmpl/crud.tmpl', 'r').read().decode("utf8")
+            res = Template(crud, searchList=[{"namespace": outDir,
+                                            "className": obj.label,
+                                            "urlBase": urlBase,
+                                            "tplPackage": tplPackage,
+                                            "obj": obj,
+                                            }])
+            writeDir = getControlDir(urlBase)
+            outfile = writeDir + "gen_" + obj.name.value.lower() + ".go"
+            with open(outfile, "w") as fp:
+                fp.write(str(res))
+        else:
+            for field in obj.fields:
+                if field.widget_type == "relateSelect":
+                    outDir = urlBase.split(path.sep)[-2]
+                    tmpl = file("tmpl/relateOnly.tmpl").read().decode("u8")
+                    ret = Template(tmpl, searchList=[{"namespace": outDir,
+                                            "className": obj.label,
+                                            "urlBase": urlBase,
+                                            "tplPackage": tplPackage,
+                                            "obj": obj,
+                                            }])
+                    writeDir = getControlDir(urlBase)
+                    outfile = writeDir + "gen_relate_" + obj.name.value.lower() + ".go"
+                    with open(outfile, "w") as fp:
+                        fp.write(str(ret).strip())
+                    break
 
 
 def main(thrift_idl):

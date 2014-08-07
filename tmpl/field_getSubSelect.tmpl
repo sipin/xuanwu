@@ -6,6 +6,15 @@ func () (subInput string, data map[string][]*IDLabelPair) {
 	#else
 	indexs, _ := $(field.bindPackage).$(field.bindPackage)FindAll(nil)
 	#end if
+	var bindData map[string]string
+	subobj := New$(subStruct)()
+	if (subobj.$(subStructView)Widget().GetBindData != nil){
+		pairs := subobj.$(subStructView)Widget().GetBindData()
+		bindData = map[string]string{}
+		for _, pair := range pairs {
+			bindData[pair.ID] = pair.Label
+		}
+	}
 	for _, index := range(indexs) {
 		query := bson.M{"$subStructIndex": index.ID.Hex()}
 		objs, _ := $(subStruct)FindAll(query)
@@ -15,10 +24,17 @@ func () (subInput string, data map[string][]*IDLabelPair) {
 		}
 		groupedData := make([]*IDLabelPair, 0, length)
 		for _, obj := range objs {
-			groupedData = append(groupedData, &IDLabelPair{
-				ID: obj.ID.Hex(),
-				Label: obj.$subStructView,
-			})
+			if bindData == nil {
+				groupedData = append(groupedData, &IDLabelPair{
+					ID: obj.ID.Hex(),
+					Label: obj.$subStructView,
+				})
+			}else if text, ok := bindData[obj.$subStructView]; ok{
+				groupedData = append(groupedData, &IDLabelPair{
+					ID: obj.ID.Hex(),
+					Label: text,
+				})
+			}
 		}
 		data[index.ID.Hex()] = groupedData
 	}

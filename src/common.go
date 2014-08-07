@@ -39,7 +39,7 @@ type Widget struct {
 	Readonly       bool
 	IsList         bool
 	GetBindData    func() (data []*IDLabelPair)
-	GetMetaData    func() (data []IXuanWuObj, head IXuanWuObj)
+	GetMetaData    func() (data []*IXuanWuObj, head *IXuanWuObj)
 	GetGroupedData func() (subInput string, data map[string][]*IDLabelPair)
 }
 

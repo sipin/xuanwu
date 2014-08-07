@@ -3,10 +3,23 @@
 func (o *$obj.name.value) Save() (info *mgo.ChangeInfo, err error) {
 	session, col := ${obj.name.value}Col()
 	defer session.Close()
-
+	
 	if o.ID == "" {
 		o.ID = bson.NewObjectId()
 	}
+	#for field in $obj.fields
+	#if $field.name.value != "ID" and hasattr($field, "meta")
+	old_metas, _ := o.GetAll$(field.meta)()
+	new_metas, _ := $(field.meta)FindByIDs(o.$(field.name.value))
+	for _, meta := range old_metas {
+		$(field.meta)RemoveByID(meta.ID.Hex())
+	}
+	for _, meta := range new_metas {
+		meta.Save()
+	}
+	#end if
+	#end for
+
 #if $obj.search != None
 	o.IndexSearch()
 #end if
