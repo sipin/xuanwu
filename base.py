@@ -289,7 +289,7 @@ def init_ListedField(obj):
 						obj.listedFields.append(f)
 
 		if len(listedFields) > len(obj.listedFields):
-			foundFields = [field.name.value for field in obj.listedFields if field.name.value in listedFields]
+			foundFields = [field.key for field in obj.listedFields if field.key in listedFields]
 			missingFields = [field for field in listedFields if field not in foundFields]
 			raise Exception(thrift_file + " " + obj.name.value +
 				" missing listedFields: " + str(missingFields))
