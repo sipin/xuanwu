@@ -75,6 +75,9 @@ func (o *$obj.name.value) ReadForm(params map[string]string) (hasError bool) {
 	#else if $field.type == "i64"
 		intVal, _ := strconv.ParseInt(val, 10, 64)
 		o.$field.name.value = intVal
+	#else if $field.type == "double"
+		floatVal, _ := strconv.ParseFloat(val, 64)
+		o.$field.name.value = floatVal
 	#else if $field.type == "bool"
 		o.$field.name.value = (val != "")
 	#else if $field.type == "list<string>"
@@ -112,6 +115,8 @@ func (o *$obj.name.value) ValidateData() (hasError bool) {
 	if o.$field.name.value == "" {
 		#elif $field.type in ["i32", "i64"]
 	if o.$field.name.value == 0 {
+		#elif $field.type in ["double"]
+	if o.$field.name.value == 0.0
 		#elif $field.type == "list<string>"
 	if len(o.$field.name.value) == 0 {
 		#end if
@@ -169,6 +174,8 @@ func (o *$obj.name.value) ${field.name.value}Widget() *Widget {
 			Value : I64Time(o.$field.name.value),
 		#else if $field.type == "i64"
 			Value : strconv.FormatInt(o.$field.name.value, 10),
+		#else if $field.type == "double"
+			Value : strconv.FormatFloat(o.$field.name.value, 'f', 2, 64),
 		#else if $field.type == "bool"
 			Value : strconv.FormatBool(o.$field.name.value),
 		#else if $field.type == "list<string>"
@@ -292,6 +299,8 @@ func (o *$obj.name.value) GetFieldAsString(fieldKey string) (Value string) {
 		} else {
 				Value = strconv.FormatInt(int64(o.$field.name.value), 10)
 		}
+	#else if $field.type == "double"
+		Value = strconv.FormatFloat(o.$field.name.value, 'f', 2, 64)
 	#else if $field.type == "bool"
 		Value = strconv.FormatBool(o.$field.name.value)
 	#else if $field.type == "list<string>"

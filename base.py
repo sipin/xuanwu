@@ -14,6 +14,7 @@ type_ref = dict(
 	i32 = "int32",
 	i64 = "int64",
 	bool = "bool",
+	double = "float64",
 )
 
 widget_types = set([

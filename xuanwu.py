@@ -75,7 +75,7 @@ def struct_import(obj):
 				import_module = src_path + "/" + import_module
 			obj.imports.add(import_module)
 
-		if field.type in ["i32", "i64", "bool"] and field.widget_type not in ["date", "time", "datetime"]:
+		if field.type in ["i32", "i64", "bool", "double"] and field.widget_type not in ["date", "time", "datetime"]:
 			obj.imports.add("strconv")
 
 		if field.type == "list<string>":
