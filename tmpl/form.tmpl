@@ -116,7 +116,7 @@ func (o *$obj.name.value) ValidateData() (hasError bool) {
 		#elif $field.type in ["i32", "i64"]
 	if o.$field.name.value == 0 {
 		#elif $field.type in ["double"]
-	if o.$field.name.value == 0.0
+	if o.$field.name.value == 0.0 {
 		#elif $field.type == "list<string>"
 	if len(o.$field.name.value) == 0 {
 		#end if
