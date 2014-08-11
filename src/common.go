@@ -220,9 +220,6 @@ func XGetMoreSearchObj(word string, fields []string, params map[string]interface
 	for k, v := range params {
 		switch v := v.(type) {
 		case string:
-			if v == "" {
-				continue
-			}
 			if _, ok := termKeys[k]; ok {
 				terms[k] = v
 				continue
