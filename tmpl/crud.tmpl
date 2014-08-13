@@ -52,6 +52,7 @@ func init() {
 	#end for
 }
 
+#if $obj.search != None
 func getSearch$(className)(current *models.Users, q string, params map[string]string, limit int, offset int, sortFields []string) (objs []*models.$(className), total int) {
 	out, _ := models.$(className)SearchWithParams(q, params, limit, offset)
 	total = out.Hits.Total
@@ -72,6 +73,7 @@ func getSearch$(className)(current *models.Users, q string, params map[string]st
 	objs, _ = models.$(className)FindAll(query, sortFields...)
 	return
 }
+#end if
 
 func make$(className)UserList(current *models.Users) ([]string) {
 	#if not $obj.hasRead
@@ -152,7 +154,7 @@ func get$(className)OrderSort(ctx *admin.AdminContext) (result map[string]string
 	if !ok {
 		order = "$(obj.defaultOrder)"
 	}
-	orders := strings.Split(order, ",")	
+	orders := strings.Split(order, ",")
 	for _, order := range orders {
 		if order == ""{
 			continue
@@ -163,7 +165,7 @@ func get$(className)OrderSort(ctx *admin.AdminContext) (result map[string]string
 			result[order] = "asc"
 		}
 	}
-	return 
+	return
 }
 
 func get$(className)Sort(ctx *admin.AdminContext) (sortFields []string){
@@ -172,7 +174,7 @@ func get$(className)Sort(ctx *admin.AdminContext) (sortFields []string){
 		order = "$(obj.defaultOrder)"
 	}
 	sortFields = strings.Split(order, ",")
-	return 
+	return
 }
 
 func $(className)Index(ctx *admin.AdminContext) (html string) {
@@ -186,15 +188,19 @@ func $(className)Index(ctx *admin.AdminContext) (html string) {
 	var obj *models.$(className)
 	var objs []*models.$(className)
 
-	action := ctx.Params["_action"]
 	sortFields := get$(className)Sort(ctx)
 	orders := get$(className)OrderSort(ctx)
+	#if $obj.search != None
+	action := ctx.Params["_action"]
 	q, ok := ctx.Params["q"]
 	if action == "search" && ok {
 		objs, total = getSearch$(className)(ctx.User, q, ctx.Params, limit, offset, sortFields)
 	} else {
 		objs, total = getQuery$(className)(ctx.User, limit, offset, sortFields)
 	}
+	#else
+	objs, total = getQuery$(className)(ctx.User, limit, offset, sortFields)
+	#end if
 
 	stupidGoInterface := make([]xuanwu.IXuanWuObj, len(objs))
 	for i, v := range objs {
@@ -213,14 +219,18 @@ func $(className)Export(ctx *admin.AdminContext) (html string) {
 	var obj *models.$(className)
 	var objs []*models.$(className)
 
-	action := ctx.Params["_action"]
 	sortFields := get$(className)Sort(ctx)
-	q, _ := ctx.Params["q"]
-	if action == "search" && q != ""{
+	#if $obj.search != None
+	action := ctx.Params["_action"]
+	q, ok := ctx.Params["q"]
+	if action == "search" && ok {
 		objs, _ = getSearch$(className)(ctx.User, q, ctx.Params, limit, offset, sortFields)
 	} else {
 		objs, _ = getQuery$(className)(ctx.User, limit, offset, sortFields)
 	}
+	#else
+	objs, _ = getQuery$(className)(ctx.User, limit, offset, sortFields)
+	#end if
 
 	sheet := xls.NewSheet("Sheet1")
 	rows := make([]*xls.Row, len(objs) + 1)
