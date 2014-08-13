@@ -15,7 +15,11 @@ var (
 } {
 		${",".join([str(item.tag) for item in obj.values])},
 	}
-
+	${obj.name.value}Field = map[int32]string {
+#for item in obj.values
+		$item.tag: "${item.name.value}",
+#end for
+	}
 	${obj.name.value}Label = map[int32]string {
 #for key, label in $obj.labels.items()
 		$key: $label,
