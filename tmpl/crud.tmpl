@@ -154,6 +154,9 @@ func get$(className)OrderSort(ctx *admin.AdminContext) (result map[string]string
 	}
 	orders := strings.Split(order, ",")	
 	for _, order := range orders {
+		if order == ""{
+			continue
+		}
 		if order[0] == '-' {
 			result[order[1:len(order)]] = "desc"
 		} else {
