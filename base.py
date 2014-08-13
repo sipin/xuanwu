@@ -298,6 +298,7 @@ def init_ListedField(obj):
 
 def init_OrderFields(obj):
 	idField = obj.fields[0]
+	defaultOrder = []
 	if hasattr(idField, "orderFields"):
 		orderFields = {}
 		for field in map(lambda s:s.strip(), idField.orderFields.split(",")):
@@ -306,17 +307,19 @@ def init_OrderFields(obj):
 			else:
 				order = ""
 			orderFields[field] = order if order in ("asc", "desc") else "none"
+			if orderFields[field] == "desc":
+				defaultOrder.append("-" + field)
+			elif orderFields[field] == "asc":
+				defaultOrder.append(field)
 		for field in obj.listedFields:
 			if field.key in orderFields:
 				field.order = orderFields[field.key]
 				del orderFields[field.key]
 
-		if len(filter(lambda s: hasattr(s, "order") and s.order!="none", obj.listedFields)) > 1:
-			raise Exception(thrift_file + " " + obj.name.value +
-				" too many default order index")
 		if len(orderFields) > 0:
 			raise Exception(thrift_file + " " + obj.name.value +
 				" missing orderFields: " + ",".join(orderFields))
+	obj.defaultOrder = ",".join(defaultOrder)
 
 def init_FilterFields(obj):
 	idField = obj.fields[0]

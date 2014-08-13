@@ -52,7 +52,7 @@ func init() {
 	#end for
 }
 
-func getSearch$(className)(current *models.Users, q string, params map[string]string, limit int, offset int, sortField string) (objs []*models.$(className), total int) {
+func getSearch$(className)(current *models.Users, q string, params map[string]string, limit int, offset int, sortFields []string) (objs []*models.$(className), total int) {
 	out, _ := models.$(className)SearchWithParams(q, params, limit, offset)
 	total = out.Hits.Total
 
@@ -69,7 +69,7 @@ func getSearch$(className)(current *models.Users, q string, params map[string]st
 	query["UsersID"] = bson.M{"\$in": make$(className)UserList(current)}
 	#end if
 
-	objs, _ = models.$(className)FindAll(query, sortField)
+	objs, _ = models.$(className)FindAll(query, sortFields...)
 	return
 }
 
@@ -130,14 +130,14 @@ func make$(className)UserList(current *models.Users) ([]string) {
 	#end if
 }
 
-func getQuery$(className)(current *models.Users, limit, offset int, sortField string) (objs []*models.$(className), total int) {
+func getQuery$(className)(current *models.Users, limit, offset int, sortFields []string) (objs []*models.$(className), total int) {
 	userId := make$(className)UserList(current)
 	query := bson.M{}
 
 	if userId != nil {
 		query["UsersID"] = bson.M{"\$in": userId}
 	}
-	objs, err := models.$(className)Find(query, limit, offset, sortField)
+	objs, err := models.$(className)Find(query, limit, offset, sortFields...)
 	if err != nil {
 		return
 	}
@@ -146,23 +146,30 @@ func getQuery$(className)(current *models.Users, limit, offset int, sortField st
 	return
 }
 
-func get$(className)OrderSort(ctx *admin.AdminContext) (order string, sort string) {
-	order, _ = ctx.Params["order"]
-	sort, _ = ctx.Params["sort"]
-	if order != "" && sort != "" {
-		return
+func get$(className)OrderSort(ctx *admin.AdminContext) (result map[string]string) {
+	result = map[string]string{}
+	order, ok := ctx.Params["orders"]
+	if !ok {
+		order = "$(obj.defaultOrder)"
 	}
-	labels := models.New$(className)().GetListedLabels()
-	for _, label := range labels {
-		if order == "" && (label.Order == "asc" || label.Order == "desc"){
-			order = label.ID
-		}
-		if label.ID == order {
-			sort = label.Order
-			break
+	orders := strings.Split(order, ",")	
+	for _, order := range orders {
+		if order[0] == '-' {
+			result[order[1:len(order)]] = "desc"
+		} else {
+			result[order] = "asc"
 		}
 	}
-	return
+	return 
+}
+
+func get$(className)Sort(ctx *admin.AdminContext) (sortFields []string){
+	order, ok := ctx.Params["orders"]
+	if !ok {
+		order = "$(obj.defaultOrder)"
+	}
+	sortFields = strings.Split(order, ",")
+	return 
 }
 
 func $(className)Index(ctx *admin.AdminContext) (html string) {
@@ -177,25 +184,20 @@ func $(className)Index(ctx *admin.AdminContext) (html string) {
 	var objs []*models.$(className)
 
 	action := ctx.Params["_action"]
-	order, sort := get$(className)OrderSort(ctx)
-	var sortField string
-	if sort == "desc" {
-		sortField = "-" + order
-	} else if sort == "asc" {
-		sortField = order
-	}
+	sortFields := get$(className)Sort(ctx)
+	orders := get$(className)OrderSort(ctx)
 	q, ok := ctx.Params["q"]
 	if action == "search" && ok {
-		objs, total = getSearch$(className)(ctx.User, q, ctx.Params, limit, offset, sortField)
+		objs, total = getSearch$(className)(ctx.User, q, ctx.Params, limit, offset, sortFields)
 	} else {
-		objs, total = getQuery$(className)(ctx.User, limit, offset, sortField)
+		objs, total = getQuery$(className)(ctx.User, limit, offset, sortFields)
 	}
 
 	stupidGoInterface := make([]xuanwu.IXuanWuObj, len(objs))
 	for i, v := range objs {
 		stupidGoInterface[i] = xuanwu.IXuanWuObj(v)
 	}
-	return autoTpl.Index(ctx.Context, obj, stupidGoInterface, total, limit, offset, order, sort)
+	return autoTpl.Index(ctx.Context, obj, stupidGoInterface, total, limit, offset, orders)
 }
 
 func $(className)Export(ctx *admin.AdminContext) (html string) {
@@ -209,18 +211,12 @@ func $(className)Export(ctx *admin.AdminContext) (html string) {
 	var objs []*models.$(className)
 
 	action := ctx.Params["_action"]
-	order, sort := get$(className)OrderSort(ctx)
-	var sortField string
-	if sort == "desc" {
-		sortField = "-" + order
-	} else if sort == "asc" {
-		sortField = order
-	}
+	sortFields := get$(className)Sort(ctx)
 	q, _ := ctx.Params["q"]
 	if action == "search" && q != ""{
-		objs, _ = getSearch$(className)(ctx.User, q, ctx.Params, limit, offset, sortField)
+		objs, _ = getSearch$(className)(ctx.User, q, ctx.Params, limit, offset, sortFields)
 	} else {
-		objs, _ = getQuery$(className)(ctx.User, limit, offset, sortField)
+		objs, _ = getQuery$(className)(ctx.User, limit, offset, sortFields)
 	}
 
 	sheet := xls.NewSheet("Sheet1")
