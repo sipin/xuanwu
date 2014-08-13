@@ -26,33 +26,9 @@ except ValueError:
 	print "output_folder_path should contains '/src/', for xuanwu to use absolute go path import"
 	sys.exit()
 
-def get_search(obj):
-	search = None
-	for field in obj.fields:
-		if field.name.value == "ID" and hasattr(field, "search"):
-			search = [f.strip() for f in field.search.split(",")]
-
-	if search == None:
-		return search
-
-	searchFields = []
-	for fieldName in search:
-		try:
-			field = obj.fieldMap[fieldName]
-			if str(field.type) not in ["string"]:
-				raise Exception("%s %s has non-string searchField: %s:%s" %
-					(thrift_file, obj.name.value, fieldName, field.type))
-			searchFields.append(field)
-		except KeyError:
-			raise Exception("%s %s has invalid searchField: %s(%s)" %
-					(thrift_file, obj.name.value, fieldName, field.type))
-
-	return searchFields
-
 def struct_import(obj):
 	idField = obj.fields[0]
 	obj.imports = set(["bytes", "fmt"])
-	obj.search = get_search(obj)
 	if obj.search != None:
 		obj.imports.add("github.com/mattbaird/elastigo/core")
 

@@ -150,6 +150,29 @@ def get_widget_type(obj, field):
 			return "meta"
 	return "text"
 
+def get_search(obj):
+	search = None
+	for field in obj.fields:
+		if field.name.value == "ID" and hasattr(field, "search"):
+			search = [f.strip() for f in field.search.split(",")]
+
+	if search == None:
+		return search
+
+	searchFields = []
+	for fieldName in search:
+		try:
+			field = obj.fieldMap[fieldName]
+			if str(field.type) not in ["string"]:
+				raise Exception("%s %s has non-string searchField: %s:%s" %
+					(thrift_file, obj.name.value, fieldName, field.type))
+			searchFields.append(field)
+		except KeyError:
+			raise Exception("%s %s has invalid searchField: %s(%s)" %
+					(thrift_file, obj.name.value, fieldName, field.type))
+
+	return searchFields
+
 def transform_type(field_type, obj):
 	if isinstance(field_type, (ast.Byte, ast.I16, ast.I32, ast.I64)):
 		return 'Integer'
@@ -259,6 +282,8 @@ def init_Fields(obj):
 	obj.toList = [i.name.value for i in obj.fields if hasattr(i, "toList")]
 	if "ID" not in obj.toList:
 		obj.toList.append("ID")
+
+	obj.search = get_search(obj)
 
 def init_ListedField(obj):
 	idField = obj.fields[0]
