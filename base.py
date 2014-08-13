@@ -71,9 +71,6 @@ supported_annotations = set([
 	"viewUrl",
 	"widget",
 	"subselect",
-
-	#permission
-	"Create", "Read", "Update", "Delete",
 ])
 
 typedef = dict()
@@ -221,6 +218,8 @@ def transform_const(obj):
 def init_Fields(obj):
 	idField = obj.fields[0]
 	obj.label = obj.name.value
+	if hasattr(idField, "label"):
+		obj.label = idField.label
 	obj.relateObj = {}
 	obj.fieldMap = {}
 	for field in obj.fields:
