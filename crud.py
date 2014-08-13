@@ -53,71 +53,6 @@ def fieldElems(field, key):
             ret.append(att.value.value)
     return ret
 
-def permission(name, action, obj):
-    validType = ["User", "Role", "Department", "Organization"]
-    ret = []
-    for p in obj:
-        item = []
-        pis = p.split(",")
-        for pi in pis:
-            pos = "(%s.%s=%s)" % (name, action, pi)
-            nameType = pi.split(":")
-            if len(nameType) != 2:
-                raise Exception("%s.%s is invalid: '%s'" % (name, action, pi))
-            perm = dict(name=nameType[0], type=nameType[1])
-            if perm["type"] not in validType:
-                raise Exception("type not in %s %s" % (validType, pos))
-            if perm["type"] != "Role" and perm["name"] != "Owner":
-                raise Exception("%s name must be Owner %s" % (perm["type"], pos))
-            if perm["type"] == "Role" and perm["name"] == "Owner":
-                raise Exception("Owner can not use Role type %s" % pos)
-            item.append(perm)
-        ret.append(item)
-    return ret
-
-def dealPermission(obj, idField, labelName):
-    location = "%s.%s" % (os.path.basename(thrift_file), str(obj.name))
-    obj.crud = dict()
-    create = fieldElems(idField, "Create")
-    obj.create = permission(location, "Create", create)
-    obj.read = permission(location, "Read", fieldElems(idField, "Read"))
-    obj.update = permission(location, "Update", fieldElems(idField, "Update"))
-    obj.delete = permission(location, "Delete", fieldElems(idField, "Delete"))
-
-    obj.hasUser = len([i for i in obj.fields if str(i.name) == "UsersID"]) > 0
-    if len(obj.read) == 0 and obj.hasUser:
-        obj.read = [[dict(name="Owner",type="Department")]]
-
-    if len(obj.delete) == 0 and obj.hasUser:
-        obj.delete = [[dict(name="Owner",type="User")]]
-
-    if len(obj.update) == 0 and obj.hasUser:
-        obj.update = [[dict(name="Owner",type="User")]]
-
-    obj.hasDelete = len(obj.delete) > 0
-    obj.hasCreate = len(obj.create) > 0
-    obj.hasUpdate = len(obj.update) > 0
-    obj.hasRead = len(obj.read) > 0
-    if len(obj.create) + len(obj.read) + len(obj.update) + len(obj.delete) > 0:
-        obj.imports.add("admin/permission")
-        if not obj.hasUser:
-            raise Exception("%s use crud and miss UsersID" % (location))
-    obj.permission = []
-
-    for items in obj.create + obj.read + obj.update + obj.delete:
-        for perm in items:
-            if perm["name"] == "Owner": continue
-            p = dict(name=perm["name"],type=perm["type"],category=labelName)
-            if p["type"] == "Role":
-                p["type"] = ["Role", "User"]
-            else:
-                p["type"] = [p["type"]]
-            p["type"] = ", ".join(["mp.Type." + i for i in p["type"]])
-            obj.permission.append(p)
-
-    if len(obj.permission) > 0:
-        obj.imports.add(("mp", "zfw/models/permission"))
-
 def transform_module(module):
     for obj in module.structs:
         urlBase = ""
@@ -131,15 +66,18 @@ def transform_module(module):
 
         if obj.label == "" or urlBase == "":
             continue
+
         if obj.classLabel:
-            dealPermission(obj, idField, obj.classLabel)
+            obj.imports.add(("mp", "zfw/models/permission"))
+            obj.hasUser = len([i for i in obj.fields if str(i.name) == "UsersID"]) > 0
+
             if len(obj.relateObj) > 0:
                 obj.imports.add("encoding/json")
 
             outDir = urlBase.split(path.sep)[-2]
             crud = open('tmpl/crud.tmpl', 'r').read().decode("utf8")
             res = Template(crud, searchList=[{"namespace": outDir,
-                                            "className": obj.label,
+                                            "className": obj.name.value,
                                             "urlBase": urlBase,
                                             "tplPackage": tplPackage,
                                             "obj": obj,

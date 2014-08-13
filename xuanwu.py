@@ -37,10 +37,6 @@ def struct_import(obj):
 		if f.foreign_package != "":
 			obj.imports.add(f.foreign_package)
 
-	obj.label = obj.name.value
-	if hasattr(idField, "label"):
-		obj.label = idField.label
-
 	for field in obj.fields:
 		if hasattr(field, "rule"):
 			obj.imports.add("regexp")

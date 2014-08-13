@@ -27,13 +27,9 @@ import (
 	"labix.org/v2/mgo/bson"
 )
 
-#if len($obj.permission) > 0
 var (
-	#for i in $obj.permission
-	Perm_$(className)_$i["name"] = permission.New("$i["category"].${i['name']}", $i["type"])
-	#end for
+	Perm_$(className) = permission.New("$(className)", "$(obj.classLabel)")
 )
-#end if
 
 func init() {
 	web.Get("$(urlBase)/index", $(className)Index)
@@ -66,71 +62,11 @@ func getSearch$(className)(current *models.Users, q string, params map[string]st
 	}
 
 	query := bson.M{"_id": bson.M{"\$in": ids}}
-	#if $obj.hasRead
-	query["UsersID"] = bson.M{"\$in": make$(className)UserList(current)}
-	#end if
 
 	objs, _ = models.$(className)FindAll(query, sortFields...)
 	return
 }
 #end if
-
-func make$(className)UserList(current *models.Users) ([]string) {
-	#if not $obj.hasRead
-	return nil
-	#else
-	item := make(map[string]int, 1024)
-	var ignore bool
-	#for iii in $obj.read
-
-
-	ignore = false
-	#if len([i["name"] for i in iii if i["name"] != "Owner"]) > 0
-	if !permission.Check(current, Perm_$(className)_$(", Perm_$(className)_".join([i["name"] for i in iii if i["name"] != "Owner"]))) {
-		ignore = true
-	}
-	#end if
-	if !ignore {
-	count := 0
-	#for i in iii
-
-	#if i["name"] != "Owner"
-	#continue
-	#end if
-	// $i
-	if users, err := permission.GetUserListSame${i["type"]}(current); err == nil {
-		count ++
-		for _, u := range users {
-			if item[u] == -1 { // added!
-				continue
-			}
-			item[u] += 1
-		}
-	}
-		#end for
-	for k, v := range item {
-		if v == -1 {
-			continue
-		}
-		if v == count {
-			item[k] = -1
-		} else {
-			item[k] = 0
-		}
-	}
-	}
-	#end for
-
-
-	ret := make([]string, 0, len(item))
-	for k, v := range item {
-		if v == -1 {
-			ret = append(ret, k)
-		}
-	}
-	return ret
-	#end if
-}
 
 func getQuery$(className)(current *models.Users, limit, offset int, sortFields []string) (objs []*models.$(className), total int) {
 	userId := make$(className)UserList(current)
@@ -274,40 +210,6 @@ func $(className)Export(ctx *admin.AdminContext) (html string) {
 	return string(ret)
 }
 
-#for act in ["Create", "Read", "Update", "Delete"]
-func has$(className)${act}Permission(current, author *models.Users) bool {
-	#if len($obj.__getattribute__(act.lower())) == 0
-	return true
-	#end if
-	#for iii in $obj.__getattribute__(act.lower())
-	{
-		#if len(iii) == 0
-		#continue
-		#end if
-		ret := true
-		#if len([i["name"] for i in iii if i["name"] != "Owner"]) > 0
-		if ret && !permission.Check(current, Perm_$(className)_$(", Perm_$(className)_".join([i["name"] for i in iii if i["name"] != "Owner"]))) {
-			ret = false
-		}
-		#end if
-
-		#if len([i["name"] for i in iii if i["name"] == "Owner"]) > 0
-		if ret {
-			if !permission.IsSame$("(current, author) || !permission.IsSame".join([i["type"] for i in iii if i["name"] == "Owner"])) (current, author) {
-			ret = false
-			}
-		}
-		#end if
-
-		if ret {
-			return true
-		}
-	}
-	#end for
-	return false
-}
-#end for
-
 func $(className)Create(ctx *admin.AdminContext) (html string) {
 	if !has$(className)CreatePermission(ctx.User, nil) {
 		ctx.SetFlashAlert("您没有创建的权限")
@@ -326,13 +228,6 @@ func $(className)Create(ctx *admin.AdminContext) (html string) {
 }
 
 func $(className)CreatePost(ctx *admin.AdminContext) (html string) {
-#if $obj.hasCreate
-	if !has$(className)CreatePermission(ctx.User, nil) {
-		ctx.SetFlashAlert("您没有创建的权限")
-		return ctx.Redirect("index")
-	}
-#end if
-
 	obj := models.New$(className)()
 	hasError := obj.ReadForm(ctx.Params)
 
@@ -362,13 +257,6 @@ func $(className)View(ctx *admin.AdminContext) (html string) {
 		return ctx.Redirect("index")
 	}
 
-#if $obj.hasRead
-	author, _ := obj.GetUsers()
-	if !has$(className)ReadPermission(ctx.User, author) {
-		ctx.SetFlashAlert("您没有查看的权限")
-		return ctx.Redirect("index")
-	}
-#end if
 	return autoTpl.View(ctx.Context, obj)
 }
 
@@ -378,14 +266,6 @@ func $(className)Edit(ctx *admin.AdminContext) (html string) {
 		ctx.SetFlashAlert(err.Error())
 		return ctx.Redirect("index")
 	}
-
-#if $obj.hasUpdate
-	author, _ := obj.GetUsers()
-	if !has$(className)UpdatePermission(ctx.User, author) {
-		ctx.SetFlashAlert("您没有修改的权限")
-		return ctx.Redirect("index")
-	}
-#end if
 
 	data := ctx.GetSession("$(className)Edit")
 
@@ -409,14 +289,6 @@ func $(className)ViewPost(ctx *admin.AdminContext) (html string) {
 		return ctx.Redirect("index")
 	}
 
-#if $obj.hasRead
-	author, _ := obj.GetUsers()
-	if !has$(className)ReadPermission(ctx.User, author) {
-		ctx.SetFlashAlert("您没有查看的权限")
-		return ctx.Redirect("index")
-	}
-#end if
-
 	hasError := obj.ReadForm(ctx.Params)
 
 	if hasError {
@@ -439,14 +311,6 @@ func $(className)EditPost(ctx *admin.AdminContext) (html string) {
 		return ctx.Redirect("index")
 	}
 
-#if $obj.hasUpdate
-	author, _ := obj.GetUsers()
-	if !has$(className)UpdatePermission(ctx.User, author) {
-		ctx.SetFlashAlert("您没有修改的权限")
-		return ctx.Redirect("index")
-	}
-#end if
-
 	hasError := obj.ReadForm(ctx.Params)
 
 	if hasError {
@@ -463,48 +327,9 @@ func $(className)EditPost(ctx *admin.AdminContext) (html string) {
 	return
 }
 
-#if $obj.hasDelete
-func $(className)DeleteOne(ctx *admin.AdminContext, id string) (ok bool) {
-	obj, err := models.$(className)FindByID(id)
-	if err != nil {
-		return false
-	}
-
-	author, _ := obj.GetUsers()
-	if !has$(className)DeletePermission(ctx.User, author) {
-		return false
-	}
-
-	models.$(className)RemoveByID(id)
-	return true
-}
-#end if
-
 func $(className)DeletePost(ctx *admin.AdminContext) (html string) {
 	ids := ctx.Params["ids"]
 
-#if $obj.hasDelete
-	var ok bool
-	if ids != "" {
-		for _, id := range strings.Split(ids, "\n") {
-			id = strings.Trim(id, "\r")
-			ok = $(className)DeleteOne(ctx, id)
-			if !ok {
-				ctx.SetFlashNotice("删除失败")
-				ctx.Redirect("index")
-				return
-			}
-		}
-	} else {
-		ok = $(className)DeleteOne(ctx, ctx.Params["id"])
-	}
-
-	if ok {
-		ctx.SetFlashNotice("删除失败")
-		ctx.Redirect("index")
-		return
-	}
-#else
 	if ids == "" {
 		id := ctx.Params["id"]
 		models.$(className)RemoveByID(id)
@@ -514,7 +339,6 @@ func $(className)DeletePost(ctx *admin.AdminContext) (html string) {
 			models.$(className)RemoveByID(id)
 		}
 	}
-#end if
 
 	ctx.SetFlashNotice("删除成功")
 	ctx.Redirect("index")
