@@ -217,9 +217,7 @@ def transform_const(obj):
 
 def init_Fields(obj):
 	idField = obj.fields[0]
-	obj.label = obj.name.value
-	if hasattr(idField, "label"):
-		obj.label = idField.label
+
 	obj.relateObj = {}
 	obj.fieldMap = {}
 	for field in obj.fields:
@@ -284,6 +282,10 @@ def init_Fields(obj):
 		obj.toList.append("ID")
 
 	obj.search = get_search(obj)
+
+	obj.label = obj.name.value
+	if hasattr(idField, "label"):
+		obj.label = idField.label
 
 def init_ListedField(obj):
 	idField = obj.fields[0]
