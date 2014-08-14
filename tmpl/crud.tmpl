@@ -28,7 +28,7 @@ import (
 )
 
 var (
-	Perm_$(className) = permission.New("$(className)", "$(obj.classLabel)")
+	Perm_$(className) = permission.New("", "$(obj.classLabel)")
 )
 
 func init() {
@@ -69,12 +69,8 @@ func getSearch$(className)(current *models.Users, q string, params map[string]st
 #end if
 
 func getQuery$(className)(current *models.Users, limit, offset int, sortFields []string) (objs []*models.$(className), total int) {
-	userId := make$(className)UserList(current)
 	query := bson.M{}
 
-	if userId != nil {
-		query["UsersID"] = bson.M{"\$in": userId}
-	}
 	objs, err := models.$(className)Find(query, limit, offset, sortFields...)
 	if err != nil {
 		return
@@ -211,10 +207,6 @@ func $(className)Export(ctx *admin.AdminContext) (html string) {
 }
 
 func $(className)Create(ctx *admin.AdminContext) (html string) {
-	if !has$(className)CreatePermission(ctx.User, nil) {
-		ctx.SetFlashAlert("您没有创建的权限")
-		return ctx.Redirect("index")
-	}
 	var obj *models.$(className)
 	data := ctx.GetSession("$(className)Create")
 

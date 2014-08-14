@@ -68,7 +68,7 @@ def transform_module(module):
             continue
 
         if obj.classLabel:
-            obj.imports.add(("mp", "zfw/models/permission"))
+            obj.imports.add("admin/permission")
             obj.hasUser = len([i for i in obj.fields if str(i.name) == "UsersID"]) > 0
 
             if len(obj.relateObj) > 0:
