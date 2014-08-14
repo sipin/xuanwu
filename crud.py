@@ -150,7 +150,7 @@ def transform_module(module):
                 fp.write(str(res))
         else:
             for field in obj.fields:
-                if field.widget_type == "relateSelect":
+                if field.widget_type in ("relateSelect", "relateAjaxSelect"):
                     outDir = urlBase.split(path.sep)[-2]
                     tmpl = file("tmpl/relateOnly.tmpl").read().decode("u8")
                     ret = Template(tmpl, searchList=[{"namespace": outDir,
