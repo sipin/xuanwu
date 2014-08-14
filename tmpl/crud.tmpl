@@ -28,7 +28,7 @@ import (
 )
 
 var (
-	Perm_$(className) = permission.New("", "$(obj.classLabel)")
+	Perm_$(className) = permission.New("", "$(obj.label)")
 )
 
 func init() {
@@ -199,7 +199,7 @@ func $(className)Export(ctx *admin.AdminContext) (html string) {
 		ctx.Logger.Error(err)
 	}
 
-	fname := fmt.Sprintf("%s_%s.xlsx", url.QueryEscape("$(obj.classLabel)"), time.Now().Format("2006-01-02_1504"))
+	fname := fmt.Sprintf("%s_%s.xlsx", url.QueryEscape("$(obj.label)"), time.Now().Format("2006-01-02_1504"))
 	fname = fmt.Sprintf("attachment;filename=\"%s\";filename*=utf-8''%s", fname, fname)
 	ctx.SetHeader("Content-Type", "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet; charset=utf-8", true)
 	ctx.SetHeader("Content-Disposition", fname, true)
@@ -214,9 +214,9 @@ func $(className)Create(ctx *admin.AdminContext) (html string) {
 		obj = models.New$(className)FromBytes(data)
 		obj.ValidateData()
 		ctx.ClearSession("$(className)Create")
-		return autoTpl.Create(ctx.Context, obj.Widgets(), "建立$(obj.classLabel)")
+		return autoTpl.Create(ctx.Context, obj.Widgets(), "建立$(obj.label)")
 	}
-	return autoTpl.Create(ctx.Context, models.New$(className)().Widgets(), "建立$(obj.classLabel)")
+	return autoTpl.Create(ctx.Context, models.New$(className)().Widgets(), "建立$(obj.label)")
 }
 
 func $(className)CreatePost(ctx *admin.AdminContext) (html string) {
