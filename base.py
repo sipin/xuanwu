@@ -28,6 +28,7 @@ widget_types = set([
 	"hidden",
 	"opinion",
 	"password",
+	"permissionSelect",
 	"photo",
 	"photos",
 	"radio",
@@ -40,12 +41,11 @@ widget_types = set([
 	"textarea",
 	"time",
 	"userselect",
-	"permissionSelect",
 ])
 
 supported_annotations = set([
-	"baseURL",
 	"apiURL",
+	"baseURL",
 	"bindData",
 	"disabled",
 	"dm",
@@ -63,14 +63,15 @@ supported_annotations = set([
 	"requiredMsg",
 	"rule",
 	"ruleMsg",
+	"scope",
 	"search",
 	"stringList",
+	"subselect",
 	"summary",
 	"toList",
 	"tplPackage",
 	"viewUrl",
 	"widget",
-	"subselect",
 ])
 
 typedef = dict()
@@ -286,6 +287,10 @@ def init_Fields(obj):
 	obj.label = obj.name.value
 	if hasattr(idField, "label"):
 		obj.label = idField.label
+
+	obj.scope = ""
+	if hasattr(idField, "scope"):
+		obj.scope = idField.scope
 
 def init_ListedField(obj):
 	idField = obj.fields[0]
