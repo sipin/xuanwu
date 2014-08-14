@@ -31,6 +31,7 @@ widget_types = set([
 	"photo",
 	"photos",
 	"radio",
+	"relateAjaxSelect",
 	"relateSelect",
 	"richtext",
 	"select",
@@ -249,7 +250,7 @@ def init_Fields(obj):
 		field.widget_type = get_widget_type(obj, field)
 		obj.fieldMap[field.name.value] = field
 
-		if field.widget_type == "relateSelect":
+		if field.widget_type in ("relateSelect", "relateAjaxSelect"):
 			obj.relateObj[field.name.value] = field
 			field.relateFields = []
 
