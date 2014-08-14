@@ -28,8 +28,20 @@ import (
 )
 
 var (
-	Perm_$(className) = permission.New("", "$(obj.label)")
+	Perm_$(className) = permission.New("$obj.scope", "$(obj.label)")
 )
+
+type $(className)Context struct {
+	*admin.AdminContext
+}
+
+func (c *$(className)Context) BeforeHandler() (continueToHandler bool) {
+	if !c.AdminContext.BeforeHandler() {
+		return false
+	}
+
+	return c.User.HasPermission(Perm_$(className))
+}
 
 func init() {
 	web.Get("$(urlBase)/index", $(className)Index)
@@ -80,7 +92,7 @@ func getQuery$(className)(current *models.Users, limit, offset int, sortFields [
 	return
 }
 
-func get$(className)OrderSort(ctx *admin.AdminContext) (result map[string]string) {
+func get$(className)OrderSort(ctx *$(className)Context) (result map[string]string) {
 	result = map[string]string{}
 	order, ok := ctx.Params["orders"]
 	if !ok {
@@ -100,7 +112,7 @@ func get$(className)OrderSort(ctx *admin.AdminContext) (result map[string]string
 	return
 }
 
-func get$(className)Sort(ctx *admin.AdminContext) (sortFields []string){
+func get$(className)Sort(ctx *$(className)Context) (sortFields []string){
 	order, ok := ctx.Params["orders"]
 	if !ok {
 		order = "$(obj.defaultOrder)"
@@ -109,7 +121,7 @@ func get$(className)Sort(ctx *admin.AdminContext) (sortFields []string){
 	return
 }
 
-func $(className)Index(ctx *admin.AdminContext) (html string) {
+func $(className)Index(ctx *$(className)Context) (html string) {
 	var total int
 	limit := 20
 	if val, ok := ctx.Params["limit"]; ok {
@@ -141,7 +153,7 @@ func $(className)Index(ctx *admin.AdminContext) (html string) {
 	return autoTpl.Index(ctx.Context, obj, stupidGoInterface, total, limit, offset, orders)
 }
 
-func $(className)Export(ctx *admin.AdminContext) (html string) {
+func $(className)Export(ctx *$(className)Context) (html string) {
 	limit := 20
 	if val, ok := ctx.Params["limit"]; ok {
 		limit, _ = strconv.Atoi(val)
@@ -206,7 +218,7 @@ func $(className)Export(ctx *admin.AdminContext) (html string) {
 	return string(ret)
 }
 
-func $(className)Create(ctx *admin.AdminContext) (html string) {
+func $(className)Create(ctx *$(className)Context) (html string) {
 	var obj *models.$(className)
 	data := ctx.GetSession("$(className)Create")
 
@@ -219,7 +231,7 @@ func $(className)Create(ctx *admin.AdminContext) (html string) {
 	return autoTpl.Create(ctx.Context, models.New$(className)().Widgets(), "建立$(obj.label)")
 }
 
-func $(className)CreatePost(ctx *admin.AdminContext) (html string) {
+func $(className)CreatePost(ctx *$(className)Context) (html string) {
 	obj := models.New$(className)()
 	hasError := obj.ReadForm(ctx.Params)
 
@@ -242,7 +254,7 @@ func $(className)CreatePost(ctx *admin.AdminContext) (html string) {
 	return
 }
 
-func $(className)View(ctx *admin.AdminContext) (html string) {
+func $(className)View(ctx *$(className)Context) (html string) {
 	obj, err := models.$(className)FindByID(ctx.Params["id"])
 	if err != nil {
 		ctx.SetFlashAlert(err.Error())
@@ -252,7 +264,7 @@ func $(className)View(ctx *admin.AdminContext) (html string) {
 	return autoTpl.View(ctx.Context, obj)
 }
 
-func $(className)Edit(ctx *admin.AdminContext) (html string) {
+func $(className)Edit(ctx *$(className)Context) (html string) {
 	obj, err := models.$(className)FindByID(ctx.Params["id"])
 	if err != nil {
 		ctx.SetFlashAlert(err.Error())
@@ -274,7 +286,7 @@ func $(className)Edit(ctx *admin.AdminContext) (html string) {
 	return autoTpl.Edit(ctx.Context, obj)
 }
 
-func $(className)ViewPost(ctx *admin.AdminContext) (html string) {
+func $(className)ViewPost(ctx *$(className)Context) (html string) {
 	obj, err := models.$(className)FindByID(ctx.Params["id"])
 	if err != nil {
 		ctx.SetFlashAlert(err.Error())
@@ -296,7 +308,7 @@ func $(className)ViewPost(ctx *admin.AdminContext) (html string) {
 	return
 }
 
-func $(className)EditPost(ctx *admin.AdminContext) (html string) {
+func $(className)EditPost(ctx *$(className)Context) (html string) {
 	obj, err := models.$(className)FindByID(ctx.Params["id"])
 	if err != nil {
 		ctx.SetFlashAlert(err.Error())
@@ -319,7 +331,7 @@ func $(className)EditPost(ctx *admin.AdminContext) (html string) {
 	return
 }
 
-func $(className)DeletePost(ctx *admin.AdminContext) (html string) {
+func $(className)DeletePost(ctx *$(className)Context) (html string) {
 	ids := ctx.Params["ids"]
 
 	if ids == "" {
@@ -339,7 +351,7 @@ func $(className)DeletePost(ctx *admin.AdminContext) (html string) {
 
 #for field in $obj.fields
 #if hasattr(field, "relateFields")
-func $(className)$(field.name)Relate(ctx *admin.AdminContext) (jsonData string) {
+func $(className)$(field.name)Relate(ctx *$(className)Context) (jsonData string) {
 	ID, _ := ctx.Params["ID"]
 	if ID != ""{
 		data, _ := models.$(field.bindTable)FindByID(ID)
