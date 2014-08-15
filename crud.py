@@ -64,10 +64,10 @@ def transform_module(module):
         if tplPackage == "":
             tplPackage = "tpl/auto"
 
-        if obj.label == "" or urlBase == "":
+        if urlBase == "":
             continue
 
-        if obj.label != "":
+        if obj.label != obj.name.value:
             obj.imports.add("admin/permission")
             obj.hasUser = len([i for i in obj.fields if str(i.name) == "UsersID"]) > 0
 
