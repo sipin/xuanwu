@@ -8,6 +8,25 @@ func () (data []*IDLabelPair) {
 	#if hasattr($field.const_value, 'value')
 	length += 1
 	#end if
+	tr := func(val string) string {
+		return val
+	}
+	#if len($pkg) == 0
+	model := New$(col)().$(label)Widget()
+	#else
+	model := $(pkg).New$(col)().$(label)Widget()
+	#end if
+	if model.GetBindData != nil {
+		bindData := model.GetBindData()
+		bindDataMap := map[string]string{}
+		for _, data := range bindData {
+			bindDataMap[data.ID] = data.Label
+		}
+		tr = func(val string) (result string) {
+			result, _ = bindDataMap[val]
+			return 
+		}
+	}
 	data = make([]*IDLabelPair, 0, length)
 	#if hasattr($field.const_value, 'value')
 	data = append(data, &IDLabelPair {"", "", ""})
@@ -15,7 +34,7 @@ func () (data []*IDLabelPair) {
 	for _, obj := range(objs) {
 		data = append(data, &IDLabelPair {
 			ID : obj.ID.Hex(),
-			Label : obj.$label,
+			Label : tr(obj.$label),
 		})
 	}
 
