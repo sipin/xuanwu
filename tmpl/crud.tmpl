@@ -40,7 +40,7 @@ func (c *$(className)Context) BeforeHandler() (continueToHandler bool) {
 		return false
 	}
 
-	return c.User.HasPermission(Perm_$(className))
+	return c.User.HasPermission(Perm_$(className).Hash())
 }
 
 func init() {
