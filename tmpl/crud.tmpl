@@ -35,6 +35,12 @@ type $(className)Context struct {
 	*admin.AdminContext
 }
 
+func (c *$(className)Context) Create(ctx *web.Context) (newContext web.IContext) {
+	a := &$(className)Context{}
+	a.AdminContext = &admin.AdminContext{Context: ctx}
+	return a
+}
+
 func (c *$(className)Context) BeforeHandler() (continueToHandler bool) {
 	if !c.AdminContext.BeforeHandler() {
 		return false
