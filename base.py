@@ -88,7 +88,8 @@ def type_translate(obj):
 	return "unknown(%s)" % obj
 
 def add_properties(field, obj):
-	field.label = field.name.value
+	if field.tag != 1:
+		field.label = field.name.value
 	# todo: add field name checking
 	for att in field.annotations:
 		if att.name.value not in supported_annotations:
