@@ -68,7 +68,7 @@ def transform_module(module):
             continue
 
         if obj.label != obj.name.value:
-            obj.perm = "工作人员"
+            obj.perm = obj.label
             if hasattr(idField, "perm"):
                 obj.perm = idField.perm
 
