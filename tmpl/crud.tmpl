@@ -29,6 +29,8 @@ import (
 
 var (
 	Perm_$(className) = permission.New("$obj.scope", "$(obj.perm)")
+	Perm_$(className)_Export = permission.New("$obj.scope.$(obj.perm)", "导出")
+	Perm_$(className)_Print = permission.New("$obj.scope.$(obj.perm)", "打印")
 )
 
 type $(className)Context struct {
@@ -163,10 +165,16 @@ func $(className)Index(ctx *$(className)Context) (html string) {
 	for i, v := range objs {
 		stupidGoInterface[i] = xuanwu.IXuanWuObj(v)
 	}
-	return autoTpl.Index(ctx.Context, obj, stupidGoInterface, total, limit, offset, orders)
+	return autoTpl.Index(ctx.Context, "$obj.scope.$(obj.perm)", obj, stupidGoInterface, total, limit, offset, orders)
 }
 
 func $(className)Export(ctx *$(className)Context) (html string) {
+	if ctx.ContextUser.HasPermission(Perm_$(className)_Export.Hash()) {
+		ctx.Context.Write([]byte("No Permision"))
+		ctx.Context.Forbidden()
+		return ""
+	}
+
 	limit := 20
 	if val, ok := ctx.Params["limit"]; ok {
 		limit, _ = strconv.Atoi(val)
