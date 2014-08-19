@@ -57,6 +57,7 @@ supported_annotations = set([
 	"listedFields",
 	"meta",
 	"orderFields",
+	"perm",
 	"placeholder",
 	"readonly",
 	"relateData",
@@ -289,7 +290,7 @@ def init_Fields(obj):
 	if hasattr(idField, "label"):
 		obj.label = idField.label
 
-	obj.scope = ""
+	obj.scope = "公共"
 	if hasattr(idField, "scope"):
 		obj.scope = idField.scope
 

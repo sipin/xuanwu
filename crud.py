@@ -68,6 +68,10 @@ def transform_module(module):
             continue
 
         if obj.label != obj.name.value:
+            obj.perm = "工作人员"
+            if hasattr(idField, "perm"):
+                obj.perm = idField.perm
+
             obj.imports.add("admin/permission")
             obj.hasUser = len([i for i in obj.fields if str(i.name) == "UsersID"]) > 0
 
