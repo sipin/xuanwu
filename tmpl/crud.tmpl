@@ -202,6 +202,7 @@ func $(className)Export(ctx *$(className)Context) (html string) {
 
 	labelObjs := obj.GetListedLabels()
 	var labels []interface{}
+	labels = append(labels, "序号")
 	for _, o := range labelObjs {
 		labels = append(labels, o.Label)
 	}
@@ -214,6 +215,7 @@ func $(className)Export(ctx *$(className)Context) (html string) {
 		#end if
 		#end for
 		rows[i + 1] = xls.NewRow(
+			i+1,
 			#for f in $obj.listedFieldNames
 			#if "." in f
 			$(f.replace(".", "")).GetFieldAsString("$(f[f.index(".")+1:])"),
