@@ -169,7 +169,7 @@ func $(className)Index(ctx *$(className)Context) (html string) {
 }
 
 func $(className)Export(ctx *$(className)Context) (html string) {
-	if ctx.ContextUser.HasPermission(Perm_$(className)_Export.Hash()) {
+	if !ctx.ContextUser.HasPermission(Perm_$(className)_Export.Hash()) {
 		ctx.Context.Write([]byte("No Permision"))
 		ctx.Context.Forbidden()
 		return ""
