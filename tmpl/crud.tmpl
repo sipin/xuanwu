@@ -215,14 +215,18 @@ func $(className)Export(ctx *$(className)Context) (html string) {
 	for i, o := range objs {
 		#for f in $obj.listedFieldNames
 		#if "." in f
-		$(f.replace(".", "")), _ := o.Get$(f[:f.index(".")])()
+		$(f[:f.index(".")]), _ := o.Get$(f[:f.index(".")])()
+		$(f.replace(".", "")) := ""
+		if o.$(f[:f.index(".")])ID != "" {
+			$(f.replace(".", "")) = $(f[:f.index(".")]).GetFieldAsString("$(f[f.index(".")+1:])")
+		}
 		#end if
 		#end for
 		rows[i + 1] = xls.NewRow(
 			i+1,
 			#for f in $obj.listedFieldNames
 			#if "." in f
-			$(f.replace(".", "")).GetFieldAsString("$(f[f.index(".")+1:])"),
+			$(f.replace(".", "")),
 			#else
 			o.GetFieldAsString("$(f)"),
 			#end if
