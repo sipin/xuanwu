@@ -2,6 +2,7 @@
 import sys
 import os
 import base
+import fcntl
 
 from ptsd import ast
 from ptsd.loader import Loader, Parser
@@ -30,7 +31,9 @@ def updateController(out_path):
 
 	content = content + ")\n"
 	f = open(out_path + "gen_init.go", "w")
+        fcntl.flock(f, fcntl.LOCK_EX)
 	f.write(content)
+        fcntl.flock(f, fcntl.LOCK_UN)
 	f.close()
 
 def getControlDir(urlBase):
