@@ -53,14 +53,33 @@ def fieldElems(field, key):
 			ret.append(att.value.value)
 	return ret
 
+
+def transform_tpl(obj, name):
+	idField = obj.fields[0]
+	tpl = fieldElem(idField, name)
+	if tpl != "":
+		obj.imports.add((name, tpl))
+		return tpl
+	return None
+
+def transform_tpls(obj):
+	obj.edittpl = transform_tpl(obj, "edittpl")
+	obj.viewtpl = transform_tpl(obj, "viewtpl")
+	obj.indextpl = transform_tpl(obj, "indextpl")
+	obj.createtpl = transform_tpl(obj, "createtpl")
+
+
 def transform_module(module):
 	for obj in module.structs:
 		urlBase = ""
 		obj.imports = set()
 		idField = obj.fields[0]
-		urlBase = fieldElem(idField, "baseurl")
-		tplPackage = fieldElem(idField, "tplpackage")
 
+		urlBase = fieldElem(idField, "baseurl")
+
+		transform_tpls(obj)
+
+		tplPackage = fieldElem(idField, "tplpackage")
 		if tplPackage == "":
 			tplPackage = "tpl/auto"
 
