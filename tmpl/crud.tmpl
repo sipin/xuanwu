@@ -165,7 +165,11 @@ func $(className)Index(ctx *$(className)Context) (html string) {
 	for i, v := range objs {
 		stupidGoInterface[i] = xuanwu.IXuanWuObj(v)
 	}
+	#if $obj.indextpl != None
+	return indextpl.Index(ctx.Context, "$obj.scope.$(obj.perm)", obj, stupidGoInterface, total, limit, offset, orders)
+	#else
 	return autoTpl.Index(ctx.Context, "$obj.scope.$(obj.perm)", obj, stupidGoInterface, total, limit, offset, orders)
+	#end if
 }
 
 func $(className)Export(ctx *$(className)Context) (html string) {
@@ -249,9 +253,17 @@ func $(className)Create(ctx *$(className)Context) (html string) {
 		obj = models.New$(className)FromBytes(data)
 		obj.ValidateData()
 		ctx.ClearSession("$(className)Create")
+		#if $obj.createtpl != None
+		return createtpl.Create(ctx.Context, obj.Widgets(), "建立$(obj.label)")
+		#else
 		return autoTpl.Create(ctx.Context, obj.Widgets(), "建立$(obj.label)")
+		#end if
 	}
+	#if $obj.createtpl != None
+	return createtpl.Create(ctx.Context, models.New$(className)().Widgets(), "建立$(obj.label)")
+	#else
 	return autoTpl.Create(ctx.Context, models.New$(className)().Widgets(), "建立$(obj.label)")
+	#end if
 }
 
 func $(className)CreatePost(ctx *$(className)Context) (html string) {
@@ -284,7 +296,11 @@ func $(className)View(ctx *$(className)Context) (html string) {
 		return ctx.Redirect("index")
 	}
 
+	#if $obj.viewtpl != None
+	return viewtpl.View(ctx.Context, obj)
+	#else
 	return autoTpl.View(ctx.Context, obj)
+	#end if
 }
 
 func $(className)Edit(ctx *$(className)Context) (html string) {
@@ -302,11 +318,19 @@ func $(className)Edit(ctx *$(className)Context) (html string) {
 		ctx.ClearSession("$(className)Edit")
 
 		if o.ID == obj.ID {
+			#if $obj.edittpl != None
+			return edittpl.Edit(ctx.Context, o)
+			#else
 			return autoTpl.Edit(ctx.Context, o)
+			#end if
 		}
 	}
 
+	#if $obj.edittpl != None
+	return edittpl.Edit(ctx.Context, obj)
+	#else
 	return autoTpl.Edit(ctx.Context, obj)
+	#end if
 }
 
 func $(className)ViewPost(ctx *$(className)Context) (html string) {
