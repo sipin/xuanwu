@@ -34,9 +34,9 @@ def updateController(out_path):
 
 	content = content + ")\n"
 	f = open(out_path + "gen_init.go", "w")
-		fcntl.flock(f, fcntl.LOCK_EX)
+	fcntl.flock(f, fcntl.LOCK_EX)
 	f.write(content)
-		fcntl.flock(f, fcntl.LOCK_UN)
+	fcntl.flock(f, fcntl.LOCK_UN)
 	f.close()
 
 def getControlDir(urlBase):
