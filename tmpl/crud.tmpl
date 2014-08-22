@@ -300,9 +300,9 @@ func $(className)View(ctx *$(className)Context) (html string) {
 	}
 
 	#if $obj.viewtpl != None
-	return viewtpl.View(ctx.Context, obj)
+	return viewtpl.View(ctx.Context, "$obj.scope.$(obj.perm)", obj)
 	#else
-	return autoTpl.View(ctx.Context, obj)
+	return autoTpl.View(ctx.Context, "$obj.scope.$(obj.perm)", obj)
 	#end if
 }
 
@@ -314,8 +314,8 @@ func $(className)Edit(ctx *$(className)Context) (html string) {
 	}
 
 	if !ctx.User.IsCreator(obj) {
-		ctx.SetFlashAlert("没有权限")
-		return ctx.Redirect("index")
+		ctx.SetFlashAlert("您没有编辑此项目的权限")
+		return ctx.Redirect("view?id=" + obj.Id())
 	}
 
 	data := ctx.GetSession("$(className)Edit")
@@ -374,10 +374,20 @@ func $(className)DeletePost(ctx *$(className)Context) (html string) {
 
 	if ids == "" {
 		id := ctx.Params["id"]
+		obj, _ := models.$(className)FindByID(id)
+		if !ctx.User.IsCreator(obj) {
+			ctx.SetFlashAlert("您没有删除此项目的权限")
+			return ctx.Redirect("view?id=" + obj.Id())
+		}
 		models.$(className)RemoveByID(id)
 	} else {
 		for _, id := range strings.Split(ids, "\n") {
 			id = strings.Trim(id, "\r")
+			obj, _ := models.$(className)FindByID(id)
+			if !ctx.User.IsCreator(obj) {
+				ctx.SetFlashAlert("您没有删除此项目的权限")
+				return ctx.Redirect("view?id=" + obj.Id())
+			}
 			models.$(className)RemoveByID(id)
 		}
 	}
