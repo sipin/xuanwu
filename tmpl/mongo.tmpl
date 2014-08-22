@@ -63,11 +63,11 @@ func (o *$obj.name.value) Sync() (err error) {
 	}, o)
 
 	if info.UpsertedId == nil {
-		for _, cb := range updateCB_UserDeparment {
+		for _, cb := range updateCB_$obj.name.value {
 			cb(o)
 		}
 	} else {
-		for _, cb := range insertCB_UserDeparment {
+		for _, cb := range insertCB_$obj.name.value {
 			cb(o)
 		}
 	}
