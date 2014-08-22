@@ -314,6 +314,11 @@ func $(className)Edit(ctx *$(className)Context) (html string) {
 		return ctx.Redirect("index")
 	}
 
+	if !ctx.User.IsCreator(obj) {
+		ctx.SetFlashAlert("没有权限")
+		return ctx.Redirect("index")
+	}
+
 	data := ctx.GetSession("$(className)Edit")
 
 	if data != nil {
@@ -363,6 +368,11 @@ func $(className)EditPost(ctx *$(className)Context) (html string) {
 	obj, err := models.$(className)FindByID(ctx.Params["id"])
 	if err != nil {
 		ctx.SetFlashAlert(err.Error())
+		return ctx.Redirect("index")
+	}
+
+	if !ctx.User.IsCreator(obj) {
+		ctx.SetFlashAlert("没有权限")
 		return ctx.Redirect("index")
 	}
 
