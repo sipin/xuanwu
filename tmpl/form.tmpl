@@ -267,7 +267,12 @@ func (o *$obj.name.value) GetFieldAsString(fieldKey string) (Value string) {
 	#if $field.name.value == "ID"
 		Value = o.ID.Hex()
 	#else if $field.type == "string"
-	        widget := o.${field.name.value}Widget()
+			widget := o.${field.name.value}Widget()
+		#if $field.widget_type in ("richtext", "textarea", "opinion")
+			raw := widget.Val()
+			re, _ := regexp.Compile("<.+?>")
+			Value = re.ReplaceAllString(raw, "")
+		#else
 		if widget.Type == "select" {
 		   Value = widget.Val()
 		} else if widget.GetBindData != nil {
@@ -275,6 +280,7 @@ func (o *$obj.name.value) GetFieldAsString(fieldKey string) (Value string) {
 		} else {
 		   Value = o.$field.name.value
 		}
+		#end if
 	#else if $field.type == "i32" and $field.widget_type == "datetime"
 		Value = I32Time(o.$field.name.value)
 	#else if $field.type == "i32"
