@@ -1,11 +1,24 @@
 //mongo methods
+var (
+	insertCB_$obj.name.value []func(obj IXuanWuObj)
+	updateCB_$obj.name.value []func(obj IXuanWuObj)
+)
+
+func $(obj.name.value)AddInsertCallback(cb func(obj IXuanWuObj)) {
+	insertCB_$obj.name.value = append(insertCB_$obj.name.value, cb)
+}
+
+func $(obj.name.value)AddUpdateCallback(cb func(obj IXuanWuObj)) {
+	updateCB_$obj.name.value = append(updateCB_$obj.name.value, cb)
+}
 
 func (o *$obj.name.value) Save() (info *mgo.ChangeInfo, err error) {
 	session, col := ${obj.name.value}Col()
 	defer session.Close()
-	
+	isInsert := false
 	if o.ID == "" {
 		o.ID = bson.NewObjectId()
+		isInsert = true
 	}
 	#for field in $obj.fields
 	#if $field.name.value != "ID" and hasattr($field, "meta")
@@ -23,18 +36,41 @@ func (o *$obj.name.value) Save() (info *mgo.ChangeInfo, err error) {
 #if $obj.search != None
 	o.IndexSearch()
 #end if
-	return col.UpsertId(o.ID, o)
+
+	info, err = col.UpsertId(o.ID, o)
+
+	if isInsert {
+		for _, cb := range insertCB_$obj.name.value {
+			cb(o)
+		}
+	} else {
+		for _, cb := range updateCB_$obj.name.value {
+			cb(o)
+		}
+	}
+
+	return
 }
 
 func (o *$obj.name.value) Sync() (err error) {
 	session, col := ${obj.name.value}Col()
 	defer session.Close()
 
-	_, err = col.Find(o).Apply(mgo.Change{
-		Update: o,
-		Upsert: true,
+	info, err := col.Find(o).Apply(mgo.Change{
+		Update:    o,
+		Upsert:    true,
 		ReturnNew: true,
 	}, o)
+
+	if info.UpsertedId == nil {
+		for _, cb := range updateCB_UserDeparment {
+			cb(o)
+		}
+	} else {
+		for _, cb := range insertCB_UserDeparment {
+			cb(o)
+		}
+	}
 	return
 }
 
