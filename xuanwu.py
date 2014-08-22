@@ -1,4 +1,6 @@
+#!/usr/bin/env python
 # -*- coding: utf-8 -*-
+
 import sys
 import base
 
@@ -49,6 +51,9 @@ def struct_import(obj):
 
 		if field.type in ["i32", "i64", "bool", "double"] and field.widget_type not in ["date", "time", "datetime"]:
 			obj.imports.add("strconv")
+
+		if field.type == "string" and field.widget_type in ("richtext", "textarea", "opinion"):
+			obj.imports.add("regexp")
 
 		if field.type == "list<string>":
 			obj.imports.add("strings")
