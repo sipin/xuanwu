@@ -51,6 +51,7 @@ supported_annotations = set([
 	"baseURL",
 	"bindData",
 	"createTpl",
+	"defaultValue",
 	"disabled",
 	"dm",
 	"editTpl",
@@ -251,6 +252,9 @@ def init_Fields(obj):
 					field.foreign_type = field.foreign_package + "." + field.foreign
 			else:
 				field.foreign_type = field.fk
+
+		if not hasattr(field, "defaultValue"):
+			field.defaultValue = None
 
 		field.go_type = type_translate(field.type)
 		field.type = str(field.type)

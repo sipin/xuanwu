@@ -86,6 +86,12 @@ type $obj.name.value struct {
 func New$(obj.name.value)() *$obj.name.value {
 	rval := new($obj.name.value)
 	rval.ID = bson.NewObjectId()
+	#for field in $obj.fields
+		#if $field.defaultValue
+			rval.$field.name.value = "$field.defaultValue"
+		#end if
+	#end for
+
 	return rval
 }
 
