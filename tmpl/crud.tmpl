@@ -165,7 +165,7 @@ func $(className)Index(ctx *$(className)Context) (html string) {
 		stupidGoInterface[i] = xuanwu.IXuanWuObj(v)
 	}
 	#if $obj.indextpl != None
-	return indextpl.Index(ctx.Context, "$obj.scope.$(obj.perm)", obj, stupidGoInterface, total, limit, offset, orders)
+	return $(obj.indextpl).Index(ctx.Context, "$obj.scope.$(obj.perm)", obj, stupidGoInterface, total, limit, offset, orders)
 	#else
 	return autoTpl.Index(ctx.Context, "$obj.scope.$(obj.perm)", obj, stupidGoInterface, total, limit, offset, orders)
 	#end if
@@ -257,13 +257,13 @@ func $(className)Create(ctx *$(className)Context) (html string) {
 		obj.ValidateData()
 		ctx.ClearSession("$(className)Create")
 		#if $obj.createtpl != None
-		return createtpl.Create(ctx.Context, obj.Widgets(), "建立$(obj.label)")
+		return $(obj.createtpl).Create(ctx.Context, obj.Widgets(), "建立$(obj.label)")
 		#else
 		return autoTpl.Create(ctx.Context, obj.Widgets(), "建立$(obj.label)")
 		#end if
 	}
 	#if $obj.createtpl != None
-	return createtpl.Create(ctx.Context, models.New$(className)().Widgets(), "建立$(obj.label)")
+	return $(obj.createtpl).Create(ctx.Context, models.New$(className)().Widgets(), "建立$(obj.label)")
 	#else
 	return autoTpl.Create(ctx.Context, models.New$(className)().Widgets(), "建立$(obj.label)")
 	#end if
@@ -300,7 +300,7 @@ func $(className)View(ctx *$(className)Context) (html string) {
 	}
 
 	#if $obj.viewtpl != None
-	return viewtpl.View(ctx.Context, "$obj.scope.$(obj.perm)", obj)
+	return $(obj.viewtpl).View(ctx.Context, "$obj.scope.$(obj.perm)", obj)
 	#else
 	return autoTpl.View(ctx.Context, "$obj.scope.$(obj.perm)", obj)
 	#end if
@@ -327,7 +327,7 @@ func $(className)Edit(ctx *$(className)Context) (html string) {
 
 		if o.ID == obj.ID {
 			#if $obj.edittpl != None
-			return edittpl.Edit(ctx.Context, o)
+			return $(obj.edittpl).Edit(ctx.Context, o)
 			#else
 			return autoTpl.Edit(ctx.Context, o)
 			#end if
@@ -335,7 +335,7 @@ func $(className)Edit(ctx *$(className)Context) (html string) {
 	}
 
 	#if $obj.edittpl != None
-	return edittpl.Edit(ctx.Context, obj)
+	return $(obj.edittpl).Edit(ctx.Context, obj)
 	#else
 	return autoTpl.Edit(ctx.Context, obj)
 	#end if

@@ -253,13 +253,17 @@ def init_Fields(obj):
 			else:
 				field.foreign_type = field.fk
 
-		if not hasattr(field, "defaultValue"):
-			field.defaultValue = None
-
 		field.go_type = type_translate(field.type)
 		field.type = str(field.type)
 		field.widget_type = get_widget_type(obj, field)
 		obj.fieldMap[field.name.value] = field
+
+		if hasattr(field, "defaultValue") and field.go_type != "string":
+			raise Exception(thrift_file + " " + obj.name.value + " " + field.name.value +
+			 " is not string type, defaultValue only support string")
+
+		if not hasattr(field, "defaultValue"):
+			field.defaultValue = None
 
 		if field.widget_type in ("relateSelect", "relateAjaxSelect"):
 			obj.relateObj[field.name.value] = field
