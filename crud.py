@@ -59,13 +59,17 @@ def fieldElems(field, key):
 			ret.append(att.value.value)
 	return ret
 
-
 def transform_tpl(obj, name):
 	idField = obj.fields[0]
 	tpl = fieldElem(idField, name)
 	if tpl != "":
+		name1 = ""
+		for item in obj.imports:
+			if isinstance(item, tuple):
+				if item[1] == tpl:
+					return item[0]
 		obj.imports.add((name, tpl))
-		return tpl
+		return name
 	return None
 
 def transform_tpls(obj):
@@ -73,7 +77,6 @@ def transform_tpls(obj):
 	obj.viewtpl = transform_tpl(obj, "viewtpl")
 	obj.indextpl = transform_tpl(obj, "indextpl")
 	obj.createtpl = transform_tpl(obj, "createtpl")
-
 
 def transform_module(module):
 	for obj in module.structs:

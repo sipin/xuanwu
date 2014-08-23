@@ -50,6 +50,7 @@ supported_annotations = set([
 	"apiURL",
 	"baseURL",
 	"bindData",
+	"bindFunc",
 	"createTpl",
 	"crud",
 	"defaultValue",
@@ -127,6 +128,18 @@ def add_properties(field, obj):
 
 		t = Template(tpl, searchList=[{"field": field, "col": col, "label": label, "pkg": short}])
 		field.bindData = str(t).strip()
+		field.bindTable = col
+		field.bindPackage = pkg
+
+	if hasattr(field, "bindFunc"):
+		ss = field.bindFunc.split(":")
+		if len(ss) == 2:
+			pkg = None
+			col, func = ss
+		else:
+			raise Exception(thrift_file + " " + obj.name.value + " " + field.name.value +
+			" has invalid field annotation: bindFunc")
+		field.bindData = func
 		field.bindTable = col
 		field.bindPackage = pkg
 
@@ -254,13 +267,17 @@ def init_Fields(obj):
 			else:
 				field.foreign_type = field.fk
 
-		if not hasattr(field, "defaultValue"):
-			field.defaultValue = None
-
 		field.go_type = type_translate(field.type)
 		field.type = str(field.type)
 		field.widget_type = get_widget_type(obj, field)
 		obj.fieldMap[field.name.value] = field
+
+		if hasattr(field, "defaultValue") and field.go_type != "string":
+			raise Exception(thrift_file + " " + obj.name.value + " " + field.name.value +
+			 " is not string type, defaultValue only support string")
+
+		if not hasattr(field, "defaultValue"):
+			field.defaultValue = None
 
 		if field.widget_type in ("relateSelect", "relateAjaxSelect"):
 			obj.relateObj[field.name.value] = field
