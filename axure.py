@@ -4,29 +4,16 @@
 import sys
 import os
 import tinycss
+from bs4 import BeautifulSoup
 
-from ptsd import ast
-from ptsd.loader import Loader, Parser
+from ptsd.loader import Loader
 from Cheetah.Template import Template
 from os import path
 
-if len(sys.argv) != 3:
-	print "usage: \n\tpython axure.py axure_folder key"
-	sys.exit()
-
-axure_folder = sys.argv[1]
-key = sys.argv[2]
-
-def readall(fname):
-	f = open(fname)
-	content = f.read()
-	f.close()
-	return content
-
 class Size:
 	def __init__(self):
-		self.top = ""
-		self.left = ""
+		self.top = 0
+		self.left = 0
 
 	def __str__(self):
 		return "top: " + str(self.top) + " left: " + str(self.left)
@@ -45,7 +32,9 @@ def get_ruledict(rs):
 	data = {}
 	for r in rs:
 		if len(r.selector) == 2 and r.selector[1].value[0] == "u":
-			data[str(r.selector[1].value)] = get_size(r.declarations)
+			size = get_size(r.declarations)
+			if size.top > 0:
+				data[str(r.selector[1].value)] = size
 
 	return data
 
@@ -61,9 +50,49 @@ def gen(axure_folder, key):
 
 	rd = get_ruledict(css.rules)
 
-	print rd
+	soup = BeautifulSoup(open(html_path))
+
+	text_dict = {}
+
+	for i in range(1, len(rd)):
+		node_id = 'u%d' % i
+		nodes = soup.find_all(id = node_id)
+		if len(nodes) == 1:
+			key = nodes[0].get_text().encode("utf-8").strip()
+			key = key.replace(" ", "").replace("*", "").replace("c2a0".decode("hex"), "")
+			if len(key) < 2 or  "\n" in key[:-1]:
+				continue
+			text_dict[key] = node_id
+
+	rows = {}
+	data = {}
+	for text in text_dict.keys():
+		key = text_dict[text]
+		if rd.has_key(key):
+			size = rd[key]
+			rows[text] = size.top + float(size.left) / (len(str(size.left)) * 10)
+			data[text] = size
+	top = 0
+	result = ""
+	for w in sorted(rows, key=rows.get):
+		size = data[w]
+		if size.top - top > 10:
+			if top > 0:
+				result += "\n"
+			top = size.top
+		else:
+			result += "\t"
+		result += w
+
+	return result
 
 def main():
-	gen(axure_folder, key)
+	if len(sys.argv) != 3:
+		print "usage: \n\tpython axure.py axure_folder key"
+		sys.exit()
+
+	axure_folder = sys.argv[1]
+	key = sys.argv[2]
+	print gen(axure_folder, key)
 
 main()
