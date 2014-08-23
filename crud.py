@@ -6,8 +6,7 @@ import os
 import base
 import fcntl
 
-from ptsd import ast
-from ptsd.loader import Loader, Parser
+from ptsd.loader import Loader
 from Cheetah.Template import Template
 from os import path
 

@@ -2,9 +2,10 @@
 # -*- coding: utf-8 -*-
 
 import sys
+import traceback
 
 from ptsd import ast
-from ptsd.loader import Loader, Parser
+from ptsd.loader import Loader
 from Cheetah.Template import Template
 from os import path, mkdir
 import traceback
