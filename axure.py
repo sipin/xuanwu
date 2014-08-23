@@ -95,4 +95,5 @@ def main():
 	key = sys.argv[2]
 	print gen(axure_folder, key)
 
-main()
+if __name__ == "__main__":
+	main()
