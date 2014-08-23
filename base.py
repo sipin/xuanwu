@@ -50,6 +50,7 @@ supported_annotations = set([
 	"apiURL",
 	"baseURL",
 	"bindData",
+	"bindFunc",
 	"createTpl",
 	"defaultValue",
 	"disabled",
@@ -126,6 +127,18 @@ def add_properties(field, obj):
 
 		t = Template(tpl, searchList=[{"field": field, "col": col, "label": label, "pkg": short}])
 		field.bindData = str(t).strip()
+		field.bindTable = col
+		field.bindPackage = pkg
+
+	if hasattr(field, "bindFunc"):
+		ss = field.bindFunc.split(":")
+		if len(ss) == 2:
+			pkg = None
+			col, func = ss
+		else:
+			raise Exception(thrift_file + " " + obj.name.value + " " + field.name.value +
+			" has invalid field annotation: bindFunc")
+		field.bindData = func
 		field.bindTable = col
 		field.bindPackage = pkg
 
