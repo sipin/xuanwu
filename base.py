@@ -51,6 +51,7 @@ supported_annotations = set([
 	"baseURL",
 	"bindData",
 	"createTpl",
+	"crud",
 	"defaultValue",
 	"disabled",
 	"dm",
@@ -305,6 +306,10 @@ def init_Fields(obj):
 	if hasattr(idField, "scope"):
 		obj.scope = idField.scope
 
+	obj.crud = ""
+	if hasattr(idField, "crud"):
+		obj.crud = idField.crud
+
 def init_ListedField(obj):
 	idField = obj.fields[0]
 	obj.listedFields = []
@@ -371,28 +376,33 @@ def init_FilterFields(obj):
 	obj.filterFields = []
 	obj.termKeys = []
 	obj.dateKeys = []
+	filterFields = []
 	if hasattr(idField, "filterFields"):
 		filterFields = [f.strip() for f in idField.filterFields.split(",")]
-		for fieldName in filterFields:
-			for field in obj.fields:
-				if field.name.value == fieldName:
-					obj.filterFields.append(field)
-					if field.widget_type in ["date", "time", "datetime"]:
-						obj.dateKeys.append(fieldName + "Start")
-						obj.dateKeys.append(fieldName + "End")
-					elif field.type == "string":
-						obj.termKeys.append(fieldName)
-					elif field.type == "list<string>":
-						obj.termKeys.append(fieldName)
-					else:
-						raise Exception("%s %s has invalid filterField: %s:%s" %
-					(thrift_file, obj.name.value, fieldName, field.type))
 
-		if len(filterFields) > len(obj.filterFields):
-			foundFields = [field.name.value for field in obj.filterFields if field.name.value in filterFields]
-			missingFields = [field for field in filterFields if field not in foundFields]
-			raise Exception(thrift_file + " " + obj.name.value +
-				" missing filterFields: " + str(missingFields))
+	if obj.crud == "personal" and "UsersID" not in filterFields:
+		filterFields.append("UsersID")
+
+	for fieldName in filterFields:
+		for field in obj.fields:
+			if field.name.value == fieldName:
+				obj.filterFields.append(field)
+				if field.widget_type in ["date", "time", "datetime"]:
+					obj.dateKeys.append(fieldName + "Start")
+					obj.dateKeys.append(fieldName + "End")
+				elif field.type == "string":
+					obj.termKeys.append(fieldName)
+				elif field.type == "list<string>":
+					obj.termKeys.append(fieldName)
+				else:
+					raise Exception("%s %s has invalid filterField: %s:%s" %
+				(thrift_file, obj.name.value, fieldName, field.type))
+
+	if len(filterFields) > len(obj.filterFields):
+		foundFields = [field.name.value for field in obj.filterFields if field.name.value in filterFields]
+		missingFields = [field for field in filterFields if field not in foundFields]
+		raise Exception(thrift_file + " " + obj.name.value +
+			" missing filterFields: " + str(missingFields))
 
 def init_module(module):
 	module.consts = []

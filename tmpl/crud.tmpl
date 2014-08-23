@@ -76,6 +76,9 @@ func init() {
 
 #if $obj.search != None
 func getSearch$(className)(current *models.Users, q string, params map[string]string, limit int, offset int, sortFields []string) (objs []*models.$(className), total int) {
+	#if $obj.crud == "personal"
+	params["UsersID"] = current.Id()
+	#end if
 	out, _ := models.$(className)SearchWithParams(q, params, limit, offset)
 	total = out.Hits.Total
 
@@ -96,6 +99,9 @@ func getSearch$(className)(current *models.Users, q string, params map[string]st
 
 func getQuery$(className)(current *models.Users, limit, offset int, sortFields []string) (objs []*models.$(className), total int) {
 	query := bson.M{}
+	#if $obj.crud == "personal"
+	query["UsersID"] = current.Id()
+	#end if
 
 	objs, err := models.$(className)Find(query, limit, offset, sortFields...)
 	if err != nil {
