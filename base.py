@@ -126,6 +126,8 @@ def add_properties(field, obj):
 			short = pkg.split("/")[-1]
 
 		t = Template(tpl, searchList=[{"field": field, "col": col, "label": label, "pkg": short}])
+
+		field.rawBindData = field.bindData
 		field.bindData = str(t).strip()
 		field.bindTable = col
 		field.bindPackage = pkg
@@ -251,6 +253,11 @@ def init_Fields(obj):
 		if field.name.value.endswith("ID"):
 			field.foreign = field.name.value[:-2]
 			field.foreign_type = field.foreign
+
+		if not hasattr(field, "fk") and hasattr(field, "rawBindData"):
+			ss = field.rawBindData.split(".")
+			if len(ss) == 3:
+				field.fk = ".".join(ss[:2])
 
 		if hasattr(field, "fk"):
 			if "." in field.fk:
