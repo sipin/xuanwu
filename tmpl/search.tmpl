@@ -58,12 +58,16 @@ func $(obj.name.value)SearchWithMoreParams(word string, params map[string]interf
 
 func $(obj.name.value)Search(word string, limit int, offset int) (core.SearchResult, error) {
 	searchObj := XGetQuery("query_string", XGetQueryString(word, $(obj.name.value)SearchFileds))
-	args := map[string]interface{} {"from" : offset, "size": limit}
-	return core.SearchRequest("$(obj.name.value.lower())", "simple", args, searchObj)
+	return $(obj.name.value)SearchRequest(searchObj, limit, offset)
 }
 
 func $(obj.name.value)SearchPurge() {
 	core.Delete("$(obj.name.value.lower())", "simple", "", nil)
+}
+
+func $(obj.name.value)SearchRequest(query interface{}, limit, offset int) (core.SearchResult, error) {
+	args := map[string]interface{} {"from" : offset, "size": limit}
+	return core.SearchRequest("$(obj.name.value.lower())", "simple", args, query)
 }
 
 func $(obj.name.value)SearchRebuild() {

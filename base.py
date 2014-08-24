@@ -185,7 +185,7 @@ def get_search(obj):
 	for fieldName in search:
 		try:
 			field = obj.fieldMap[fieldName]
-			if str(field.type) not in ["string"]:
+			if str(field.type) not in ["string", "list<string>", "i32", "bool"]:
 				raise Exception("%s %s has non-string searchField: %s:%s" %
 					(thrift_file, obj.name.value, fieldName, field.type))
 			searchFields.append(field)
