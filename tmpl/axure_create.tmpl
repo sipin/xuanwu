@@ -1,0 +1,35 @@
+@{
+	import (
+		"tpl/admin/layout/base"
+		"tpl/html"
+		"zfw/models"
+		. "zfw/tplhelper"
+		"github.com/sipin/web"
+	)
+	var ctx *web.Context
+	var obj *models.$className
+	var pageTitle string
+}
+
+<div style="">
+<form role="form" method="post" action="create" class="form-inline">
+	@raw(web.XSRFFormField(ctx))
+	#for r in $rows
+	#set global $row = $r
+	<div class="row" style="margin-bottom:12px">
+	#include "tmpl" + $os.sep + "axure_row.tmpl"
+	</div>
+	#end for
+	<div class="clearfix form-actions">
+		<div class="col-md-offset-3 col-md-9">
+			<button type="submit" class="btn btn-primary pull-left">保存</button>
+			<a href="index" class="btn btn-default pull-right">取消</a>
+		</div>
+	</div>
+</form>
+</div>
+
+
+@section title {
+	@pageTitle
+}

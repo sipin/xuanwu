@@ -266,7 +266,7 @@ func $(className)Create(ctx *$(className)Context) (html string) {
 		obj.ValidateData()
 		ctx.ClearSession("$(className)Create")
 		#if $obj.createtpl != None
-		return $(obj.createtpl).Create(ctx.Context, obj.Widgets(), "建立$(obj.label)")
+		return $(obj.createtpl).Create(ctx.Context, obj, "建立$(obj.label)")
 		#else
 		return autoTpl.Create(ctx.Context, obj.Widgets(), "建立$(obj.label)")
 		#end if

@@ -1,0 +1,9 @@
+#for field in $row
+	#set $w = 12 / len($row)
+		<div class="col-xs-$w @GetErrorClass(obj.$(field.name)Widget())">
+			<label for="@obj.$(field.name)Widget().Name" style="text-align:right" class="col-xs-3 control-label no-padding-right">@obj.$(field.name)Widget().Label@BoolStr(obj.$(field.name)Widget().Required, "*")</label>
+			<div class="col-xs-9">
+				@html.Widget(ctx, obj.$(field.name)Widget())
+			</div>
+		</div>
+#end for
