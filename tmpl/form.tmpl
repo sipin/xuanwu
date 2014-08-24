@@ -36,7 +36,7 @@ func (o *$obj.name.value) ReadForm(params map[string]string) (hasError bool) {
 		if val == "" {
 			o.$field.name.value = 0
 		} else {
-		        loc, _ := time.LoadLocation("Local")
+				loc, _ := time.LoadLocation("Local")
 			intVal, _ := time.ParseInLocation(DateTimeLayout, val, loc)
 			o.$field.name.value = int32(intVal.Unix())
 		}
@@ -52,7 +52,7 @@ func (o *$obj.name.value) ReadForm(params map[string]string) (hasError bool) {
 		if val == "" {
 			o.$field.name.value = 0
 		} else {
-		        loc, _ := time.LoadLocation("Local")
+				loc, _ := time.LoadLocation("Local")
 			intVal, _ := time.ParseInLocation(DateTimeLayout, val, loc)
 			o.$field.name.value = intVal.Unix()
 		}
@@ -60,7 +60,7 @@ func (o *$obj.name.value) ReadForm(params map[string]string) (hasError bool) {
 		if val == "" {
 			o.$field.name.value = 0
 		} else {
-		        loc, _ := time.LoadLocation("Local")
+				loc, _ := time.LoadLocation("Local")
 			intVal, _ := time.ParseInLocation(DateLayout, val, loc)
 			o.$field.name.value = intVal.Unix()
 		}
@@ -68,7 +68,7 @@ func (o *$obj.name.value) ReadForm(params map[string]string) (hasError bool) {
 		if val == "" {
 			o.$field.name.value = 0
 		} else {
-		        loc, _ := time.LoadLocation("Local")
+				loc, _ := time.LoadLocation("Local")
 			intVal, _ := time.ParseInLocation(TimeLayout, val, loc)
 			o.$field.name.value = intVal.Unix()
 		}
@@ -206,13 +206,13 @@ func (o *$obj.name.value) ${field.name.value}Widget() *Widget {
 			Required: true,
 		#end if
 		#if hasattr($field, "disable")
-		        Disabled: $field.disable,
+				Disabled: $field.disable,
 		#end if
 		#if hasattr($field, "hidden")
-		        Hidden: $field.hidden,
+				Hidden: $field.hidden,
 		#end if
 		#if hasattr($field, "readonly")
-		        Readonly: $field.readonly,
+				Readonly: $field.readonly,
 		#end if
 		}
 		if o.widgets == nil {
@@ -274,22 +274,22 @@ func (o *$obj.name.value) GetFieldAsString(fieldKey string) (Value string) {
 			Value = re.ReplaceAllString(raw, "")
 		#else
 		if widget.Type == "select" {
-		   Value = widget.Val()
+			Value = widget.Val()
 		} else if widget.GetBindData != nil {
 			Value = widget.Val()
 		} else {
-		   Value = o.$field.name.value
+			Value = o.$field.name.value
 		}
 		#end if
 	#else if $field.type == "i32" and $field.widget_type == "datetime"
 		Value = I32Time(o.$field.name.value)
 	#else if $field.type == "i32"
-	        widget := o.${field.name.value}Widget()
+			widget := o.${field.name.value}Widget()
 		if widget.Type == "select" {
-		   	       idx := int32(o.$field.name.value)
-			       Value = widget.StringList[idx]
+			idx := int32(o.$field.name.value)
+			Value = widget.StringList[idx]
 		} else {
-				Value = strconv.FormatInt(int64(o.$field.name.value), 10)
+			Value = strconv.FormatInt(int64(o.$field.name.value), 10)
 		}
 	#else if $field.type == "i64" and $field.widget_type == "datetime"
 		Value = I64DateTime(o.$field.name.value)
@@ -300,10 +300,10 @@ func (o *$obj.name.value) GetFieldAsString(fieldKey string) (Value string) {
 	#else if $field.type == "i64"
 		widget := o.${field.name.value}Widget()
 		if widget.Type == "select" {
-		   	       idx := int64(o.$field.name.value)
-			       Value = widget.StringList[idx]
+			idx := int64(o.$field.name.value)
+			Value = widget.StringList[idx]
 		} else {
-				Value = strconv.FormatInt(int64(o.$field.name.value), 10)
+			Value = strconv.FormatInt(int64(o.$field.name.value), 10)
 		}
 	#else if $field.type == "double"
 		Value = strconv.FormatFloat(o.$field.name.value, 'f', 2, 64)
