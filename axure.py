@@ -38,7 +38,7 @@ def get_ruledict(rs):
 
 	return data
 
-def gen(axure_folder, key):
+def gen(axure_folder, key, output):
 	if not axure_folder.endswith(path.sep):
 		axure_folder = axure_folder + path.sep
 
@@ -84,16 +84,21 @@ def gen(axure_folder, key):
 			result += "\t"
 		result += w
 
+	f = file(output, "w+")
+	f.write(result)
+	f.close()
+
 	return result
 
 def main():
-	if len(sys.argv) != 3:
-		print "usage: \n\tpython axure.py axure_folder key"
+	if len(sys.argv) != 4:
+		print "usage: \n\tpython axure.py axure_folder key output"
 		sys.exit()
 
 	axure_folder = sys.argv[1]
 	key = sys.argv[2]
-	print gen(axure_folder, key)
+	output = sys.argv[3]
+	gen(axure_folder, key, output)
 
 if __name__ == "__main__":
 	main()
