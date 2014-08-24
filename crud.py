@@ -103,14 +103,18 @@ def gen_axure(obj):
 		raise Exception(thrift_file + " " + obj.name.value + " has no label: " + label)
 
 	rows = []
+	max_fields = 1
 	for row in axure.split("\n"):
 		fields = []
 		labels = row.split("\t")
+		if len(labels) > max_fields:
+			max_fields = len(labels)
 		for label in labels:
 			fields.append(get_field_by_label(obj, label))
 		rows.append(fields)
 
 	crud = open('tmpl/axure_create.tmpl', 'r').read().decode("utf8")
+	obj.max_fields = max_fields
 	res = Template(crud, searchList=[{"namespace": outDir,
 									"className": obj.name.value,
 									"obj": obj,
