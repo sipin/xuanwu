@@ -2,6 +2,7 @@ package xuanwu
 
 import (
 	"strconv"
+	"strings"
 	"time"
 )
 
@@ -38,9 +39,21 @@ type Widget struct {
 	Hidden         bool
 	Readonly       bool
 	IsList         bool
+	Option         map[string]bool
 	GetBindData    func() (data []*IDLabelPair)
 	GetMetaData    func() (data []IXuanWuObj, head IXuanWuObj)
 	GetGroupedData func() (subInput string, data map[string][]*IDLabelPair)
+}
+
+func (w *Widget) SetOption(name string) {
+	if w.Option == nil {
+		w.Option = make(map[string]bool, 2)
+	}
+	w.Option[name] = true
+}
+
+func (w *Widget) HasOption(name string) bool {
+	return w.Option[name]
 }
 
 func (w *Widget) Disable() {
@@ -64,9 +77,23 @@ func (w *Widget) Val() string {
 
 	if w.GetBindData != nil {
 		datas := w.GetBindData()
-		for _, data := range datas {
-			if w.Value == data.ID {
-				return data.Label
+		if w.IsList {
+			result := []string{}
+			values := strings.Split(w.Value, "\n")
+			for _, value := range values {
+				for _, data := range datas {
+					if value == data.ID {
+						result = append(result, data.Label)
+						break
+					}
+				}
+			}
+			return strings.Join(result, "\n")
+		} else {
+			for _, data := range datas {
+				if w.Value == data.ID {
+					return data.Label
+				}
 			}
 		}
 	}
@@ -136,6 +163,12 @@ func XGetQuery(key string, data map[string]interface{}) map[string]interface{} {
 	return args
 }
 
+func parseTime(layout, str string) time.Time {
+	now := time.Now()
+	t, _ := time.ParseInLocation(layout, str, now.Location())
+	return t
+}
+
 func XGetSearchObj(word string, fields []string, params map[string]string, termKeys map[string]bool, dateKeys map[string]bool) map[string]interface{} {
 	terms := make(map[string]string)
 	ranges := make(map[string]map[string]int64)
@@ -150,7 +183,7 @@ func XGetSearchObj(word string, fields []string, params map[string]string, termK
 		}
 
 		if isStart, ok := dateKeys[k]; ok {
-			intVal, _ := time.Parse(DateLayout, v)
+			intVal := parseTime(DateLayout, v)
 			if isStart {
 				fieldName := k[0 : len(k)-5]
 				if dateVal, ok := ranges[fieldName]; ok {
@@ -226,7 +259,7 @@ func XGetMoreSearchObj(word string, fields []string, params map[string]interface
 			}
 
 			if isStart, ok := dateKeys[k]; ok {
-				intVal, _ := time.Parse(DateLayout, v)
+				intVal := parseTime(DateLayout, v)
 				if isStart {
 					fieldName := k[0 : len(k)-5]
 					if dateVal, ok := ranges[fieldName]; ok {
