@@ -6,6 +6,23 @@ import (
 	"time"
 )
 
+var (
+	xuanWuObjs = make(map[string]func() IXuanWuObj)
+)
+
+func RegisterXuanWuObj(namespace, classname string, constructor func() IXuanWuObj) {
+	xuanWuObjs[namespace+"."+classname] = constructor
+}
+
+func NewXuanWuObj(namespace, classname string) IXuanWuObj {
+	constructor, ok := xuanWuObjs[namespace+"."+classname]
+	if !ok {
+		return nil
+	}
+
+	return constructor()
+}
+
 type IDLabelPair struct {
 	ID    string
 	Label string
@@ -110,10 +127,13 @@ type IXuanWuObj interface {
 	Id() string
 	IsSearchEnabled() bool
 	GetLabel() string
+	GetNameSpace() string
+	GetClassName() string
 	GetName() string
 	GetListedLabels() []*IDLabelPair
 	GetFieldAsString(fieldKey string) (Value string)
 	GetFilters() []*Widget
+	GetWidgetByLabel(label string) (w *Widget)
 	Widgets() []*Widget
 }
 

@@ -270,14 +270,14 @@ func $(className)Create(ctx *$(className)Context) (html string) {
 		if rowsInfo != nil {
 			return autoTpl.AxureCreate(ctx.Context, obj, "建立$(obj.label)", rowsInfo)
 		}
-		return autoTpl.Create(ctx.Context, obj.Widgets(), "建立$(obj.label)")
+		return autoTpl.Create(ctx.Context, obj, "建立$(obj.label)")
 	}
 
 	if rowsInfo != nil {
 		return autoTpl.AxureCreate(ctx.Context, m_$(modelsNamespace).New$(className)(), "建立$(obj.label)", rowsInfo)
 	}
 
-	return autoTpl.Create(ctx.Context, m_$(modelsNamespace).New$(className)().Widgets(), "建立$(obj.label)")
+	return autoTpl.Create(ctx.Context, m_$(modelsNamespace).New$(className)(), "建立$(obj.label)")
 }
 
 func $(className)CreatePost(ctx *$(className)Context) (html string) {
