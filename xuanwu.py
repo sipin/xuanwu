@@ -39,6 +39,10 @@ def struct_import(obj):
 		if f.foreign_package != "":
 			obj.imports.add(f.foreign_package)
 
+		if hasattr(f, "bindPackage"):
+			if f.bindPackage and f.bindPackage != "":
+				obj.imports.add(f.bindPackage)
+
 	for field in obj.fields:
 		if hasattr(field, "rule"):
 			obj.imports.add("regexp")
@@ -47,7 +51,6 @@ def struct_import(obj):
 			import_module = filename
 			if src_path:
 				import_module = src_path + "/" + import_module
-			obj.imports.add(import_module)
 
 		if field.type in ["i32", "i64", "bool", "double"] and field.widget_type not in ["date", "time", "datetime"]:
 			obj.imports.add("strconv")
@@ -79,7 +82,9 @@ def transform_struct(obj):
 	tpl = open('tmpl/go.tmpl', 'r').read()
 	t = Template(tpl, searchList=[{"namespace": namespace, "filename": filename, "obj": obj}])
 	code = str(t)
-	with open(out_path + 'gen_' + obj.name.value.lower() + ".go", "w") as f:
+	if not path.exists(out_path + namespace):
+		mkdir(out_path + namespace)
+	with open(out_path +  namespace + '/gen_' + obj.name.value.lower() + ".go", "w") as f:
 		f.write(code)
 
 def transform(module):
@@ -88,21 +93,21 @@ def transform(module):
 
 	if len(module.consts) > 0:
 		tpl = open('tmpl/go_const.tmpl', 'r').read()
-		t = Template(tpl, searchList=[{"namespace": filename, "objs": module.consts}])
-		if not path.exists(out_path + filename):
-			mkdir(out_path + filename)
+		t = Template(tpl, searchList=[{"namespace": namespace, "objs": module.consts}])
+		if not path.exists(out_path + namespace):
+			mkdir(out_path + namespace)
 		with open(out_path + "%s/gen_%s_const.go" % (filename, filename), "w") as fp:
 			fp.write(str(t))
 
 	if len(module.enums) > 0:
 		tpl = open('tmpl/go_enum.tmpl', 'r').read()
 		t = Template(tpl, searchList=[{
-			"namespace": filename,
+			"namespace": namespace,
 			"objs": module.enums,
 			"name": filename,
 		}])
-		if not path.exists(out_path + filename):
-			mkdir(out_path + filename)
+		if not path.exists(out_path + namespace):
+			mkdir(out_path + namespace)
 		with open(out_path + "%s/gen_%s_enum.go" % (filename, filename), "w") as fp:
 			fp.write(str(t))
 
@@ -114,7 +119,9 @@ def main(thrift_idl):
 	tpl = open('tmpl/go_package.tmpl', 'r').read()
 	t = Template(tpl, searchList=[{"namespace": namespace}])
 	code = unicode(t)
-	with open(out_path + 'gen_init.go', "w") as fp:
+	if not path.exists(out_path + namespace):
+		mkdir(out_path + namespace)
+	with open(out_path + namespace + '/gen_init.go', "w") as fp:
 		fp.write(code)
 
 	for module in loader.modules.values():

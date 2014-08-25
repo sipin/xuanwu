@@ -191,10 +191,10 @@ func (o *$obj.name.value) ${field.name.value}Widget() *Widget {
 			PlaceHolder: "$field.placeholder",
 			Type: "$field.widget_type",
 		#if hasattr($field, "enums")
-			EnumKey : $(filename).$(field.enums)Key,
-			EnumData : $(filename).$(field.enums)Label,
+			EnumKey : $(field.enums)Key,
+			EnumData : $(field.enums)Label,
 		#else if hasattr($field, "stringList")
-			StringList : $(filename).$field.stringList,
+			StringList : $field.stringList,
 		#else if hasattr($field, "bindData")
 			GetBindData : $field.bindData,
 			#if hasattr($field, "GroupedDataFunc")
@@ -352,10 +352,10 @@ func (o *$obj.name.value) GetFilters() []*Widget {
 			PlaceHolder: "$field.placeholder",
 			Type: "$field.widget_type",
 		#if hasattr($field, "enums")
-			EnumKey : $(filename).$(field.enums)Key,
-			EnumData : $(filename).$(field.enums)Label,
+			EnumKey : $(field.enums)Key,
+			EnumData : $(field.enums)Label,
 		#else if hasattr($field, "stringList")
-			StringList : $(filename).$field.stringList,
+			StringList : $field.stringList,
 		#else if hasattr($field, "bindData")
 			GetBindData : $field.bindData,
 		#end if

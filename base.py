@@ -9,7 +9,7 @@ from Cheetah.Template import Template
 from os import path, mkdir
 import traceback
 
-
+namespace = ""
 thrift_file = ""
 type_ref = dict(
 	string = "string",
@@ -126,9 +126,15 @@ def add_properties(field, obj):
 			short = pkg.split("/")[-1]
 
 		t = Template(tpl, searchList=[{"field": field, "col": col, "label": label, "pkg": short}])
+
+		field.rawBindData = field.bindData
 		field.bindData = str(t).strip()
 		field.bindTable = col
 		field.bindPackage = pkg
+		if pkg != None:
+			field.bindModels = pkg.split("/")[-1]
+		else:
+			field.bindModels = namespace
 
 	if hasattr(field, "bindFunc"):
 		ss = field.bindFunc.split(":")
@@ -251,6 +257,11 @@ def init_Fields(obj):
 		if field.name.value.endswith("ID"):
 			field.foreign = field.name.value[:-2]
 			field.foreign_type = field.foreign
+
+		if not hasattr(field, "fk") and hasattr(field, "rawBindData"):
+			ss = field.rawBindData.split(".")
+			if len(ss) == 3:
+				field.fk = ".".join(ss[:2])
 
 		if hasattr(field, "fk"):
 			if "." in field.fk:
@@ -459,7 +470,7 @@ def init_module(module):
 		init_FilterFields(obj)
 
 def load_thrift(thrift_idl):
-	global thrift_file
+	global thrift_file, namespace
 	thrift_file = thrift_idl
 	try:
 		loader = Loader(thrift_idl, lambda x: x)
@@ -468,6 +479,7 @@ def load_thrift(thrift_idl):
 			sys.exit(1)
 
 		loader.namespace = str(loader.namespace)
+		namespace = loader.namespace
 
 		for module in loader.modules.values():
 			init_module(module)
