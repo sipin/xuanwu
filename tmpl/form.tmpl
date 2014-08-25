@@ -254,8 +254,10 @@ func (o *$obj.name.value) GetName() string {
 
 func (o *$obj.name.value) GetWidgetByLabel(label string) (w *Widget) {
 	switch label {
+#set $keyMap = {}
 #for field in $obj.fields
-#if $field.name.value != "ID"
+#if $field.name.value != "ID" and not $keyMap.has_key($field.label)
+#set $keyMap[$field.label] = True
 		case "$field.label":
 			w = o.${field.name.value}Widget()
 #end if

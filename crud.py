@@ -65,9 +65,7 @@ def transform_tpl(obj, name):
 	namespace = tpl
 
 	if tpl == "axure":
-		namespace = "tpl" + idField.baseURL
-		obj.baseURL = idField.baseURL
-		name = "axure"
+		return tpl
 
 	if tpl != "":
 		name1 = ""
