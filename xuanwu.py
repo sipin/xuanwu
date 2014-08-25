@@ -96,7 +96,7 @@ def transform(module):
 		t = Template(tpl, searchList=[{"namespace": namespace, "objs": module.consts}])
 		if not path.exists(out_path + namespace):
 			mkdir(out_path + namespace)
-		with open(out_path + "%s/gen_%s_const.go" % (filename, filename), "w") as fp:
+		with open(out_path + "%s/gen_%s_const.go" % (namespace, namespace), "w") as fp:
 			fp.write(str(t))
 
 	if len(module.enums) > 0:
@@ -108,7 +108,7 @@ def transform(module):
 		}])
 		if not path.exists(out_path + namespace):
 			mkdir(out_path + namespace)
-		with open(out_path + "%s/gen_%s_enum.go" % (filename, filename), "w") as fp:
+		with open(out_path + "%s/gen_%s_enum.go" % (namespace, namespace), "w") as fp:
 			fp.write(str(t))
 
 
