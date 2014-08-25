@@ -272,7 +272,7 @@ func $(className)Create(ctx *$(className)Context) (html string) {
 		#end if
 	}
 	#if $obj.createtpl != None
-	return $(obj.createtpl).Create(ctx.Context, m_$(modelsNamespace).New$(className)().Widgets(), "建立$(obj.label)")
+	return autoTpl.AxureCreate(ctx.Context, m_$(modelsNamespace).New$(className)(), "建立$(obj.label)")
 	#else
 	return autoTpl.Create(ctx.Context, m_$(modelsNamespace).New$(className)().Widgets(), "建立$(obj.label)")
 	#end if

@@ -93,6 +93,7 @@ def assure_path_exists(path):
             os.makedirs(dir)
 
 def gen_axure(obj):
+	return
 	with open("../axure/" + obj.baseURL[1:].replace("/", "_") + ".txt", "r") as f:
 		axure = f.read()
 
