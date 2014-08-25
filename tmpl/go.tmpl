@@ -24,6 +24,8 @@ func init() {
 	#if $obj.need_mapping
 	db.SetOnFinishInit(init${obj.name.value}Mapping)
 	#end if
+
+	RegisterXuanWuObj("$namespace", "$obj.name.value", new$(obj.name.value)XuanWuObj)
 }
 
 #if $obj.need_mapping
@@ -81,6 +83,26 @@ type $obj.name.value struct {
 		#end if
 	#end for
 	widgets map[string]*Widget
+}
+
+func (p *$obj.name.value) GetNameSpace() string {
+	return "$namespace"
+}
+
+func (p *$obj.name.value) GetClassName() string {
+	return "$obj.name.value"
+}
+
+func new$(obj.name.value)XuanWuObj() IXuanWuObj {
+	rval := new($obj.name.value)
+	rval.ID = bson.NewObjectId()
+	#for field in $obj.fields
+		#if $field.defaultValue
+			rval.$field.name.value = "$field.defaultValue"
+		#end if
+	#end for
+
+	return rval
 }
 
 func New$(obj.name.value)() *$obj.name.value {

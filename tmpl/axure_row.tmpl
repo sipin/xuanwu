@@ -1,0 +1,18 @@
+#for field in $row
+	#set $w = 12 / len($row)
+	#if len($row) > 1
+		<div class="col-xs-$w @GetErrorClass(obj.$(field.name)Widget())">
+			<label for="@obj.$(field.name)Widget().Name" style="text-align:right" class="col-xs-3 control-label no-padding-right">@obj.$(field.name)Widget().Label@BoolStr(obj.$(field.name)Widget().Required, "*")</label>
+			<div class="col-xs-9">
+				@html.Widget(ctx, obj.$(field.name)Widget())
+			</div>
+		</div>
+	#else
+		<div class="col-xs-12 @GetErrorClass(obj.$(field.name)Widget())">
+			<label for="@obj.$(field.name)Widget().Name" style="text-align:right;margin-left: -5px" class="col-xs-1 control-label no-padding-right">@obj.$(field.name)Widget().Label@BoolStr(obj.$(field.name)Widget().Required, "*")</label>
+			<div class="col-xs-11" style="padding-right: 10px">
+				@html.Widget(ctx, obj.$(field.name)Widget())
+			</div>
+		</div>
+	#end if
+#end for

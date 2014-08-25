@@ -25,6 +25,7 @@ import (
 	m_$(modelsNamespace) "zfw/models/$modelsNamespace"
 	#end if
 	m_users "zfw/models/users"
+	"axure"
 	"xuanwu"
 	"github.com/sipin/web"
 	"labix.org/v2/mgo/bson"
@@ -260,22 +261,23 @@ func $(className)Export(ctx *$(className)Context) (html string) {
 func $(className)Create(ctx *$(className)Context) (html string) {
 	var obj *m_$(modelsNamespace).$(className)
 	data := ctx.GetSession("$(className)Create")
+	rowsInfo := axure.Load(obj.GetLabel())
 
 	if data != nil {
 		obj = m_$(modelsNamespace).New$(className)FromBytes(data)
 		obj.ValidateData()
 		ctx.ClearSession("$(className)Create")
-		#if $obj.createtpl != None
-		return $(obj.createtpl).Create(ctx.Context, obj.Widgets(), "建立$(obj.label)")
-		#else
-		return autoTpl.Create(ctx.Context, obj.Widgets(), "建立$(obj.label)")
-		#end if
+		if rowsInfo != nil {
+			return autoTpl.AxureCreate(ctx.Context, obj, "建立$(obj.label)", rowsInfo)
+		}
+		return autoTpl.Create(ctx.Context, obj, "建立$(obj.label)")
 	}
-	#if $obj.createtpl != None
-	return $(obj.createtpl).Create(ctx.Context, m_$(modelsNamespace).New$(className)().Widgets(), "建立$(obj.label)")
-	#else
-	return autoTpl.Create(ctx.Context, m_$(modelsNamespace).New$(className)().Widgets(), "建立$(obj.label)")
-	#end if
+
+	if rowsInfo != nil {
+		return autoTpl.AxureCreate(ctx.Context, m_$(modelsNamespace).New$(className)(), "建立$(obj.label)", rowsInfo)
+	}
+
+	return autoTpl.Create(ctx.Context, m_$(modelsNamespace).New$(className)(), "建立$(obj.label)")
 }
 
 func $(className)CreatePost(ctx *$(className)Context) (html string) {

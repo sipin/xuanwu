@@ -6,8 +6,7 @@ import os
 import base
 import fcntl
 
-from ptsd import ast
-from ptsd.loader import Loader, Parser
+from ptsd.loader import Loader
 from Cheetah.Template import Template
 from os import path
 
@@ -63,13 +62,20 @@ def fieldElems(field, key):
 def transform_tpl(obj, name):
 	idField = obj.fields[0]
 	tpl = fieldElem(idField, name)
+	namespace = tpl
+
+	if tpl == "axure":
+		return tpl
+
 	if tpl != "":
 		name1 = ""
 		for item in obj.imports:
 			if isinstance(item, tuple):
-				if item[1] == tpl:
+				if item[1] == namespace:
 					return item[0]
-		obj.imports.add((name, tpl))
+		obj.imports.add((name, namespace))
+		if tpl == "axure":
+			return tpl
 		return name
 	return None
 
@@ -78,6 +84,48 @@ def transform_tpls(obj):
 	obj.viewtpl = transform_tpl(obj, "viewtpl")
 	obj.indextpl = transform_tpl(obj, "indextpl")
 	obj.createtpl = transform_tpl(obj, "createtpl")
+
+def assure_path_exists(path):
+    dir = os.path.dirname(path)
+    if not os.path.exists(dir):
+            os.makedirs(dir)
+
+def gen_axure(obj):
+	return
+	with open("../axure/" + obj.baseURL[1:].replace("/", "_") + ".txt", "r") as f:
+		axure = f.read()
+
+	def get_field_by_label(obj, label):
+		for f in obj.fields:
+			if f.label == label:
+				return f
+		raise Exception(thrift_file + " " + obj.name.value + " has no label: " + label)
+
+	rows = []
+	max_fields = 1
+	for row in axure.split("\n"):
+		fields = []
+		labels = row.split("\t")
+		if len(labels) > max_fields:
+			max_fields = len(labels)
+		for label in labels:
+			fields.append(get_field_by_label(obj, label))
+		rows.append(fields)
+
+	crud = open('tmpl/axure_create.tmpl', 'r').read().decode("utf8")
+	obj.max_fields = max_fields
+	res = Template(crud, searchList=[{"namespace": outDir,
+									"className": obj.name.value,
+									"obj": obj,
+									"rows": rows,
+									}])
+
+	outfile = "../tpl" + obj.baseURL + "/create.gohtml"
+	assure_path_exists(outfile)
+	with open(outfile, "w+") as fp:
+		fp.write(str(res))
+
+	print outfile
 
 def transform_module(module):
 	for obj in module.structs:
@@ -121,6 +169,9 @@ def transform_module(module):
 			outfile = writeDir + "gen_" + obj.name.value.lower() + ".go"
 			with open(outfile, "w") as fp:
 				fp.write(str(res))
+
+			if obj.createtpl == "axure":
+				gen_axure(obj)
 		else:
 			for field in obj.fields:
 				if field.widget_type in ("relateSelect", "relateAjaxSelect") and (not hasattr(field, "bindFunc")):
