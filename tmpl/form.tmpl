@@ -252,6 +252,18 @@ func (o *$obj.name.value) GetName() string {
 	return "$obj.name.value"
 }
 
+func (o *$obj.name.value) GetWidgetByLabel(label string) (w *Widget) {
+	switch label {
+#for field in $obj.fields
+#if $field.name.value != "ID"
+		case "$field.label":
+			w = o.${field.name.value}Widget()
+#end if
+#end for
+	}
+	return
+}
+
 func (o *$obj.name.value) GetFieldAsString(fieldKey string) (Value string) {
 	switch fieldKey {
 #for field in $obj.listedFieldStrings
