@@ -21,8 +21,11 @@ import (
 	"admin"
 	"xls"
 	autoTpl "$tplPackage"
+	#if $modelsNamespace != "users":
+	m_$(modelsNamespace) "zfw/models/$modelsNamespace"
+	#end if
+	m_users "zfw/models/users"
 	"xuanwu"
-	"zfw/models"
 	"github.com/sipin/web"
 	"labix.org/v2/mgo/bson"
 )
@@ -75,11 +78,11 @@ func init() {
 }
 
 #if $obj.search != None
-func getSearch$(className)(current *models.Users, q string, params map[string]string, limit int, offset int, sortFields []string) (objs []*models.$(className), total int) {
+func getSearch$(className)(current *m_users.Users, q string, params map[string]string, limit int, offset int, sortFields []string) (objs []*m_$(modelsNamespace).$(className), total int) {
 	#if $obj.crud == "personal"
 	params["UsersID"] = current.Id()
 	#end if
-	out, _ := models.$(className)SearchWithParams(q, params, limit, offset)
+	out, _ := m_$(modelsNamespace).$(className)SearchWithParams(q, params, limit, offset)
 	total = out.Hits.Total
 
 	ids := make([]bson.ObjectId, 0, len(out.Hits.Hits))
@@ -92,22 +95,22 @@ func getSearch$(className)(current *models.Users, q string, params map[string]st
 
 	query := bson.M{"_id": bson.M{"\$in": ids}}
 
-	objs, _ = models.$(className)FindAll(query, sortFields...)
+	objs, _ = m_$(modelsNamespace).$(className)FindAll(query, sortFields...)
 	return
 }
 #end if
 
-func getQuery$(className)(current *models.Users, limit, offset int, sortFields []string) (objs []*models.$(className), total int) {
+func getQuery$(className)(current *m_users.Users, limit, offset int, sortFields []string) (objs []*m_$(modelsNamespace).$(className), total int) {
 	query := bson.M{}
 	#if $obj.crud == "personal"
 	query["UsersID"] = current.Id()
 	#end if
 
-	objs, err := models.$(className)Find(query, limit, offset, sortFields...)
+	objs, err := m_$(modelsNamespace).$(className)Find(query, limit, offset, sortFields...)
 	if err != nil {
 		return
 	}
-	total = models.$(className)Count(query)
+	total = m_$(modelsNamespace).$(className)Count(query)
 
 	return
 }
@@ -149,8 +152,8 @@ func $(className)Index(ctx *$(className)Context) (html string) {
 	}
 	offset, _ := strconv.Atoi(ctx.Params["offset"])
 
-	var obj *models.$(className)
-	var objs []*models.$(className)
+	var obj *m_$(modelsNamespace).$(className)
+	var objs []*m_$(modelsNamespace).$(className)
 
 	sortFields := get$(className)Sort(ctx)
 	orders := get$(className)OrderSort(ctx)
@@ -190,8 +193,8 @@ func $(className)Export(ctx *$(className)Context) (html string) {
 	}
 	offset, _ := strconv.Atoi(ctx.Params["offset"])
 
-	var obj *models.$(className)
-	var objs []*models.$(className)
+	var obj *m_$(modelsNamespace).$(className)
+	var objs []*m_$(modelsNamespace).$(className)
 
 	sortFields := get$(className)Sort(ctx)
 	#if $obj.search != None
@@ -255,11 +258,11 @@ func $(className)Export(ctx *$(className)Context) (html string) {
 }
 
 func $(className)Create(ctx *$(className)Context) (html string) {
-	var obj *models.$(className)
+	var obj *m_$(modelsNamespace).$(className)
 	data := ctx.GetSession("$(className)Create")
 
 	if data != nil {
-		obj = models.New$(className)FromBytes(data)
+		obj = m_$(modelsNamespace).New$(className)FromBytes(data)
 		obj.ValidateData()
 		ctx.ClearSession("$(className)Create")
 		#if $obj.createtpl != None
@@ -269,14 +272,14 @@ func $(className)Create(ctx *$(className)Context) (html string) {
 		#end if
 	}
 	#if $obj.createtpl != None
-	return $(obj.createtpl).Create(ctx.Context, models.New$(className)().Widgets(), "建立$(obj.label)")
+	return $(obj.createtpl).Create(ctx.Context, m_$(modelsNamespace).New$(className)().Widgets(), "建立$(obj.label)")
 	#else
-	return autoTpl.Create(ctx.Context, models.New$(className)().Widgets(), "建立$(obj.label)")
+	return autoTpl.Create(ctx.Context, m_$(modelsNamespace).New$(className)().Widgets(), "建立$(obj.label)")
 	#end if
 }
 
 func $(className)CreatePost(ctx *$(className)Context) (html string) {
-	obj := models.New$(className)()
+	obj := m_$(modelsNamespace).New$(className)()
 	hasError := obj.ReadForm(ctx.Params)
 
 	if hasError {
@@ -299,7 +302,7 @@ func $(className)CreatePost(ctx *$(className)Context) (html string) {
 }
 
 func $(className)View(ctx *$(className)Context) (html string) {
-	obj, err := models.$(className)FindByID(ctx.Params["id"])
+	obj, err := m_$(modelsNamespace).$(className)FindByID(ctx.Params["id"])
 	if err != nil {
 		ctx.SetFlashAlert(err.Error())
 		return ctx.Redirect("index")
@@ -313,7 +316,7 @@ func $(className)View(ctx *$(className)Context) (html string) {
 }
 
 func $(className)Edit(ctx *$(className)Context) (html string) {
-	obj, err := models.$(className)FindByID(ctx.Params["id"])
+	obj, err := m_$(modelsNamespace).$(className)FindByID(ctx.Params["id"])
 	if err != nil {
 		ctx.SetFlashAlert(err.Error())
 		return ctx.Redirect("index")
@@ -327,7 +330,7 @@ func $(className)Edit(ctx *$(className)Context) (html string) {
 	data := ctx.GetSession("$(className)Edit")
 
 	if data != nil {
-		o := models.New$(className)FromBytes(data)
+		o := m_$(modelsNamespace).New$(className)FromBytes(data)
 		o.ValidateData()
 		ctx.ClearSession("$(className)Edit")
 
@@ -348,7 +351,7 @@ func $(className)Edit(ctx *$(className)Context) (html string) {
 }
 
 func $(className)EditPost(ctx *$(className)Context) (html string) {
-	obj, err := models.$(className)FindByID(ctx.Params["id"])
+	obj, err := m_$(modelsNamespace).$(className)FindByID(ctx.Params["id"])
 	if err != nil {
 		ctx.SetFlashAlert(err.Error())
 		return ctx.Redirect("index")
@@ -380,21 +383,21 @@ func $(className)DeletePost(ctx *$(className)Context) (html string) {
 
 	if ids == "" {
 		id := ctx.Params["id"]
-		obj, _ := models.$(className)FindByID(id)
+		obj, _ := m_$(modelsNamespace).$(className)FindByID(id)
 		if !ctx.User.IsCreator(obj) {
 			ctx.SetFlashAlert("您没有删除此项目的权限")
 			return ctx.Redirect("view?id=" + obj.Id())
 		}
-		models.$(className)RemoveByID(id)
+		m_$(modelsNamespace).$(className)RemoveByID(id)
 	} else {
 		for _, id := range strings.Split(ids, "\n") {
 			id = strings.Trim(id, "\r")
-			obj, _ := models.$(className)FindByID(id)
+			obj, _ := m_$(modelsNamespace).$(className)FindByID(id)
 			if !ctx.User.IsCreator(obj) {
 				ctx.SetFlashAlert("您没有删除此项目的权限")
 				return ctx.Redirect("view?id=" + obj.Id())
 			}
-			models.$(className)RemoveByID(id)
+			m_$(modelsNamespace).$(className)RemoveByID(id)
 		}
 	}
 
@@ -408,7 +411,7 @@ func $(className)DeletePost(ctx *$(className)Context) (html string) {
 func $(className)$(field.name)Relate(ctx *$(className)Context) (jsonData string) {
 	ID, _ := ctx.Params["ID"]
 	if ID != ""{
-		data, _ := models.$(field.bindTable)FindByID(ID)
+		data, _ := m_$(field.bindModels).$(field.bindTable)FindByID(ID)
 		if data == nil {
 			return
 		}

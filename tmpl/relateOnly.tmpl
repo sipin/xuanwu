@@ -5,7 +5,7 @@ import (
 
 	//Own libs
 	"admin"
-	"zfw/models"
+	m_$(modelsNamespace) "zfw/models/$(modelsNamespace)"
 	"github.com/sipin/web"
 )
 
@@ -23,7 +23,7 @@ func init() {
 func $(className)$(field.name)Relate(ctx *admin.AdminContext) (jsonData string) {
 	ID, _ := ctx.Params["ID"]
 	if ID != ""{
-		data, _ := models.$(field.bindTable)FindByID(ID)
+		data, _ := m_$(modelsNamespace).$(field.bindTable)FindByID(ID)
 		if data == nil {
 			return
 		}

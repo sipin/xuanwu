@@ -24,6 +24,8 @@ if not out_path.endswith(path.sep):
 
 outDir = out_path.split(path.sep)[-2]
 
+modelsNamespace = ""
+
 def updateController(out_path):
 	subdirs = [o for o in os.listdir(out_path) if os.path.isdir(os.path.join(out_path, o))]
 	content = "package controller\n\nimport (\n"
@@ -107,10 +109,12 @@ def transform_module(module):
 
 			outDir = urlBase.split(path.sep)[-2]
 			crud = open('tmpl/crud.tmpl', 'r').read().decode("utf8")
+
 			res = Template(crud, searchList=[{"namespace": outDir,
 											"className": obj.name.value,
 											"urlBase": urlBase,
 											"tplPackage": tplPackage,
+											"modelsNamespace": modelsNamespace,
 											"obj": obj,
 											}])
 			writeDir = getControlDir(urlBase)
@@ -126,6 +130,7 @@ def transform_module(module):
 											"className": obj.label,
 											"urlBase": urlBase,
 											"tplPackage": tplPackage,
+											"modelsNamespace": field.bindModels,
 											"obj": obj,
 											}])
 					writeDir = getControlDir(urlBase)
@@ -137,8 +142,9 @@ def transform_module(module):
 
 def main(thrift_idl):
 	loader = base.load_thrift(thrift_idl)
-	global namespace
+	global namespace, modelsNamespace
 	namespace = loader.namespace
+	modelsNamespace = namespace
 	for obj in loader.modules.values():
 		transform_module(obj)
 	updateController(out_path)

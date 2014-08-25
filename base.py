@@ -9,7 +9,7 @@ from Cheetah.Template import Template
 from os import path, mkdir
 import traceback
 
-
+namespace = ""
 thrift_file = ""
 type_ref = dict(
 	string = "string",
@@ -131,6 +131,10 @@ def add_properties(field, obj):
 		field.bindData = str(t).strip()
 		field.bindTable = col
 		field.bindPackage = pkg
+		if pkg != None:
+			field.bindModels = pkg.split("/")[-1]
+		else:
+			field.bindModels = namespace
 
 	if hasattr(field, "bindFunc"):
 		ss = field.bindFunc.split(":")
@@ -466,7 +470,7 @@ def init_module(module):
 		init_FilterFields(obj)
 
 def load_thrift(thrift_idl):
-	global thrift_file
+	global thrift_file, namespace
 	thrift_file = thrift_idl
 	try:
 		loader = Loader(thrift_idl, lambda x: x)
@@ -475,6 +479,7 @@ def load_thrift(thrift_idl):
 			sys.exit(1)
 
 		loader.namespace = str(loader.namespace)
+		namespace = loader.namespace
 
 		for module in loader.modules.values():
 			init_module(module)
