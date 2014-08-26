@@ -26,6 +26,9 @@ func init() {
 	#end if
 
 	RegisterXuanWuObj("$namespace", "$obj.name.value", new$(obj.name.value)XuanWuObj)
+	#if $obj.search != None
+	RegisterIndexer("$namespace", "$obj.name.value", $(obj.name.value)SearchRebuild)
+	#end if
 }
 
 #if $obj.need_mapping

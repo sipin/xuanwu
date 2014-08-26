@@ -8,10 +8,15 @@ import (
 
 var (
 	xuanWuObjs = make(map[string]func() IXuanWuObj)
+	Indexers = make(map[string]func())
 )
 
 func RegisterXuanWuObj(namespace, classname string, constructor func() IXuanWuObj) {
 	xuanWuObjs[namespace+"."+classname] = constructor
+}
+
+func RegisterIndexer(namespace, classname string, indexer func()) {
+	Indexers[namespace+"."+classname] = indexer
 }
 
 func NewXuanWuObj(namespace, classname string) IXuanWuObj {
