@@ -15,14 +15,35 @@ import (
 	//Own libs
 	"db"
 	. "xuanwu"
+
+	#if $obj.searchIndex == "flow"
+	#if "encoding/json" not in $obj.imports
+	"encoding/json"
+	#end if
+	"flow/base"
+	"github.com/mattbaird/elastigo/api"
+	#end if
 )
 
 func init() {
 	#if $obj.need_index
 	db.SetOnFinishInit(init${obj.name.value}Index)
 	#end if
+
+	#if $obj.need_mapping and $obj.searchIndex == "flow"
+	db.SetOnFinishInit(func() {
+		init${obj.name.value}Parent()
+		init${obj.name.value}Mapping()
+	})
+	#else
+
 	#if $obj.need_mapping
 	db.SetOnFinishInit(init${obj.name.value}Mapping)
+	#end if
+	#if $obj.searchIndex == "flow"
+	db.SetOnFinishInit(init${obj.name.value}Parent)
+	#end if
+
 	#end if
 
 	RegisterXuanWuObj("$namespace", "$obj.name.value", new$(obj.name.value)XuanWuObj)
@@ -30,6 +51,24 @@ func init() {
 	RegisterIndexer("$namespace", "$obj.name.value", $(obj.name.value)SearchRebuild)
 	#end if
 }
+
+#if $obj.searchIndex == "flow"
+func init${obj.name.value}Parent() {
+	index, _type := "flow", "$obj.searchType"
+	url_ := fmt.Sprintf("/%s/%s/_mapping", index, _type)
+	body, _ := json.Marshal(db.M{
+		_type: db.M{
+			"_parent": db.M{
+				"type": "flow",
+			},
+		},
+	})
+	_, err := api.DoCommand("PUT", url_, nil, body)
+	if err != nil {
+		fmt.Println(err)
+	}
+}
+#end if
 
 #if $obj.need_mapping
 func init${obj.name.value}Mapping() {
@@ -41,8 +80,8 @@ func init${obj.name.value}Mapping() {
 		},
 	}
 
-	indices.CreateIndex("$(obj.name.value.lower())")
-	indices.PutMapping("$(obj.name.value.lower())", "simple", $(obj.name.value){}, opt)
+	indices.CreateIndex("$(obj.searchIndex)")
+	indices.PutMapping("$(obj.searchIndex)", "$(obj.searchType)", $(obj.name.value){}, opt)
 }
 #end if
 

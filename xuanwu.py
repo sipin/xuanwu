@@ -27,12 +27,25 @@ except ValueError:
 	print "output_folder_path should contains '/src/', for xuanwu to use absolute go path import"
 	sys.exit()
 
+def fieldElem(field, key):
+	for att in field.annotations:
+		if att.name.value == key:
+			return att.value.value
+	return ""
+
 def struct_import(obj):
 	idField = obj.fields[0]
 	obj.imports = set(["bytes", "fmt"])
 	if obj.search != None:
 		obj.imports.add("github.com/mattbaird/elastigo/core")
 
+	searchIndex = fieldElem(idField, "searchIndex")
+	if searchIndex == "":
+		obj.searchIndex = obj.name.value.lower()
+		obj.searchType = "simple"
+	else:
+		obj.searchIndex = searchIndex
+		obj.searchType = obj.name.value.lower()
 
 	for f in obj.fields:
 		if f.foreign_package != "":
