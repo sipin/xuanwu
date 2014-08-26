@@ -15,11 +15,9 @@ func $(obj.name.value)AddUpdateCallback(cb func(obj IXuanWuObj)) {
 func (o *$obj.name.value) Save() (info *mgo.ChangeInfo, err error) {
 	session, col := ${obj.name.value}Col()
 	defer session.Close()
-	isInsert := false
-	if o.ID == "" {
-		o.ID = bson.NewObjectId()
-		isInsert = true
-	}
+
+	isNew := o.isNew
+
 	#for field in $obj.fields
 	#if $field.name.value != "ID" and hasattr($field, "meta")
 	old_metas, _ := o.GetAll$(field.meta)()
@@ -33,13 +31,14 @@ func (o *$obj.name.value) Save() (info *mgo.ChangeInfo, err error) {
 	#end if
 	#end for
 
+	info, err = col.UpsertId(o.ID, o)
+	o.isNew = false
+
 #if $obj.search != None
 	o.IndexSearch()
 #end if
 
-	info, err = col.UpsertId(o.ID, o)
-
-	if isInsert {
+	if isNew {
 		for _, cb := range insertCB_$obj.name.value {
 			cb(o)
 		}
@@ -61,6 +60,8 @@ func (o *$obj.name.value) Sync() (err error) {
 		Upsert:    true,
 		ReturnNew: true,
 	}, o)
+
+	o.isNew = false
 
 	if info.UpsertedId == nil {
 		for _, cb := range updateCB_$obj.name.value {
