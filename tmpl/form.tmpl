@@ -88,7 +88,7 @@ func (o *$obj.name.value) ReadForm(params map[string]string) (hasError bool) {
 	#else
 	Change go.tmpl go support $field.type now!
 	#end if
-	#if $field.type == "bool"
+	#if $field.type == "bool" and $field.widget_type == "checkbox"
 	} else {
 		o.$field.name.value = false
 	#end if
