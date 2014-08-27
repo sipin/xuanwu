@@ -9,15 +9,25 @@ type $(obj.name.value)SearchIndexObj struct {
 	#end for
 }
 
+func $(obj.name)SearchIndexName() (string, string) {
+	return "$obj.searchIndex", "$obj.searchType"
+}
+
 func (o *$obj.name.value) IndexSearch() () {
-	core.Index("$(obj.name.value.lower())", "simple", o.ID.Hex(), nil, $(obj.name.value)SearchIndexObj{
+	data := $(obj.name.value)SearchIndexObj{
 		#for field in $obj.search
 		o.$(field.name.value),
 		#end for
 		#for field in $obj.filterFields
 		o.$(field.name.value),
 		#end for
-	})
+	}
+	id := o.ID.Hex()
+	#if $obj.searchIndex != "flow"
+	core.Index("$obj.searchIndex", "$obj.searchType", id, nil, data)
+	#else
+	core.IndexWithParameters("$obj.searchIndex", "$obj.searchType", id, id, 0, "", "", "", 0, "", "", false, nil, data)
+	#end if
 }
 
 var $(obj.name.value)SearchFileds = []string{
@@ -45,14 +55,14 @@ var $(obj.name.value)SearchDateKeys = map[string]bool{
 func $(obj.name.value)SearchWithParams(word string, params map[string]string, limit int, offset int) (core.SearchResult, error) {
 	searchObj := XGetSearchObj(word, $(obj.name.value)SearchFileds, params, $(obj.name.value)SearchTermKeys, $(obj.name.value)SearchDateKeys)
 	args := map[string]interface{} {"from" : offset, "size": limit}
-	return core.SearchRequest("$(obj.name.value.lower())", "simple", args, searchObj)
+	return core.SearchRequest("$obj.searchIndex", "$obj.searchType", args, searchObj)
 }
 
 #if $obj.need_searchmore
 func $(obj.name.value)SearchWithMoreParams(word string, params map[string]interface{}, limit int, offset int) (core.SearchResult, error) {
 	searchObj := XGetMoreSearchObj(word, $(obj.name.value)SearchFileds, params, $(obj.name.value)SearchTermKeys, $(obj.name.value)SearchDateKeys)
 	args := map[string]interface{} {"from" : offset, "size": limit}
-	return core.SearchRequest("$(obj.name.value.lower())", "simple", args, searchObj)
+	return core.SearchRequest("$obj.searchIndex", "$obj.searchType", args, searchObj)
 }
 #end if
 
@@ -62,16 +72,21 @@ func $(obj.name.value)Search(word string, limit int, offset int) (core.SearchRes
 }
 
 func $(obj.name.value)SearchPurge() {
-	core.Delete("$(obj.name.value.lower())", "simple", "", nil)
+	core.Delete("$obj.searchIndex", "$obj.searchType", "", nil)
+	// for delete old index
+	core.Delete("$obj.name.value.lower()", "simple", "", nil)
 }
 
 func $(obj.name.value)SearchRequest(query interface{}, limit, offset int) (core.SearchResult, error) {
 	args := map[string]interface{} {"from" : offset, "size": limit}
-	return core.SearchRequest("$(obj.name.value.lower())", "simple", args, query)
+	return core.SearchRequest("$obj.searchIndex", "$obj.searchType", args, query)
 }
 
 func $(obj.name.value)SearchRebuild() {
 	$(obj.name.value)SearchPurge()
+#if $obj.searchIndex == "flow"
+	init${obj.name.value}Parent()
+#end if
 #if $obj.need_mapping
 	init${obj.name.value}Mapping()
 #end if

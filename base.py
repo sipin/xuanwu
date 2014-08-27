@@ -75,6 +75,7 @@ supported_annotations = set([
 	"ruleMsg",
 	"scope",
 	"search",
+	"searchIndex",
 	"stringList",
 	"subselect",
 	"summary",
