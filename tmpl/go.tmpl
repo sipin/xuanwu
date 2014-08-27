@@ -22,20 +22,8 @@ func init() {
 	db.SetOnFinishInit(init${obj.name.value}Index)
 	#end if
 
-	#if $obj.need_mapping and $obj.searchIndex == "flow"
-	db.SetOnFinishInit(func() {
-		init${obj.name.value}Parent()
-		init${obj.name.value}Mapping()
-	})
-	#else
-
-	#if $obj.need_mapping
+	#if $obj.need_mapping or $obj.searchIndex == "flow"
 	db.SetOnFinishInit(init${obj.name.value}Mapping)
-	#end if
-	#if $obj.searchIndex == "flow"
-	db.SetOnFinishInit(init${obj.name.value}Parent)
-	#end if
-
 	#end if
 
 	RegisterXuanWuObj("$namespace", "$obj.name.value", new$(obj.name.value)XuanWuObj)
@@ -44,26 +32,30 @@ func init() {
 	#end if
 }
 
-#if $obj.searchIndex == "flow"
-func init${obj.name.value}Parent() {
-	index, _type := "flow", "$obj.searchType"
+#if $obj.need_mapping or $obj.searchIndex == "flow"
+func init${obj.name.value}Mapping() {
+	#if $obj.searchIndex == "flow"
+	index, _type := "flow", "goabroad"
 	url_ := fmt.Sprintf("/%s/%s/_mapping", index, _type)
 	body, _ := json.Marshal(db.M{
 		_type: db.M{
 			"_parent": db.M{
 				"type": "flow",
 			},
+			#if $obj.need_mapping
+			"properties": map[string]interface{}{
+				#for f in $obj.stringFilterFields
+				"$f.name.value": map[string]string{"index": "not_analyzed", "type": "string"},
+				#end for
+			},
+			#end if
 		},
 	})
 	_, err := api.DoCommand("PUT", url_, nil, body)
 	if err != nil {
 		fmt.Println(err)
 	}
-}
-#end if
-
-#if $obj.need_mapping
-func init${obj.name.value}Mapping() {
+	#else
 	opt := indices.MappingOptions{
 		Properties: map[string]interface{}{
 			#for f in $obj.stringFilterFields
@@ -74,6 +66,7 @@ func init${obj.name.value}Mapping() {
 
 	indices.CreateIndex("$(obj.searchIndex)")
 	indices.PutMapping("$(obj.searchIndex)", "$(obj.searchType)", $(obj.name.value){}, opt)
+	#end if
 }
 #end if
 

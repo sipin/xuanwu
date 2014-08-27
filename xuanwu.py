@@ -87,7 +87,7 @@ def struct_import(obj):
 	obj.need_index = len([i for i in obj.fields if hasattr(i, "index")]) > 0
 	obj.need_searchmore = len([f for f in obj.filterFields if f.type in ["list<string>"]]) > 0
 
-	if obj.need_mapping:
+	if obj.need_mapping and obj.searchIndex != "flow":
 		obj.imports.add("github.com/mattbaird/elastigo/indices")
 
 

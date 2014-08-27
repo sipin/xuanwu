@@ -88,10 +88,7 @@ func $(obj.name.value)SearchRequest(query interface{}, limit, offset int) (core.
 
 func $(obj.name.value)SearchRebuild() {
 	$(obj.name.value)SearchPurge()
-#if $obj.searchIndex == "flow"
-	init${obj.name.value}Parent()
-#end if
-#if $obj.need_mapping
+#if $obj.need_mapping or $obj.searchIndex == "flow"
 	init${obj.name.value}Mapping()
 #end if
 	total := $(obj.name.value)Count(nil)
