@@ -46,6 +46,9 @@ def struct_import(obj):
 	else:
 		obj.searchIndex = searchIndex
 		obj.searchType = obj.name.value.lower()
+		if obj.searchIndex == "flow":
+			obj.imports.add("encoding/json")
+			obj.imports.add("github.com/mattbaird/elastigo/api")
 
 	for f in obj.fields:
 		if f.foreign_package != "":

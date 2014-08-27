@@ -15,14 +15,6 @@ import (
 	//Own libs
 	"db"
 	. "xuanwu"
-
-	#if $obj.searchIndex == "flow"
-	#if "encoding/json" not in $obj.imports
-	"encoding/json"
-	#end if
-	"flow/base"
-	"github.com/mattbaird/elastigo/api"
-	#end if
 )
 
 func init() {

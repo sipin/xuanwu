@@ -14,20 +14,6 @@ func (o *$obj.name.value) SearchIndexName() (string, string) {
 }
 
 func (o *$obj.name.value) IndexSearch() () {
-	#if $obj.searchIndex != "flow"
-	core.Index("$obj.searchIndex", "$obj.searchType", o.ID.Hex(), nil, $(obj.name.value)SearchIndexObj{
-		#for field in $obj.search
-		o.$(field.name.value),
-		#end for
-		#for field in $obj.filterFields
-		o.$(field.name.value),
-		#end for
-	})
-	#else
-	parentID := base.GetExtraIDByFlowID(o.ID.Hex())
-	if parentID == "" {
-		return
-	}
 	data := $(obj.name.value)SearchIndexObj{
 		#for field in $obj.search
 		o.$(field.name.value),
@@ -36,7 +22,11 @@ func (o *$obj.name.value) IndexSearch() () {
 		o.$(field.name.value),
 		#end for
 	}
-	core.IndexWithParameters("$obj.searchIndex", "$obj.searchType", o.ID.Hex(), parentID, 0, "", "", "", 0, "", "", false, nil, data)
+	id := o.ID.Hex()
+	#if $obj.searchIndex != "flow"
+	core.Index("$obj.searchIndex", "$obj.searchType", id, nil, data)
+	#else
+	core.IndexWithParameters("$obj.searchIndex", "$obj.searchType", id, id, 0, "", "", "", 0, "", "", false, nil, data)
 	#end if
 }
 
@@ -83,6 +73,7 @@ func $(obj.name.value)Search(word string, limit int, offset int) (core.SearchRes
 
 func $(obj.name.value)SearchPurge() {
 	core.Delete("$obj.searchIndex", "$obj.searchType", "", nil)
+	// for delete old index
 	core.Delete("$obj.name.value.lower()", "simple", "", nil)
 }
 
