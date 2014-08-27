@@ -16,7 +16,11 @@ func $(obj.name)SearchIndexName() (string, string) {
 func (o *$obj.name.value) IndexSearch() () {
 	data := $(obj.name.value)SearchIndexObj{
 		#for field in $obj.search
+		#if $field.go_type == "string"
+		o.GetFieldAsString("$(field.name.value)"),
+		#else
 		o.$(field.name.value),
+		#end if
 		#end for
 		#for field in $obj.filterFields
 		o.$(field.name.value),
