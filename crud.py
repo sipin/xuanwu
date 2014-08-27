@@ -127,6 +127,13 @@ def gen_axure(obj):
 
 	print outfile
 
+def check_users_id(urlBase, obj):
+	for field in obj.fields:
+		if field.name.value == "UsersID":
+			return
+	print(thrift_file + " " + obj.name.value + " don't have field UsersID. urlBase=" + urlBase)
+
+
 def transform_module(module):
 	for obj in module.structs:
 		urlBase = ""
@@ -143,6 +150,8 @@ def transform_module(module):
 
 		if urlBase == "":
 			continue
+
+		check_users_id(urlBase, obj)
 
 		if obj.label != obj.name.value:
 			obj.perm = obj.label
