@@ -35,7 +35,8 @@ func init() {
 #if $obj.need_mapping or $obj.searchIndex == "flow"
 func init${obj.name.value}Mapping() {
 	#if $obj.searchIndex == "flow"
-	index, _type := "flow", "goabroad"
+	indices.CreateIndex("$(obj.searchIndex)")
+	index, _type := "$(obj.searchIndex)", "$(obj.searchType)"
 	url_ := fmt.Sprintf("/%s/%s/_mapping", index, _type)
 	body, _ := json.Marshal(db.M{
 		_type: db.M{
