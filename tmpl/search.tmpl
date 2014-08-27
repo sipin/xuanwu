@@ -9,7 +9,7 @@ type $(obj.name.value)SearchIndexObj struct {
 	#end for
 }
 
-func (o *$obj.name.value) SearchIndexName() (string, string) {
+func $(obj.name)SearchIndexName() (string, string) {
 	return "$obj.searchIndex", "$obj.searchType"
 }
 
