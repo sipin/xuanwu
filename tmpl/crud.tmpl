@@ -141,6 +141,7 @@ func get$(className)Sort(ctx *$(className)Context) (sortFields []string){
 		order = "$(obj.defaultOrder)"
 	}
 	sortFields = strings.Split(order, ",")
+	sortFields = append(sortFields, "-_id")
 	return
 }
 
