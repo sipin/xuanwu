@@ -14,6 +14,7 @@ import (
 
 	//Own libs
 	"db"
+	"xls"
 	. "xuanwu"
 )
 
@@ -99,6 +100,56 @@ reEnsure${field.name}:
 	#end for
 }
 #end if
+
+func $(obj.name.value)ToXLS(objs []*$obj.name.value, ext_labels []string, ext_handler func(string, IXuanWuObj) interface{}) ([]byte, error) {
+	obj := &$obj.name.value{}
+	sheet := xls.NewSheet("Sheet1")
+	rows := make([]*xls.Row, len(objs) + 1)
+
+	labelObjs := obj.GetListedLabels()
+	var labels []interface{}
+	labels = append(labels, "序号")
+	for _, o := range labelObjs {
+		labels = append(labels, o.Label)
+	}
+	for _, o := range ext_labels {
+		labels = append(labels, o)
+	}
+	rows[0] = xls.NewRow(labels...)
+
+	for i, o := range objs {
+		_ = o
+		#for f in $obj.listedFieldNames
+		#if "." in f
+		$(f[:f.index(".")]), _ := o.Get$(f[:f.index(".")])()
+		$(f.replace(".", "")) := ""
+		if o.$(f[:f.index(".")])ID != "" {
+			$(f.replace(".", "")) = $(f[:f.index(".")]).GetFieldAsString("$(f[f.index(".")+1:])")
+		}
+		#end if
+		#end for
+		ext_cells := []interface{} {}
+		for _, ext_label := range ext_labels {
+			ext_cells = append(ext_cells, ext_handler(ext_label, o))
+		}
+		rows[i + 1] = xls.NewRow(
+			i+1,
+			#for f in $obj.listedFieldNames
+			#if "." in f
+			$(f.replace(".", "")),
+			#else
+			o.GetFieldAsString("$(f)"),
+			#end if
+			#end for
+		)
+		rows[i + 1].AppendData(ext_cells...)
+	}
+
+	tbl := xls.NewTable(rows...)
+	sheet.SetTable(tbl)
+
+	return xls.Marshal(sheet)
+}
 
 var ${obj.name.value}TableName = "${obj.name.value}"
 

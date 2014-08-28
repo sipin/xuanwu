@@ -19,7 +19,6 @@ import (
 
 	//Own libs
 	"admin"
-	"xls"
 	autoTpl "$tplPackage"
 	#if $modelsNamespace != "users":
 	m_$(modelsNamespace) "zfw/models/$modelsNamespace"
@@ -194,7 +193,6 @@ func $(className)Export(ctx *$(className)Context) (html string) {
 	}
 	offset, _ := strconv.Atoi(ctx.Params["offset"])
 
-	var obj *m_$(modelsNamespace).$(className)
 	var objs []*m_$(modelsNamespace).$(className)
 
 	sortFields := get$(className)Sort(ctx)
@@ -210,43 +208,7 @@ func $(className)Export(ctx *$(className)Context) (html string) {
 	objs, _ = getQuery$(className)(ctx.User, limit, offset, sortFields)
 	#end if
 
-	sheet := xls.NewSheet("Sheet1")
-	rows := make([]*xls.Row, len(objs) + 1)
-
-	labelObjs := obj.GetListedLabels()
-	var labels []interface{}
-	labels = append(labels, "序号")
-	for _, o := range labelObjs {
-		labels = append(labels, o.Label)
-	}
-	rows[0] = xls.NewRow(labels...)
-
-	for i, o := range objs {
-		#for f in $obj.listedFieldNames
-		#if "." in f
-		$(f[:f.index(".")]), _ := o.Get$(f[:f.index(".")])()
-		$(f.replace(".", "")) := ""
-		if o.$(f[:f.index(".")])ID != "" {
-			$(f.replace(".", "")) = $(f[:f.index(".")]).GetFieldAsString("$(f[f.index(".")+1:])")
-		}
-		#end if
-		#end for
-		rows[i + 1] = xls.NewRow(
-			i+1,
-			#for f in $obj.listedFieldNames
-			#if "." in f
-			$(f.replace(".", "")),
-			#else
-			o.GetFieldAsString("$(f)"),
-			#end if
-			#end for
-		)
-	}
-
-	tbl := xls.NewTable(rows...)
-	sheet.SetTable(tbl)
-
-	ret, err := xls.Marshal(sheet)
+	ret, err := m_$(modelsNamespace).$(className)ToXLS(objs, nil, nil)
 	if err != nil {
 		ctx.Logger.Error(err)
 	}

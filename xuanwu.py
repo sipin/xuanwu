@@ -94,7 +94,7 @@ def struct_import(obj):
 
 def transform_struct(obj):
 	struct_import(obj)
-	tpl = open('tmpl/go.tmpl', 'r').read()
+	tpl = open('tmpl/go.tmpl', 'r').read().decode("utf8")
 	t = Template(tpl, searchList=[{"namespace": namespace, "filename": filename, "obj": obj}])
 	code = str(t)
 	if not path.exists(out_path + namespace):
