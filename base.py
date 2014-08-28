@@ -150,6 +150,10 @@ def add_properties(field, obj):
 		field.bindData = func
 		field.bindTable = col
 		field.bindPackage = pkg
+		if pkg != None:
+			field.bindModels = pkg.split("/")[-1]
+		else:
+			field.bindModels = namespace
 
 	if hasattr(field, "meta"):
 		if str(field.type) != "list<string>":

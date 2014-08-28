@@ -183,7 +183,7 @@ def transform_module(module):
 				gen_axure(obj)
 		else:
 			for field in obj.fields:
-				if field.widget_type in ("relateSelect", "relateAjaxSelect") and (not hasattr(field, "bindFunc")):
+				if field.widget_type in ("relateSelect", "relateAjaxSelect"):
 					outDir = urlBase.split(path.sep)[-2]
 					tmpl = file("tmpl/relateOnly.tmpl").read().decode("u8")
 					ret = Template(tmpl, searchList=[{"namespace": outDir,
