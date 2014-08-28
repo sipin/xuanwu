@@ -4,7 +4,7 @@ type $(obj.name.value)SearchIndexObj struct {
 	#for field in $obj.search
 	$field.name.value $field.go_type `json:"$(field.name.value)"`
 	#end for
-	#for field in $obj.filterFields
+	#for field in $obj.filterFields + $obj.indexFields
 	$field.name.value $field.go_type `json:"$(field.name.value)"`
 	#end for
 }
@@ -17,13 +17,13 @@ func (o *$obj.name.value) IndexSearch() () {
 	data := $(obj.name.value)SearchIndexObj{
 		#for field in $obj.search
 		#if $field.go_type == "string"
-		o.GetFieldAsString("$(field.name.value)"),
+		$(field.name.value): o.GetFieldAsString("$(field.name.value)"),
 		#else
-		o.$(field.name.value),
+		$(field.name.value): o.$(field.name.value),
 		#end if
 		#end for
-		#for field in $obj.filterFields
-		o.$(field.name.value),
+		#for field in $obj.filterFields+$obj.indexFields
+		$(field.name.value): o.$(field.name.value),
 		#end for
 	}
 	id := o.ID.Hex()

@@ -61,6 +61,7 @@ supported_annotations = set([
 	"filterFields",
 	"fk",
 	"index",
+	"indexFields",
 	"indexTpl",
 	"label",
 	"listedFields",
@@ -180,11 +181,11 @@ def get_widget_type(obj, field):
 			return "meta"
 	return "text"
 
-def get_search(obj):
+def get_search(obj, defField="search"):
 	search = None
 	for field in obj.fields:
-		if field.name.value == "ID" and hasattr(field, "search"):
-			search = [f.strip() for f in field.search.split(",")]
+		if field.name.value == "ID" and hasattr(field, defField):
+			search = [f.strip() for f in field.__getattribute__(defField).split(",")]
 
 	if search == None:
 		return search
@@ -326,6 +327,9 @@ def init_Fields(obj):
 		obj.toList.append("ID")
 
 	obj.search = get_search(obj)
+	obj.indexFields = get_search(obj, "indexFields")
+	if obj.indexFields == None:
+		obj.indexFields = []
 
 	obj.label = obj.name.value
 	if hasattr(idField, "label"):
