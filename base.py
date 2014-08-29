@@ -259,6 +259,7 @@ def transform_const(obj):
 
 def init_Fields(obj):
 	idField = obj.fields[0]
+	obj.idField = idField
 
 	obj.relateObj = {}
 	obj.fieldMap = {}

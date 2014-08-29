@@ -1,21 +1,13 @@
-#for i in $obj.fields
-#if i.name.value == "ID"
 
-#if hasattr(i, "viewUrl")
+#if hasattr($obj.idField, "viewUrl")
 func (o *$obj.name.value) ViewUrl(id string) string {
-	return "$i.viewUrl" + id
+	return "$$obj.idField.viewUrl" + id
 }
 #end if
 
-#if hasattr(i, "summary")
+#if hasattr($obj.idField, "summary")
 func (o *$obj.name.value) GetSummary() string {
-	return o.$i.summary
+	return o.$obj.idField.summary
 }
 #end if
 
-func (o *$obj.name.value) TypeName() string {
-	return ${obj.name.value}TableName
-}
-
-#end if
-#end for

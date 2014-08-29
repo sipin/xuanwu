@@ -76,5 +76,5 @@ func (o *$obj.name.value) Sync() (err error) {
 }
 
 func $(obj.name.value)Col() (session *mgo.Session, col *mgo.Collection) {
-	return db.GetCol(${obj.name.value}TableName)
+	return db.GetCol("${obj.name.value}")
 }
