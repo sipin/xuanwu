@@ -8,7 +8,7 @@ import (
 
 var (
 	xuanWuObjs = make(map[string]func() IXuanWuObj)
-	Indexers = make(map[string]func())
+	Indexers   = make(map[string]func())
 )
 
 func RegisterXuanWuObj(namespace, classname string, constructor func() IXuanWuObj) {
@@ -131,13 +131,13 @@ func (w *Widget) Val() string {
 type IXuanWuObj interface {
 	Id() string
 	IsSearchEnabled() bool
-	GetLabel() string
-	GetNameSpace() string
 	GetClassName() string
-	GetName() string
-	GetListedLabels() []*IDLabelPair
 	GetFieldAsString(fieldKey string) (Value string)
 	GetFilters() []*Widget
+	GetLabel() string
+	GetListedLabels() []*IDLabelPair
+	GetNameSpace() string
+	GetScope() string
 	GetWidgetByLabel(label string) (w *Widget)
 	Widgets() []*Widget
 }
