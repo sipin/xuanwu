@@ -324,7 +324,19 @@ func (o *$obj.name.value) GetFieldAsString(fieldKey string) (Value string) {
 	#else if $field.type == "bool"
 		Value = strconv.FormatBool(o.$field.name.value)
 	#else if $field.type == "list<string>"
+		#if $field.widget_type == "checkbox"
+		values := make([]string, len(o.$field.name.value))
+		widget := o.$(field.name.value)Widget()
+		for _, v := range o.$field.name.value {
+			if iv, err := strconv.Atoi(v); err == nil {
+				label, _ := widget.EnumData[int32(iv)]
+				values = append(values, label)
+			}
+		}
+		Value = strings.Join(values, "\n")
+		#else
 		Value = strings.Join(o.$field.name.value, "\n")
+		#end if
 	#else
 	Change go.tmpl go support $field.type now!
 	#end if
