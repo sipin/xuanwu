@@ -66,6 +66,7 @@ supported_annotations = set([
 	"label",
 	"listedFields",
 	"meta",
+	"metaDetailURL",
 	"orderFields",
 	"perm",
 	"placeholder",
@@ -155,6 +156,9 @@ def add_properties(field, obj):
 		else:
 			field.bindModels = namespace
 
+
+	if not hasattr(field, "metaDetailURL"):
+		field.metaDetailURL = None
 	if hasattr(field, "meta"):
 		if str(field.type) != "list<string>":
 			raise Exception(thrift_file + " " + obj.name.value +
@@ -162,7 +166,7 @@ def add_properties(field, obj):
 
 		tpl = open('tmpl/field_getMeta.tmpl', 'r').read()
 
-		t = Template(tpl, searchList=[{"field": field, "table": field.meta}])
+		t = Template(tpl, searchList=[{"field": field, "table": field.meta, "metaDetailURL": field.metaDetailURL}])
 		field.metaFunc = str(t).strip()
 
 	if not hasattr(field, "placeholder"):

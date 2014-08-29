@@ -1,4 +1,4 @@
-func () (data []IXuanWuObj, head IXuanWuObj) {
+func () (data []IXuanWuObj, head IXuanWuObj, detailURL string) {
 	ids := o.$field.name.value
 	records, _ := $(table)FindByIDs(ids)
 	length := len(records)
@@ -8,6 +8,7 @@ func () (data []IXuanWuObj, head IXuanWuObj) {
 	}
 
 	head = IXuanWuObj(New$(table)())
+	detailURL = "$metaDetailURL"
 
 	return
 }
