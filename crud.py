@@ -159,6 +159,10 @@ def transform_module(module):
 				obj.perm = idField.perm
 
 			obj.imports.add("admin/permission")
+
+			if obj.has_docnumber:
+				obj.imports.add("zfw/docnumber")
+
 			obj.hasUser = len([i for i in obj.fields if str(i.name) == "UsersID"]) > 0
 
 			if len(obj.relateObj) > 0:

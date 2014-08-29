@@ -211,7 +211,9 @@ func (o *$obj.name.value) ${field.name.value}Widget() *Widget {
 		#if hasattr($field, "hidden")
 				Hidden: $field.hidden,
 		#end if
-		#if hasattr($field, "readonly")
+		#if $field.widget_type == "docnumber"
+				Readonly: true,
+		#else if hasattr($field, "readonly")
 				Readonly: $field.readonly,
 		#end if
 		}

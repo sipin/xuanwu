@@ -25,6 +25,7 @@ widget_types = set([
 	"combobox",
 	"date",
 	"datetime",
+	"docnumber",
 	"droplist",
 	"file",
 	"files",
@@ -261,6 +262,7 @@ def init_Fields(obj):
 
 	obj.relateObj = {}
 	obj.fieldMap = {}
+	obj.has_docnumber = False
 	for field in obj.fields:
 		add_properties(field, obj)
 		field.foreign = ""
@@ -303,6 +305,13 @@ def init_Fields(obj):
 		if field.widget_type in ("relateSelect", "relateAjaxSelect"):
 			obj.relateObj[field.name.value] = field
 			field.relateFields = []
+		elif field.widget_type == "docnumber":
+			if field.type != "string" or field.defaultValue != None or field.name.value != "Number":
+				raise Exception(thrift_file + " " + obj.name.value + " " + field.name.value +
+			 " is docnumber, must be string and has no defaultValue and named as Number")
+			obj.has_docnumber = True
+
+
 
 	for field in obj.fields:
 		if hasattr(field, "relateData"):

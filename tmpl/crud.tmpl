@@ -240,6 +240,9 @@ func $(className)Create(ctx *$(className)Context) (html string) {
 	#if $field.defaultValue == "currentUser"
 		obj.$field.name.value = ctx.User.Id()
 	#end if
+	#if $obj.has_docnumber
+		obj.Number = "保存后，系统自动生成..."
+	#end if
 #end for
 	}
 
@@ -265,6 +268,10 @@ func $(className)CreatePost(ctx *$(className)Context) (html string) {
 		obj.UsersID = ctx.User.Id()
 	}
 #end if
+
+	#if $obj.has_docnumber
+	obj.Number = docnumber.GetNewNumber(obj)
+	#end if
 
 	obj.Save()
 	ctx.ClearSession("$(className)Create")
