@@ -101,9 +101,9 @@ def main():
 	gen(axure_folder, key, output)
 
 def assure_path_exists(path):
-    dir = os.path.dirname(path)
-    if not os.path.exists(dir):
-            os.makedirs(dir)
+	dir = os.path.dirname(path)
+	if not os.path.exists(dir):
+		os.makedirs(dir)
 
 def gen_axure(thrift_file, obj):
 	with open("../axure/" + obj.baseURL[1:].replace("/", "_") + ".txt", "r") as f:
