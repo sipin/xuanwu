@@ -7,6 +7,7 @@ import base
 from ptsd.loader import Loader
 from Cheetah.Template import Template
 from os import path, mkdir
+import os
 
 if len(sys.argv) != 3:
 	print "usage: \n\tpython xuanwu.py thrift_file_path output_folder_path"
@@ -90,17 +91,26 @@ def struct_import(obj):
 	if obj.need_mapping or obj.searchIndex == "flow":
 		obj.imports.add("github.com/mattbaird/elastigo/indices")
 
+def write_file(fname, content):
+	dir = path.dirname(fname)
+	if not path.exists(dir):
+		os.makedirs(dir)
 
+	with open(fname, "w") as f:
+		f.write(content)
 
 def transform_struct(obj):
 	struct_import(obj)
 	tpl = open('tmpl/go.tmpl', 'r').read().decode("utf8")
 	t = Template(tpl, searchList=[{"namespace": namespace, "filename": filename, "obj": obj}])
 	code = str(t)
-	if not path.exists(out_path + namespace):
-		mkdir(out_path + namespace)
-	with open(out_path +  namespace + '/gen_' + obj.name.value.lower() + ".go", "w") as f:
-		f.write(code)
+
+	write_file(out_path + namespace + '/gen_' + obj.name.value.lower() + ".go", code)
+
+	tpl = open('tmpl/model_web.tmpl', 'r').read().decode("utf8")
+	t = Template(tpl, searchList=[{"namespace": namespace, "filename": filename, "obj": obj}])
+	code = str(t)
+	write_file(out_path + namespace + '/web/gen_' + obj.name.value.lower() + ".go", code)
 
 def transform(module):
 	for struct in module.structs:
