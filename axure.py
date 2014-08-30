@@ -100,5 +100,46 @@ def main():
 	output = sys.argv[3]
 	gen(axure_folder, key, output)
 
+def assure_path_exists(path):
+    dir = os.path.dirname(path)
+    if not os.path.exists(dir):
+            os.makedirs(dir)
+
+def gen_axure(thrift_file, obj):
+	with open("../axure/" + obj.baseURL[1:].replace("/", "_") + ".txt", "r") as f:
+		axure = f.read()
+
+	def get_field_by_label(obj, label):
+		for f in obj.fields:
+			if f.label == label:
+				return f
+		raise Exception(thrift_file + " " + obj.name.value + " has no label: " + label)
+
+	rows = []
+	max_fields = 1
+	for row in axure.split("\n"):
+		fields = []
+		labels = row.split("\t")
+		if len(labels) > max_fields:
+			max_fields = len(labels)
+		for label in labels:
+			fields.append(get_field_by_label(obj, label))
+		rows.append(fields)
+
+	crud = open('tmpl/axure_create.tmpl', 'r').read().decode("utf8")
+	obj.max_fields = max_fields
+	res = Template(crud, searchList=[{"namespace": outDir,
+									"className": obj.name.value,
+									"obj": obj,
+									"rows": rows,
+									}])
+
+	outfile = "../tpl" + obj.baseURL + "/create.gohtml"
+	assure_path_exists(outfile)
+	with open(outfile, "w+") as fp:
+		fp.write(str(res))
+
+	print outfile
+
 if __name__ == "__main__":
 	main()
