@@ -74,7 +74,7 @@ func init${obj.name.value}Mapping() {
 
 #if $obj.need_index
 func init${obj.name.value}Index() {
-	session, collection := db.GetCol(${obj.name.value}TableName)
+	session, collection := $(obj.name.value)Col()
 	defer session.Close()
 	#for field in $obj.fields
 	#if hasattr(field, "index")
