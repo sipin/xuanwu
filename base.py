@@ -54,6 +54,7 @@ supported_annotations = set([
 	"bindFunc",
 	"createTpl",
 	"crud",
+	"css",
 	"defaultValue",
 	"disabled",
 	"dm",
@@ -360,6 +361,14 @@ def init_Fields(obj):
 	obj.crud = ""
 	if hasattr(idField, "crud"):
 		obj.crud = idField.crud
+
+	obj.css = []
+	if hasattr(idField, "css"):
+		obj.css = [x.strip().lower() for x in idField.css.split(",")]
+		for style in obj.css:
+			if style not in ["index", "create", "edit", "view"]:
+				raise Exception(thrift_file + " " + obj.name.value +
+			 " css annotation must only have values of index/create/edit/view separated by ,")
 
 def init_ListedField(obj):
 	idField = obj.fields[0]

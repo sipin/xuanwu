@@ -170,6 +170,10 @@ func $(className)Index(ctx *$(className)Context) (html string) {
 	objs, total = getQuery$(className)(ctx.User, limit, offset, sortFields)
 	#end if
 
+	#if "index" in $obj.css
+	ctx.AddCSS("/css/fix/$(className)_index.css")
+	#end if
+
 	stupidGoInterface := make([]xuanwu.IXuanWuObj, len(objs))
 	for i, v := range objs {
 		stupidGoInterface[i] = xuanwu.IXuanWuObj(v)
@@ -225,6 +229,10 @@ func $(className)Create(ctx *$(className)Context) (html string) {
 	var obj *m_$(modelsNamespace).$(className)
 	data := ctx.GetSession("$(className)Create")
 	rowsInfo := axure.Load(obj.GetLabel())
+
+	#if "create" in $obj.css
+	ctx.AddCSS("/css/fix/$(className)_create.css")
+	#end if
 
 	if data != nil {
 		obj = m_$(modelsNamespace).New$(className)FromBytes(data)
@@ -291,6 +299,10 @@ func $(className)View(ctx *$(className)Context) (html string) {
 		return ctx.Redirect("index")
 	}
 
+	#if "view" in $obj.css
+	ctx.AddCSS("/css/fix/$(className)_view.css")
+	#end if
+
 	#if $obj.viewtpl != None
 	return $(obj.viewtpl).View(ctx.Context, "$obj.scope.$(obj.perm)", obj)
 	#else
@@ -311,6 +323,10 @@ func $(className)Edit(ctx *$(className)Context) (html string) {
 	}
 
 	data := ctx.GetSession("$(className)Edit")
+
+	#if "edit" in $obj.css
+	ctx.AddCSS("/css/fix/$(className)_edit.css")
+	#end if
 
 	if data != nil {
 		o := m_$(modelsNamespace).New$(className)FromBytes(data)
