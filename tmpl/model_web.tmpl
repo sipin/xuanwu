@@ -1,0 +1,22 @@
+package web
+
+import (
+	"admin"
+	m_$(namespace) "zfw/models/$namespace"
+)
+
+func Set$(obj.name.value)DefaultWithContext(ctx *admin.AdminContext, obj *m_$(namespace).$(obj.name.value)) {
+#for field in $obj.fields
+#if $field.defaultValue == "currentUser"
+	obj.$field.name.value = ctx.User.Id()
+#else if $field.defaultValue == "currentUserDept" or ($field.name.value == "DepartmentsID" and $field.widget_type == "select")
+	obj.$field.name.value = ctx.User.GetDepartmentID()
+#else if $field.defaultValue == "currentUserOrg" or ($field.name.value == "OrganizationsID" and $field.widget_type == "select")
+	obj.$field.name.value = ctx.User.GetOrganizationID()
+#end if
+#end for
+
+#if $obj.has_docnumber
+	obj.Number = "保存后，系统自动生成..."
+#end if
+}

@@ -22,6 +22,9 @@ import (
 	autoTpl "$tplPackage"
 	#if $modelsNamespace != "users":
 	m_$(modelsNamespace) "zfw/models/$modelsNamespace"
+	m_$(modelsNamespace)_web "zfw/models/$modelsNamespace/web"
+	#else
+	m_users_web "zfw/models/users/web"
 	#end if
 	m_users "zfw/models/users"
 	"axure"
@@ -236,18 +239,7 @@ func $(className)Create(ctx *$(className)Context) (html string) {
 		return autoTpl.Create(ctx.Context, obj, "建立$(obj.label)")
 	} else {
 		obj = m_$(modelsNamespace).New$(className)()
-#for field in $obj.fields
-	#if $field.defaultValue == "currentUser"
-		obj.$field.name.value = ctx.User.Id()
-	#else if $field.defaultValue == "currentUserDept" or ($field.name.value == "DepartmentsID" and $field.widget_type == "select")
-		obj.$field.name.value = ctx.User.GetDepartmentID()
-	#else if $field.defaultValue == "currentUserOrg" or ($field.name.value == "OrganizationsID" and $field.widget_type == "select")
-		obj.$field.name.value = ctx.User.GetOrganizationID()
-	#end if
-	#if $obj.has_docnumber
-		obj.Number = "保存后，系统自动生成..."
-	#end if
-#end for
+		m_$(modelsNamespace)_web.Set$(className)DefaultWithContext(ctx.AdminContext, obj)
 	}
 
 	if rowsInfo != nil {
